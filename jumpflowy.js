@@ -16,6 +16,16 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   "use strict";
   // JumpFlowy implementation starts
 
+  /**
+   * @returns {projectRef} The root node of the WorkFlowy account
+   *                       currently logged into.
+   */
+  function getRootNode() {
+    return project_tree.getMainProjectTree().getRootProjectReference();
+  }
+
   // Return jumpflowy object
-  return {};
+  return {
+    getRootNode: getRootNode
+  };
 });
