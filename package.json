@@ -8,6 +8,8 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
-    "expect.js": "^0.3.1"
+    "expect.js": "^0.3.1",
+    "jshint": "^2.9.5",
+    "prettier": "1.10.2"
   }
 }
