@@ -1,5 +1,5 @@
-JumpFlowy: JavaScript extensions for WorkFlowy.
+JumpFlowy: WorkFlowy extension/library for search and navigation.
 
 Target platforms:
-- Handyflowy for iOS
+- HandyFlowy for iOS
 - Chrome (macOS/Linux/Windows), via Tampermonkey
