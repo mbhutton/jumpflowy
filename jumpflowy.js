@@ -1,6 +1,7 @@
 /*
 JumpFlowy: WorkFlowy extension/library for search and navigation.
 */
+/*jshint esversion: 6 */
 
 // UMD (Universal Module Definition) boilerplate
 (function(root, umdFactory) {
@@ -25,6 +26,39 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
+   * Applies the given function to the given node
+   * and each of its descendants, as a depth first search.
+   * @param {function} functionToApply The function to apply to each visited node.
+   * @param {projectRef} searchRoot The root node of the search.
+   */
+  function applyToEachNode(functionToApply, searchRoot) {
+    // Apply the function
+    functionToApply(searchRoot);
+    // Recurse
+    for (let child of searchRoot.getChildren()) {
+      applyToEachNode(functionToApply, child);
+    }
+  }
+
+  /**
+   * @param {function} nodePredicate A function (projectRef -> boolean) which
+   *                                 returns whether or not a node is a match.
+   * @param {projectRef} searchRoot The root node of the search.
+   * @returns {Array.projectRef} The matching nodes, in order or appearance.
+   */
+  function findMatchingNodes(nodePredicate, searchRoot) {
+    const matches = Array();
+
+    function addIfMatch(node) {
+      if (nodePredicate(node)) {
+        matches.push(node);
+      }
+    }
+    applyToEachNode(addIfMatch, searchRoot);
+    return matches;
+  }
+
+  /**
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
@@ -33,6 +67,9 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 
   // Return jumpflowy object
   return {
+    // Alphabetical order
+    applyToEachNode: applyToEachNode,
+    findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode
   };
