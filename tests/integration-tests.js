@@ -35,24 +35,24 @@ loading the expect.js and jumpflowy modules.
     const rootNodeViaTree = mainProjectTree.getRootProjectReference();
     const rootNode = jumpflowy.getRootNode();
     expect(rootNode).to.be.an("object");
-    expect(rootNodeViaTree.getProjectId()).to.eql(rootNode.getProjectId());
+    expect(rootNodeViaTree.getProjectId()).to.be(rootNode.getProjectId());
 
     expectProjectRefFunctions(rootNode);
-    expect(rootNode.getName()).to.eql(null);
-    expect(rootNode.getNote()).to.eql(null);
-    expect(rootNode.getProjectId()).to.eql("None");
-    expect(rootNode.getAncestors().length).to.eql(0);
-    expect(rootNode.getChildren().length).to.be.greaterThan(0);
+    expect(rootNode.getName()).to.be(null);
+    expect(rootNode.getNote()).to.be(null);
+    expect(rootNode.getProjectId()).to.be("None");
+    expect(rootNode.getAncestors()).to.be.empty();
+    expect(rootNode.getChildren()).to.not.be.empty();
 
     const firstChildOfRoot = rootNode.getChildren()[0];
 
     expectProjectRefFunctions(firstChildOfRoot);
-    expect(firstChildOfRoot.getName()).not.to.eql(null);
-    expect(firstChildOfRoot.getNote()).not.to.eql(null);
+    expect(firstChildOfRoot.getName()).not.to.be(null);
+    expect(firstChildOfRoot.getNote()).not.to.be(null);
     expect(firstChildOfRoot.getProjectId()).to.not.be(rootNode.getProjectId());
-    expect(firstChildOfRoot.getAncestors().length).to.eql(1);
+    expect(firstChildOfRoot.getAncestors().length).to.be(1);
     const ancestorOfFirstChild = firstChildOfRoot.getAncestors()[0];
-    expect(ancestorOfFirstChild.getProjectId()).to.eql(rootNode.getProjectId());
+    expect(ancestorOfFirstChild.getProjectId()).to.be(rootNode.getProjectId());
 
     expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
       rootNode.getNumDescendants()
@@ -100,12 +100,12 @@ loading the expect.js and jumpflowy modules.
 
     const noNodes = jumpflowy.findMatchingNodes(alwaysFalse, searchRoot);
     expect(noNodes).to.be.an("array");
-    expect(noNodes.length).to.be(0);
+    expect(noNodes).to.be.empty();
 
     const allNodes = jumpflowy.findMatchingNodes(alwaysTrue, searchRoot);
     const expectedNames = ["search root", "a", "b", "c", "d", "e"];
-    expect(allNodes.length).to.eql(expectedNames.length);
-    expect(allNodes.length).to.eql(searchRoot.getNumDescendants() + 1);
+    expect(allNodes.length).to.be(expectedNames.length);
+    expect(allNodes.length).to.be(searchRoot.getNumDescendants() + 1);
     const actualNames = mapNodesToNames(allNodes);
     expect(actualNames).to.eql(expectedNames);
 
