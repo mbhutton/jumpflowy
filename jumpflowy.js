@@ -24,8 +24,16 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     return project_tree.getMainProjectTree().getRootProjectReference();
   }
 
+  /**
+   * @returns {number} The current clock time in seconds since Unix epoch.
+   */
+  function getCurrentTimeSec() {
+    return Math.floor(date_time.getCurrentTimeInMS() / 1000);
+  }
+
   // Return jumpflowy object
   return {
+    getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode
   };
 });

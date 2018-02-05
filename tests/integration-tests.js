@@ -53,9 +53,18 @@ loading the expect.js and jumpflowy modules.
     expect(ancestorOfFirstChild.getProjectId()).to.eql(rootNode.getProjectId());
   }
 
+  /** Tests for getCurrentTimeSec function. */
+  function whenUsingGetCurrentTimeSec() {
+    expect(jumpflowy.getCurrentTimeSec).to.be.a("function");
+    expect(jumpflowy.getCurrentTimeSec()).to.be.a("number");
+    expect(jumpflowy.getCurrentTimeSec()).to.be.greaterThan(1517855243);
+    expect(jumpflowy.getCurrentTimeSec()).to.be.lessThan(7287926400); // 2200 A.D.
+  }
+
   function runAllTests() {
     console.log("Starting integration tests.");
     whenUsingGetRootNodeAndProjectRefFunctions();
+    whenUsingGetCurrentTimeSec();
     console.log("Finished integration tests.");
   }
 
