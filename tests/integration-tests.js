@@ -18,6 +18,8 @@ loading the expect.js and jumpflowy modules.
     expect(node.getAncestors()).to.be.an("array");
     expect(node.getChildren).to.be.a("function");
     expect(node.getChildren()).to.be.an("array");
+    expect(node.getNumDescendants).to.be.a("function");
+    expect(node.getNumDescendants()).to.be.a("number");
   }
 
   /** Tests getRootNode, and the projectRef type. */
@@ -51,6 +53,79 @@ loading the expect.js and jumpflowy modules.
     expect(firstChildOfRoot.getAncestors().length).to.eql(1);
     const ancestorOfFirstChild = firstChildOfRoot.getAncestors()[0];
     expect(ancestorOfFirstChild.getProjectId()).to.eql(rootNode.getProjectId());
+
+    expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
+      rootNode.getNumDescendants()
+    );
+  }
+
+  /** Returns the one and only node with the given note text, or fails. */
+  function getUniqueNodeByNoteOrFail(noteText) {
+    const matches = jumpflowy.findMatchingNodes(
+      node => node.getNote() === noteText,
+      jumpflowy.getRootNode()
+    );
+    if (matches.length === 0) {
+      expect.fail(
+        `Couldn't find node with note text matching >>>${noteText}<<<.`
+      );
+    }
+    if (matches.length > 1) {
+      expect.fail(
+        `Found multiple nodes with note text matching >>>${noteText}<<<, when expecting exactly 1.`
+      );
+    }
+    return matches[0];
+  }
+
+  /** Tests for applyToEachNode and findMatchingNodes functions. */
+  function whenUsingFindMatchingNodesAndApplyToEachNode() {
+    expect(jumpflowy.applyToEachNode).to.be.a("function");
+    expect(jumpflowy.findMatchingNodes).to.be.a("function");
+
+    const alwaysTrue = node => true;
+    const alwaysFalse = node => false;
+
+    /**
+     * @param {Array.projectRef} nodes
+     * @returns {Array.string}
+     */
+    function mapNodesToNames(nodes) {
+      return nodes.map(node => node.getName());
+    }
+
+    const searchRoot = getUniqueNodeByNoteOrFail(
+      "b611674e-b218-9580-ea39-2dda99a0e627"
+    );
+
+    const noNodes = jumpflowy.findMatchingNodes(alwaysFalse, searchRoot);
+    expect(noNodes).to.be.an("array");
+    expect(noNodes.length).to.be(0);
+
+    const allNodes = jumpflowy.findMatchingNodes(alwaysTrue, searchRoot);
+    const expectedNames = ["search root", "a", "b", "c", "d", "e"];
+    expect(allNodes.length).to.eql(expectedNames.length);
+    expect(allNodes.length).to.eql(searchRoot.getNumDescendants() + 1);
+    const actualNames = mapNodesToNames(allNodes);
+    expect(actualNames).to.eql(expectedNames);
+
+    function isNameSingleVowel(node) {
+      const name = node.getName();
+      return name.length === 1 && "aeiouAEIOU".includes(name);
+    }
+    const nodesWithSingleVowel = jumpflowy.findMatchingNodes(
+      isNameSingleVowel,
+      searchRoot
+    );
+    expect(mapNodesToNames(nodesWithSingleVowel)).to.eql(["a", "e"]);
+
+    // Test that applyToEachNode is applied for each node in order
+    const foundNames = Array(0);
+    jumpflowy.applyToEachNode(
+      node => foundNames.push(node.getName()),
+      searchRoot
+    );
+    expect(foundNames).to.eql(expectedNames);
   }
 
   /** Tests for getCurrentTimeSec function. */
@@ -64,6 +139,7 @@ loading the expect.js and jumpflowy modules.
   function runAllTests() {
     console.log("Starting integration tests.");
     whenUsingGetRootNodeAndProjectRefFunctions();
+    whenUsingFindMatchingNodesAndApplyToEachNode();
     whenUsingGetCurrentTimeSec();
     console.log("Finished integration tests.");
   }
