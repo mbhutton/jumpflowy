@@ -59,6 +59,25 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
+   * Returns the tags found in the given string.
+   *
+   * Note: Tags containing punctuation may produce unexpected results.
+   * Suggested best practice: freely use '-' and '_' and ':'
+   * as part of tags, being careful to avoid ':' as a suffix.
+   *
+   * @param {string} s The string to split.
+   * @returns {Array.string} An array of tags found in the string.
+   */
+  function stringToTags(s) {
+    const results = Array();
+    function handleTag(location, tagFound) {
+      results.push(tagFound);
+    }
+    tagging.forEachTagInString(s, handleTag, 1);
+    return results;
+  }
+
+  /**
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
@@ -71,6 +90,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     applyToEachNode: applyToEachNode,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
-    getRootNode: getRootNode
+    getRootNode: getRootNode,
+    stringToTags: stringToTags,
   };
 });

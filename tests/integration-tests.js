@@ -132,8 +132,47 @@ loading the expect.js and jumpflowy modules.
   function whenUsingGetCurrentTimeSec() {
     expect(jumpflowy.getCurrentTimeSec).to.be.a("function");
     expect(jumpflowy.getCurrentTimeSec()).to.be.a("number");
-    expect(jumpflowy.getCurrentTimeSec()).to.be.greaterThan(1517855243);
-    expect(jumpflowy.getCurrentTimeSec()).to.be.lessThan(7287926400); // 2200 A.D.
+    expect(jumpflowy.getCurrentTimeSec()).to.be.within(1517855243, 7287926400);
+  }
+
+  function whenUsingStringToTags() {
+    expect(tagging.forEachTagInString).to.be.a("function");
+    expect(jumpflowy.stringToTags).to.be.a("function");
+
+    expect(jumpflowy.stringToTags("#foo @bar")).to.eql(["#foo", "@bar"]);
+    expect(jumpflowy.stringToTags("#foo #foo")).to.eql(["#foo", "#foo"]);
+    expect(jumpflowy.stringToTags("#@foo")).to.eql([]);
+    expect(jumpflowy.stringToTags("@#foo")).to.eql([]);
+    expect(jumpflowy.stringToTags("#foo(1,2) ")).to.eql(["#foo"]);
+
+    for (let tagStart of "#@") {
+      const baseTag = tagStart + "foo";
+      // Expect these characters to be a part of a tag
+      for (let c of "-_") {
+        const tagToMatch = baseTag + c + "1";
+        expect(jumpflowy.stringToTags(` ${tagToMatch} `)).to.eql([tagToMatch]);
+      }
+
+      // Expect these characters to indicate the end of a tag
+      for (let c of "!()[];',/?. ") {
+        expect(jumpflowy.stringToTags(` ${baseTag}${c} `)).to.eql([baseTag]);
+        expect(jumpflowy.stringToTags(` ${baseTag}${c}1 `)).to.eql([baseTag]);
+      }
+
+      // Expect these characters to be part of the tag, except when used as a suffix.
+      for (let c of ":") {
+        expect(jumpflowy.stringToTags(` ${baseTag}${c} `)).to.eql([baseTag]);
+        expect(jumpflowy.stringToTags(` ${baseTag}${c}1 `)).to.eql([
+          baseTag + c + 1
+        ]);
+      }
+
+      // Expect these characters to prevent matching of the tag
+      for (let c of '`@#$&%^*=+{}|<>\\"') {
+        const tagsFound = jumpflowy.stringToTags(` ${baseTag}${c} `);
+        expect(tagsFound).to.be.empty();
+      }
+    }
   }
 
   function runAllTests() {
@@ -141,6 +180,7 @@ loading the expect.js and jumpflowy modules.
     whenUsingGetRootNodeAndProjectRefFunctions();
     whenUsingFindMatchingNodesAndApplyToEachNode();
     whenUsingGetCurrentTimeSec();
+    whenUsingStringToTags();
     console.log("Finished integration tests.");
   }
 
