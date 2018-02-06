@@ -187,8 +187,11 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode,
-    nodeToTagArgsText: nodeToTagArgsText,
     stringToTags: stringToTags,
-    stringToTagArgsText: stringToTagArgsText
+
+    experimental: {
+      nodeToTagArgsText: nodeToTagArgsText,
+      stringToTagArgsText: stringToTagArgsText
+    }
   };
 });

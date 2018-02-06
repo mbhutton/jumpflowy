@@ -209,7 +209,7 @@ loading the expect.js and jumpflowy modules.
   function whenUsingDoesNodeNameOrNoteMatch() {
     expect(jumpflowy.doesNodeNameOrNoteMatch).to.be.a("function");
 
-    let node = mocks.nodeWithNameAndNote("someName", "someNote");
+    const node = mocks.nodeWithNameAndNote("someName", "someNote");
     const fnToTest = jumpflowy.doesNodeNameOrNoteMatch;
 
     expect(fnToTest(t => t === "someName", node)).to.be(true);
@@ -222,7 +222,7 @@ loading the expect.js and jumpflowy modules.
   function whenUsingDoesNodeHaveTag() {
     expect(jumpflowy.doesNodeHaveTag).to.be.a("function");
 
-    let node = mocks.nodeWithNameAndNote("someName #foo", "someNote @bar");
+    const node = mocks.nodeWithNameAndNote("someName #foo", "someNote @bar");
     expect(jumpflowy.doesNodeHaveTag("#foo", node)).to.be(true);
     expect(jumpflowy.doesNodeHaveTag("foo", node)).to.be(false);
     expect(jumpflowy.doesNodeHaveTag("@bar", node)).to.be(true);
@@ -232,29 +232,29 @@ loading the expect.js and jumpflowy modules.
   }
 
   function whenUsingNodeToTagArgsText() {
-    expect(jumpflowy.nodeToTagArgsText).to.be.a("function");
+    expect(jumpflowy.experimental.nodeToTagArgsText).to.be.a("function");
 
-    let node = mocks.nodeWithNameAndNote("SomeName #foo(a, b, c)");
-    expect(jumpflowy.nodeToTagArgsText("#foo", node)).to.be("a, b, c");
+    const node = mocks.nodeWithNameAndNote("SomeName #foo(a, b, c)");
+    expect(jumpflowy.experimental.nodeToTagArgsText("#foo", node)).to.be(
+      "a, b, c"
+    );
   }
 
   function whenUsingStringToTagArgsText() {
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo(1)")).to.be("1");
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo (1)")).to.be("1");
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo( 1) ")).to.be("1");
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo(1 ) ")).to.be("1");
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo ( 1 2 ) ")).to.be("1 2");
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo ( 1, b ) ")).to.be(
-      "1, b"
-    );
-    expect(jumpflowy.stringToTagArgsText("@foo", "@foo(1 ) ")).to.be("1");
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo(bar, baz)")).to.be(
-      "bar, baz"
-    );
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo('bar)', baz')")).to.be(
-      "'bar"
-    );
-    expect(jumpflowy.stringToTagArgsText("#foo", "#foo()")).to.be("");
+    expect(jumpflowy.experimental.stringToTagArgsText).to.be.a("function");
+
+    const fnToTest = jumpflowy.experimental.stringToTagArgsText;
+
+    expect(fnToTest("#foo", "#foo(1)")).to.be("1");
+    expect(fnToTest("#foo", "#foo (1)")).to.be("1");
+    expect(fnToTest("#foo", "#foo( 1) ")).to.be("1");
+    expect(fnToTest("#foo", "#foo(1 ) ")).to.be("1");
+    expect(fnToTest("#foo", "#foo ( 1 2 ) ")).to.be("1 2");
+    expect(fnToTest("#foo", "#foo ( 1, b ) ")).to.be("1, b");
+    expect(fnToTest("@foo", "@foo(1 ) ")).to.be("1");
+    expect(fnToTest("#foo", "#foo(bar, baz)")).to.be("bar, baz");
+    expect(fnToTest("#foo", "#foo('bar)', baz')")).to.be("'bar");
+    expect(fnToTest("#foo", "#foo()")).to.be("");
   }
 
   function runAllTests() {
