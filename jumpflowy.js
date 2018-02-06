@@ -105,7 +105,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    *                            E.g. "#foo".
    * @param {string} s The string to extract the args text from.
    *                   E.g. "#foo(bar, baz)".
-   * @returns {string} The trimmed arguments string.
+   * @returns {string} The trimmed arguments string, or null if no call found.
    *                   E.g. "bar, baz".
    */
   function stringToTagArgsText(tagToMatch, s) {
@@ -134,6 +134,20 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
       }
       start = afterTag;
     }
+  }
+
+  /**
+   * @param {string} tagToMatch The tag to match.
+   * @param {projectRef} node The node to extract the args text from.
+   * @returns {string} The trimmed arguments string, or null if no call found.
+   * @see {@link stringToTagArgsText} For semantics.
+   */
+  function nodeToTagArgsText(tagToMatch, node) {
+    const resultForName = stringToTagArgsText(tagToMatch, node.getName());
+    if (resultForName !== null) {
+      return resultForName;
+    }
+    return stringToTagArgsText(tagToMatch, node.getNote());
   }
 
   /**
@@ -173,6 +187,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode,
+    nodeToTagArgsText: nodeToTagArgsText,
     stringToTags: stringToTags,
     stringToTagArgsText: stringToTagArgsText
   };

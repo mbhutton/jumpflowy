@@ -231,6 +231,13 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesNodeHaveTag("baz", node)).to.be(false);
   }
 
+  function whenUsingNodeToTagArgsText() {
+    expect(jumpflowy.nodeToTagArgsText).to.be.a("function");
+
+    let node = mocks.nodeWithNameAndNote("SomeName #foo(a, b, c)");
+    expect(jumpflowy.nodeToTagArgsText("#foo", node)).to.be("a, b, c");
+  }
+
   function whenUsingStringToTagArgsText() {
     expect(jumpflowy.stringToTagArgsText("#foo", "#foo(1)")).to.be("1");
     expect(jumpflowy.stringToTagArgsText("#foo", "#foo (1)")).to.be("1");
@@ -259,6 +266,7 @@ loading the expect.js and jumpflowy modules.
     whenUsingDoesStringHaveTag();
     whenUsingDoesNodeNameOrNoteMatch();
     whenUsingDoesNodeHaveTag();
+    whenUsingNodeToTagArgsText();
     whenUsingStringToTagArgsText();
     console.log("Finished integration tests.");
   }
