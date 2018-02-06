@@ -137,6 +137,16 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
+   * @param {function} textPredicate The predicate to apply to each string.
+   * @param {projectRef} node The node to test.
+   * @returns {boolean} Whether textPredicate returns true for either the node's
+   *                    name or note.
+   */
+  function doesNodeNameOrNoteMatch(textPredicate, node) {
+    return textPredicate(node.getName()) || textPredicate(node.getNote());
+  }
+
+  /**
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
@@ -147,6 +157,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   return {
     // Alphabetical order
     applyToEachNode: applyToEachNode,
+    doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
     doesStringHaveTag: doesStringHaveTag,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,

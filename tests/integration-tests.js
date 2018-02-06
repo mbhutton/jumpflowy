@@ -192,6 +192,28 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
   }
 
+  const mocks = (function() {
+    return {
+      nodeWithNameAndNote: (name, note) => ({
+        getName: () => name,
+        getNote: () => note
+      })
+    };
+  })();
+
+  function whenUsingDoesNodeNameOrNoteMatch() {
+    expect(jumpflowy.doesNodeNameOrNoteMatch).to.be.a("function");
+
+    let node = mocks.nodeWithNameAndNote("someName", "someNote");
+    const fnToTest = jumpflowy.doesNodeNameOrNoteMatch;
+
+    expect(fnToTest(t => t === "someName", node)).to.be(true);
+    expect(fnToTest(t => t === "someNote", node)).to.be(true);
+    expect(fnToTest(t => t === "someName ", node)).to.be(false);
+    expect(fnToTest(t => t === "someNote ", node)).to.be(false);
+    expect(fnToTest(t => t === "wrong", node)).to.be(false);
+  }
+
   function whenUsingStringToTagArgsText() {
     expect(jumpflowy.stringToTagArgsText("#foo", "#foo(1)")).to.be("1");
     expect(jumpflowy.stringToTagArgsText("#foo", "#foo (1)")).to.be("1");
@@ -218,6 +240,7 @@ loading the expect.js and jumpflowy modules.
     whenUsingGetCurrentTimeSec();
     whenUsingStringToTags();
     whenUsingDoesStringHaveTag();
+    whenUsingDoesNodeNameOrNoteMatch();
     whenUsingStringToTagArgsText();
     console.log("Finished integration tests.");
   }
