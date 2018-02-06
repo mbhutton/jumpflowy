@@ -78,6 +78,22 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
+   * @param {string} tagToMatch The tag to match.
+   * @param {string} s The string to test.
+   * @returns {boolean} True if and only if the given string has the
+   *                    exact given tag, ignoring case.
+   * @see {@link stringToTags} For notes, caveats regarding tag handling.
+   */
+  function doesStringHaveTag(tagToMatch, s) {
+    for (let tag of stringToTags(s)) {
+      if (tag.toLowerCase() === tagToMatch.toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
@@ -88,6 +104,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   return {
     // Alphabetical order
     applyToEachNode: applyToEachNode,
+    doesStringHaveTag: doesStringHaveTag,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode,

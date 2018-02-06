@@ -175,12 +175,30 @@ loading the expect.js and jumpflowy modules.
     }
   }
 
+  function whenUsingDoesStringHaveTag() {
+    expect(jumpflowy.doesStringHaveTag).to.be.a("function");
+
+    expect(jumpflowy.doesStringHaveTag("#foo", "#foo")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#foo", "#fool")).to.be(false);
+    expect(jumpflowy.doesStringHaveTag("#foo", "#fo")).to.be(false);
+    expect(jumpflowy.doesStringHaveTag("foo", "#foo")).to.be(false);
+    expect(jumpflowy.doesStringHaveTag("#foo", "@foo")).to.be(false);
+    expect(jumpflowy.doesStringHaveTag("#foo:1", "#foo:1")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#foo", "#foo:")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#foo: ", "#foo")).to.be(false);
+    expect(jumpflowy.doesStringHaveTag("#foo ", "#foo")).to.be(false);
+    expect(jumpflowy.doesStringHaveTag("#foo", "#foo()")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#foo", "#foo(a,b)")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
+  }
+
   function runAllTests() {
     console.log("Starting integration tests.");
     whenUsingGetRootNodeAndProjectRefFunctions();
     whenUsingFindMatchingNodesAndApplyToEachNode();
     whenUsingGetCurrentTimeSec();
     whenUsingStringToTags();
+    whenUsingDoesStringHaveTag();
     console.log("Finished integration tests.");
   }
 
