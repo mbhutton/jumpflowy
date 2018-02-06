@@ -93,6 +93,49 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     return false;
   }
 
+  const _stringToTagArgsText_CallRegExp = RegExp("^ *\\([^\\(\\)]*\\) *$");
+
+  /**
+   * An 'argument passing' mechanism, where '#foo(bar, baz)'
+   * is considered as 'passing' the string "bar, baz" to #foo.
+   * It's very rudimentary/naive: e.g. "#foo('bar)', baz')"
+   * would lead to an args string of "'bar".
+   *
+   * @param {string} tagToMatch The tag to match.
+   *                            E.g. "#foo".
+   * @param {string} s The string to extract the args text from.
+   *                   E.g. "#foo(bar, baz)".
+   * @returns {string} The trimmed arguments string.
+   *                   E.g. "bar, baz".
+   */
+  function stringToTagArgsText(tagToMatch, s) {
+    if (!doesStringHaveTag(tagToMatch, s)) {
+      return false;
+    }
+
+    let start = 0;
+    while (true) {
+      const tagIndex = s.indexOf(tagToMatch, start);
+      if (tagIndex === -1) {
+        return null;
+      }
+      const afterTag = tagIndex + tagToMatch.length;
+      const callOpenIndex = s.indexOf("(", afterTag);
+      if (callOpenIndex === -1) {
+        return null;
+      }
+      const callCloseIndex = s.indexOf(")", callOpenIndex + 1);
+      if (callCloseIndex === -1) {
+        return null;
+      }
+      const fullCall = s.substring(afterTag, callCloseIndex + 1);
+      if (_stringToTagArgsText_CallRegExp.test(fullCall)) {
+        return s.substring(callOpenIndex + 1, callCloseIndex).trim();
+      }
+      start = afterTag;
+    }
+  }
+
   /**
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
@@ -109,5 +152,6 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode,
     stringToTags: stringToTags,
+    stringToTagArgsText: stringToTagArgsText
   };
 });

@@ -192,6 +192,25 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
   }
 
+  function whenUsingStringToTagArgsText() {
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo(1)")).to.be("1");
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo (1)")).to.be("1");
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo( 1) ")).to.be("1");
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo(1 ) ")).to.be("1");
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo ( 1 2 ) ")).to.be("1 2");
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo ( 1, b ) ")).to.be(
+      "1, b"
+    );
+    expect(jumpflowy.stringToTagArgsText("@foo", "@foo(1 ) ")).to.be("1");
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo(bar, baz)")).to.be(
+      "bar, baz"
+    );
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo('bar)', baz')")).to.be(
+      "'bar"
+    );
+    expect(jumpflowy.stringToTagArgsText("#foo", "#foo()")).to.be("");
+  }
+
   function runAllTests() {
     console.log("Starting integration tests.");
     whenUsingGetRootNodeAndProjectRefFunctions();
@@ -199,6 +218,7 @@ loading the expect.js and jumpflowy modules.
     whenUsingGetCurrentTimeSec();
     whenUsingStringToTags();
     whenUsingDoesStringHaveTag();
+    whenUsingStringToTagArgsText();
     console.log("Finished integration tests.");
   }
 
