@@ -147,6 +147,16 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
+   * @param {string} tagToMatch The tag to match.
+   * @param {projectRef} node The node to test.
+   * @returns {boolean} Whether the given node has the exact given tag, ignoring case.
+   */
+  function doesNodeHaveTag(tagToMatch, node) {
+    const hasTagFn = text => doesStringHaveTag(tagToMatch, text);
+    return doesNodeNameOrNoteMatch(hasTagFn, node);
+  }
+
+  /**
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
@@ -158,6 +168,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     // Alphabetical order
     applyToEachNode: applyToEachNode,
     doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
+    doesNodeHaveTag: doesNodeHaveTag,
     doesStringHaveTag: doesStringHaveTag,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
