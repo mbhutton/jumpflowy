@@ -177,6 +177,25 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     return Math.floor(date_time.getCurrentTimeInMS() / 1000);
   }
 
+  /**
+   * @returns {number} When the node was last modified, in seconds since
+   *                   unix epoch. For the root node, returns the time the
+   *                   user joined WorkFlowy.
+   */
+  function nodeToLastModifiedSec(node) {
+    const tree = node.getProjectTree();
+    const joinedSec = tree.dateJoinedTimestampInSeconds;
+    const treeObject = node.getProjectTreeObject();
+    // treeObject is null for the root node
+    if (treeObject === null) {
+      return joinedSec;
+    }
+    const lastModSecSinceJoining = global_project_tree_object.getLastModified(
+      treeObject
+    );
+    return joinedSec + lastModSecSinceJoining;
+  }
+
   // Return jumpflowy object
   return {
     // Alphabetical order
@@ -187,6 +206,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode,
+    nodeToLastModifiedSec: nodeToLastModifiedSec,
     stringToTags: stringToTags,
 
     experimental: {

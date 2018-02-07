@@ -231,6 +231,55 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesNodeHaveTag("baz", node)).to.be(false);
   }
 
+  /** Tests for nodeToLastModifiedSec and for assumptions related to it. */
+  function whenUsingNodeToLastModifiedSec() {
+    expect(jumpflowy.nodeToLastModifiedSec).to.be.a("function");
+
+    const currentTime = jumpflowy.getCurrentTimeSec();
+
+    function testWfAssumptions(node, isRoot) {
+      const tree = node.getProjectTree();
+      expect(tree).to.not.be(null);
+      expect(tree.dateJoinedTimestampInSeconds).to.be.a("number");
+      const treeObject = node.getProjectTreeObject();
+      expect(global_project_tree_object.getLastModified).to.be.a("function");
+
+      if (node.getProjectId() === jumpflowy.getRootNode().getProjectId()) {
+        expect(treeObject).to.be(null);
+      } else {
+        expect(global_project_tree_object.getLastModified(treeObject)).to.be.a(
+          "number"
+        );
+      }
+    }
+    testWfAssumptions(jumpflowy.getRootNode());
+    testWfAssumptions(jumpflowy.getRootNode().getChildren()[0]);
+
+    function testNode(uuid) {
+      const node = getUniqueNodeByNoteOrFail(uuid);
+      // The expected timestamp is the name of its first child node
+      const expectedTimestampStr = node.getChildren()[0].getName();
+      const expectedTimestamp = Number(expectedTimestampStr);
+      const actualTimestamp = jumpflowy.nodeToLastModifiedSec(node);
+      expect(actualTimestamp).to.be(expectedTimestamp);
+      expect(actualTimestamp).to.be.lessThan(currentTime + 1);
+    }
+    testNode("7685e7f0-122e-69ff-be9f-e03bcf7d84ca"); // Internal
+    testNode("9c6ede17-831d-b04c-7a97-a825f0fd4bf0"); // Embedded
+
+    function testRootNodeJoinedDate() {
+      const root = jumpflowy.getRootNode();
+      const joinedAt = root.getProjectTree().dateJoinedTimestampInSeconds;
+      expect(jumpflowy.nodeToLastModifiedSec(root)).to.be(joinedAt);
+
+      const child = root.getChildren()[0];
+      const childJoinedAt = child.getProjectTree().dateJoinedTimestampInSeconds;
+      const childLastMod = jumpflowy.nodeToLastModifiedSec(child);
+      expect(childLastMod).to.be.within(joinedAt, currentTime + 1);
+    }
+    testRootNodeJoinedDate();
+  }
+
   function whenUsingNodeToTagArgsText() {
     expect(jumpflowy.experimental.nodeToTagArgsText).to.be.a("function");
 
@@ -266,6 +315,7 @@ loading the expect.js and jumpflowy modules.
     whenUsingDoesStringHaveTag();
     whenUsingDoesNodeNameOrNoteMatch();
     whenUsingDoesNodeHaveTag();
+    whenUsingNodeToLastModifiedSec();
     whenUsingNodeToTagArgsText();
     whenUsingStringToTagArgsText();
     console.log("Finished integration tests.");
