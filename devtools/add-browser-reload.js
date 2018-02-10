@@ -11,11 +11,11 @@
 // ==/UserScript==
 
 /*
-  A utility to semi-automate reloading of jumpflowy.js and integration tests,
+  A utility to assist reloading of jumpflowy.js and integration tests,
   by providing a button, a keyboard shortcut and a function to reload both
   from a local web server.
 
-  To use this:
+  To set up:
 
   (1) At the root of the jumpflowy source tree, run e.g.:
       > (cd ~/git/jumpflowy && python3 -m http.server 17362)
@@ -23,19 +23,27 @@
 
   (2) Run ngrok http 17362, and note the generated ngrok URL.
 
-  (3) Run this script once in the Chrome console to add the reload button.
+  (3) Disable cache in Chrome dev tools under the Network tab.
 
-  (4) Run the script once in HandyFlowy to do the same.
+  (4) Run this script once in the Chrome console to add the reload button,
+      if not already installed as a user script in Tampermonkey.
 
-  (5) To reload each time, either: type reloadJumpFlowy() in the console,
-      or press ctrl-r when focused on the WF doc,
-      or click the reload scripts button.
+  (5) Run this script in HandyFlowy to add the reload button,
+      passing in the ngrok URL from above.
 
-  (6) To clean up:
-      - Stop the ngrok tunnel
-      - Stop the HTTP server
-      - Reload WorkFlowy
-      - Reload HandyFlowy
+  To reload each time, either:
+
+  (A) Type reloadJumpFlowy() in the console, or
+  (B) Press ctrl-r when focused on the WF doc, or
+  (C) Click the reload button.
+
+  To clean up:
+
+  (1) Stop the ngrok tunnel
+  (2) Stop the HTTP server
+  (3) Re-enable Chrome's cache
+  (4) Close and reload WorkFlowy in Chrome
+  (5) Close and reload HandyFlowy
 
 */
 
