@@ -4,7 +4,6 @@ Integration tests and tests of basic assumptions.
 Run these tests in the browser after
 loading the expect.js and jumpflowy modules.
 */
-/*jshint esversion: 6 */
 (function() {
   "use strict";
 

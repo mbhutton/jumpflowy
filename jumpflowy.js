@@ -1,7 +1,6 @@
 /*
 JumpFlowy: WorkFlowy extension/library for search and navigation.
 */
-/*jshint esversion: 6 */
 
 // UMD (Universal Module Definition) boilerplate
 (function(root, umdFactory) {

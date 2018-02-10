@@ -15,7 +15,6 @@
       when focused on the WF doc, or click the reload scripts button.
   */
 
-/*jshint esversion: 6 */
 (function() {
   "use strict";
 
