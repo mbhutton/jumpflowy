@@ -1,3 +1,15 @@
+// ==UserScript==
+// @name         Add JumpFlowy reload button
+// @namespace    https://bitbucket.org/mbhutton/jumpflowy
+// @version      0.1.0.1
+// @description  Add button to reload JumpFlowy scripts from localhost server
+// @author       Matt Hutton
+// @match        https://workflowy.com*
+// @grant        none
+// @run-at       document-end
+// @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/devtools/add-browser-reload.js
+// ==/UserScript==
+
 /*
   A utility to semi-automate reloading of jumpflowy.js and integration tests,
   by providing a button, a keyboard shortcut and a function to reload both
