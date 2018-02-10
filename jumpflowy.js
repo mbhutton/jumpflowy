@@ -5,8 +5,10 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 // UMD (Universal Module Definition) boilerplate
 (function(root, umdFactory) {
   "use strict";
+  // eslint-disable-next-line no-undef
   if (typeof define === "function" && define.amd) {
     // AMD. Register as an anonymous module.
+    // eslint-disable-next-line no-undef
     define([], umdFactory);
   } else {
     // Browser globals
@@ -15,6 +17,11 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 })(typeof self !== "undefined" ? self : this, function() {
   "use strict";
   // JumpFlowy implementation starts
+
+  const project_tree = window.project_tree;
+  const tagging = window.tagging;
+  const date_time = window.date_time;
+  const global_project_tree_object = window.global_project_tree_object;
 
   /**
    * @returns {projectRef} The root node of the WorkFlowy account
@@ -29,6 +36,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * and each of its descendants, as a depth first search.
    * @param {function} functionToApply The function to apply to each visited node.
    * @param {projectRef} searchRoot The root node of the search.
+   * @returns {void}
    */
   function applyToEachNode(functionToApply, searchRoot) {
     // Apply the function
@@ -113,7 +121,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     }
 
     let start = 0;
-    while (true) {
+    for (;;) {
       const tagIndex = s.indexOf(tagToMatch, start);
       if (tagIndex === -1) {
         return null;
@@ -177,6 +185,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
+   * @param {projectRef} node The node to query.
    * @returns {number} When the node was last modified, in seconds since
    *                   unix epoch. For the root node, returns the time the
    *                   user joined WorkFlowy.

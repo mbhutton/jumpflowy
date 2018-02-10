@@ -13,10 +13,15 @@
 
   (3) To reload each time, either: type r() in the console, or press ctrl-r
       when focused on the WF doc, or click the reload scripts button.
-  */
+*/
+
+/* eslint-disable no-console */
 
 (function() {
   "use strict";
+
+  const IS_MAC_OS = window.IS_MAC_OS;
+  const IS_CHROME = window.IS_CHROME;
 
   const port = "17362";
   const hostPort = "http://localhost:" + port;

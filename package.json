@@ -8,6 +8,7 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "eslint": "^4.17.0",
     "expect.js": "^0.3.1",
     "prettier": "1.10.2"
   }

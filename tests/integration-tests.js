@@ -4,8 +4,17 @@ Integration tests and tests of basic assumptions.
 Run these tests in the browser after
 loading the expect.js and jumpflowy modules.
 */
+
+/* eslint-disable no-console, valid-jsdoc */
+
 (function() {
   "use strict";
+
+  const expect = window.expect;
+  const jumpflowy = window.jumpflowy;
+  const project_tree = window.project_tree;
+  const global_project_tree_object = window.global_project_tree_object;
+  const tagging = window.tagging;
 
   /** Tests existence and behaviour of common projectRef functions. */
   function expectProjectRefFunctions(node) {
@@ -82,8 +91,8 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.applyToEachNode).to.be.a("function");
     expect(jumpflowy.findMatchingNodes).to.be.a("function");
 
-    const alwaysTrue = node => true;
-    const alwaysFalse = node => false;
+    const alwaysTrue = () => true;
+    const alwaysFalse = () => false;
 
     /**
      * @param {Array.projectRef} nodes
@@ -167,6 +176,7 @@ loading the expect.js and jumpflowy modules.
       }
 
       // Expect these characters to prevent matching of the tag
+      // eslint-disable-next-line quotes
       for (let c of '`@#$&%^*=+{}|<>\\"') {
         const tagsFound = jumpflowy.stringToTags(` ${baseTag}${c} `);
         expect(tagsFound).to.be.empty();
@@ -236,7 +246,7 @@ loading the expect.js and jumpflowy modules.
 
     const currentTime = jumpflowy.getCurrentTimeSec();
 
-    function testWfAssumptions(node, isRoot) {
+    function testWfAssumptions(node) {
       const tree = node.getProjectTree();
       expect(tree).to.not.be(null);
       expect(tree.dateJoinedTimestampInSeconds).to.be.a("number");
@@ -274,7 +284,7 @@ loading the expect.js and jumpflowy modules.
       const child = root.getChildren()[0];
       const childJoinedAt = child.getProjectTree().dateJoinedTimestampInSeconds;
       const childLastMod = jumpflowy.nodeToLastModifiedSec(child);
-      expect(childLastMod).to.be.within(joinedAt, currentTime + 1);
+      expect(childLastMod).to.be.within(childJoinedAt, currentTime + 1);
     }
     testRootNodeJoinedDate();
   }
