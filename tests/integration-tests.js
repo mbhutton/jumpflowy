@@ -12,9 +12,6 @@ loading the expect.js and jumpflowy modules.
 
   const expect = window.expect;
   const jumpflowy = window.jumpflowy;
-  const project_tree = window.project_tree;
-  const global_project_tree_object = window.global_project_tree_object;
-  const tagging = window.tagging;
 
   /** Tests existence and behaviour of common projectRef functions. */
   function expectProjectRefFunctions(node) {
@@ -34,9 +31,9 @@ loading the expect.js and jumpflowy modules.
   function whenUsingGetRootNodeAndProjectRefFunctions() {
     expect(jumpflowy.getRootNode).to.be.a("function");
 
-    expect(project_tree).to.be.an("object");
-    expect(project_tree.getMainProjectTree).to.be.a("function");
-    const mainProjectTree = project_tree.getMainProjectTree();
+    expect(window.project_tree).to.be.an("object");
+    expect(window.project_tree.getMainProjectTree).to.be.a("function");
+    const mainProjectTree = window.project_tree.getMainProjectTree();
     expect(mainProjectTree).to.be.an("object");
     expect(mainProjectTree.getRootProjectReference).to.be.a("function");
 
@@ -144,7 +141,7 @@ loading the expect.js and jumpflowy modules.
   }
 
   function whenUsingStringToTags() {
-    expect(tagging.forEachTagInString).to.be.a("function");
+    expect(window.tagging.forEachTagInString).to.be.a("function");
     expect(jumpflowy.stringToTags).to.be.a("function");
 
     expect(jumpflowy.stringToTags("#foo @bar")).to.eql(["#foo", "@bar"]);
@@ -251,14 +248,13 @@ loading the expect.js and jumpflowy modules.
       expect(tree).to.not.be(null);
       expect(tree.dateJoinedTimestampInSeconds).to.be.a("number");
       const treeObject = node.getProjectTreeObject();
-      expect(global_project_tree_object.getLastModified).to.be.a("function");
+      const global_tree_obj = window.global_project_tree_object;
+      expect(global_tree_obj.getLastModified).to.be.a("function");
 
       if (node.getProjectId() === jumpflowy.getRootNode().getProjectId()) {
         expect(treeObject).to.be(null);
       } else {
-        expect(global_project_tree_object.getLastModified(treeObject)).to.be.a(
-          "number"
-        );
+        expect(global_tree_obj.getLastModified(treeObject)).to.be.a("number");
       }
     }
     testWfAssumptions(jumpflowy.getRootNode());

@@ -18,17 +18,12 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   "use strict";
   // JumpFlowy implementation starts
 
-  const project_tree = window.project_tree;
-  const tagging = window.tagging;
-  const date_time = window.date_time;
-  const global_project_tree_object = window.global_project_tree_object;
-
   /**
    * @returns {projectRef} The root node of the WorkFlowy account
    *                       currently logged into.
    */
   function getRootNode() {
-    return project_tree.getMainProjectTree().getRootProjectReference();
+    return window.project_tree.getMainProjectTree().getRootProjectReference();
   }
 
   /**
@@ -80,7 +75,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     function handleTag(location, tagFound) {
       results.push(tagFound);
     }
-    tagging.forEachTagInString(s, handleTag, 1);
+    window.tagging.forEachTagInString(s, handleTag, 1);
     return results;
   }
 
@@ -181,7 +176,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
-    return Math.floor(date_time.getCurrentTimeInMS() / 1000);
+    return Math.floor(window.date_time.getCurrentTimeInMS() / 1000);
   }
 
   /**
@@ -198,9 +193,8 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
     if (treeObject === null) {
       return joinedSec;
     }
-    const lastModSecSinceJoining = global_project_tree_object.getLastModified(
-      treeObject
-    );
+    const global_tree_obj = window.global_project_tree_object;
+    const lastModSecSinceJoining = global_tree_obj.getLastModified(treeObject);
     return joinedSec + lastModSecSinceJoining;
   }
 

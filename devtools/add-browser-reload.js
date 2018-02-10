@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Add JumpFlowy reload button
 // @namespace    https://bitbucket.org/mbhutton/jumpflowy
-// @version      0.1.0.1
+// @version      0.1.0.2
 // @description  Add button to reload JumpFlowy scripts from localhost server
 // @author       Matt Hutton
 // @match        https://workflowy.com*
@@ -27,8 +27,9 @@
 
   (4) Run the script once in HandyFlowy to do the same.
 
-  (5) To reload each time, either: type r() in the console, or press ctrl-r
-      when focused on the WF doc, or click the reload scripts button.
+  (5) To reload each time, either: type reloadJumpFlowy() in the console,
+      or press ctrl-r when focused on the WF doc,
+      or click the reload scripts button.
 
   (6) To clean up:
       - Stop the ngrok tunnel
@@ -42,10 +43,6 @@
 
 (function() {
   "use strict";
-
-  const IS_MAC_OS = window.IS_MAC_OS;
-  const IS_CHROME = window.IS_CHROME;
-  const IS_MOBILE = window.IS_MOBILE;
 
   let hostPort;
 
@@ -90,8 +87,7 @@
   }
 
   function addReloadButton() {
-    // Add button
-    var button = document.createElement("button");
+    const button = document.createElement("button");
     button.innerHTML = "<div>Reload scripts</div>";
     const header = document.getElementById("header");
     if (header !== null) {
@@ -102,33 +98,28 @@
     button.onclick = reloadScripts;
   }
 
+  // Adds keyboard shortcut ctrl-r (only appropriate on macOS)
   function addShortcut() {
-    // Add keyboard shortcut ctrl-r (only appropriate on macOS)
-    if (IS_MAC_OS) {
-      const keyEventHandler = function(keyEvent) {
-        if (
-          keyEvent.ctrlKey &&
-          !keyEvent.shiftKey &&
-          !keyEvent.altKey &&
-          !keyEvent.metaKey &&
-          keyEvent.code === "KeyR"
-        ) {
-          reloadScripts();
-          keyEvent.stopPropagation();
-          keyEvent.preventDefault();
-        }
-      };
-      document.addEventListener("keydown", keyEventHandler);
-    } else {
-      console.log("Not macOS, so not adding ctrl-r reloading shortcut.");
-    }
+    const keyEventHandler = function(keyEvent) {
+      if (
+        keyEvent.ctrlKey &&
+        !keyEvent.shiftKey &&
+        !keyEvent.altKey &&
+        !keyEvent.metaKey &&
+        keyEvent.code === "KeyR"
+      ) {
+        keyEvent.stopPropagation();
+        keyEvent.preventDefault();
+        reloadScripts();
+      }
+    };
+    document.addEventListener("keydown", keyEventHandler);
+    console.log("Added ctrl-r shortcut for reloading.");
   }
 
   function addReloadFunction() {
-    // Only appropriate in a browser
-    if (IS_CHROME) {
-      window.r = reloadScripts;
-    }
+    window.reloadJumpFlowy = reloadScripts;
+    console.log("Added reloadJumpFlowy() function to global scope.");
   }
 
   function toastrIfAvailable(message, methodName) {
@@ -149,13 +140,22 @@
     toastrIfAvailable(message, "info");
   }
 
-  if (IS_CHROME) {
+  if (window.IS_CHROME) {
     hostPort = "http://localhost:17362";
 
     addReloadButton();
-    addShortcut();
     addReloadFunction();
-  } else if (IS_MOBILE) {
+
+    // Wait a while before adding the reload shortcut,
+    // as window.IS_MAC_OS isn't set immediately.
+    setTimeout(() => {
+      if (window.IS_MAC_OS) {
+        addShortcut();
+      } else {
+        console.log("Not macOS, so not adding ctrl-r reloading shortcut.");
+      }
+    }, 4000);
+  } else if (window.IS_MOBILE) {
     // HandyFlowy
     const rawAnswer = prompt("Reload from which ngrok URL?");
     if (rawAnswer !== null && rawAnswer !== "") {
