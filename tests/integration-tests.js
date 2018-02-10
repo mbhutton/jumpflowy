@@ -315,19 +315,51 @@ loading the expect.js and jumpflowy modules.
     expect(fnToTest("#foo", "#foo()")).to.be("");
   }
 
+  function toastrIfAvailable(message, methodName) {
+    if (typeof window.toastr !== "undefined" && window.toastr !== null) {
+      if (typeof window.toastr[methodName] === "function") {
+        window.toastr[methodName](message);
+      } else {
+        window.toastr.info(`${methodName}: ${message}`);
+        const errorMessage = "Invalid toastr level: " + methodName;
+        window.toastr.error(errorMessage);
+        console.error(errorMessage);
+      }
+    }
+  }
+
+  function showInfo(message) {
+    console.info(message);
+    toastrIfAvailable(message, "info");
+  }
+
+  function showSuccess(message) {
+    console.info(message);
+    toastrIfAvailable(message, "success");
+  }
+
+  function showError(message) {
+    console.error(message);
+    toastrIfAvailable(message, "error");
+  }
+
   function runAllTests() {
-    console.log("Starting integration tests.");
-    whenUsingGetRootNodeAndProjectRefFunctions();
-    whenUsingFindMatchingNodesAndApplyToEachNode();
-    whenUsingGetCurrentTimeSec();
-    whenUsingStringToTags();
-    whenUsingDoesStringHaveTag();
-    whenUsingDoesNodeNameOrNoteMatch();
-    whenUsingDoesNodeHaveTag();
-    whenUsingNodeToLastModifiedSec();
-    whenUsingNodeToTagArgsText();
-    whenUsingStringToTagArgsText();
-    console.log("Finished integration tests.");
+    showInfo("Starting tests...");
+    try {
+      whenUsingGetRootNodeAndProjectRefFunctions();
+      whenUsingFindMatchingNodesAndApplyToEachNode();
+      whenUsingGetCurrentTimeSec();
+      whenUsingStringToTags();
+      whenUsingDoesStringHaveTag();
+      whenUsingDoesNodeNameOrNoteMatch();
+      whenUsingDoesNodeHaveTag();
+      whenUsingNodeToLastModifiedSec();
+      whenUsingNodeToTagArgsText();
+      whenUsingStringToTagArgsText();
+      showSuccess("SUCCESS: Tests passed.");
+    } catch (error) {
+      showError("FAILURE: Tests failed: " + error.message);
+    }
   }
 
   expect(jumpflowy).to.be.an("object");

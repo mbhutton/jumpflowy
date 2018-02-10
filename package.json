@@ -10,6 +10,7 @@
   "devDependencies": {
     "eslint": "^4.17.0",
     "expect.js": "^0.3.1",
-    "prettier": "1.10.2"
+    "prettier": "1.10.2",
+    "toastr": "^2.1.4"
   }
 }
