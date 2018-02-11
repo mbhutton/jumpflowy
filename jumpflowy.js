@@ -72,6 +72,9 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    */
   function stringToTags(s) {
     const results = Array();
+    if (s === null) {
+      return results;
+    }
     function handleTag(location, tagFound) {
       results.push(tagFound);
     }
@@ -87,6 +90,9 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * @see {@link stringToTags} For notes, caveats regarding tag handling.
    */
   function doesStringHaveTag(tagToMatch, s) {
+    if (s === null) {
+      return false;
+    }
     for (let tag of stringToTags(s)) {
       if (tag.toLowerCase() === tagToMatch.toLowerCase()) {
         return true;
@@ -111,8 +117,9 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    *                   E.g. "bar, baz".
    */
   function stringToTagArgsText(tagToMatch, s) {
+    // Note: doesStringHaveTag is null safe for s
     if (!doesStringHaveTag(tagToMatch, s)) {
-      return false;
+      return null;
     }
 
     let start = 0;
