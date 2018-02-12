@@ -144,6 +144,7 @@ loading the expect.js and jumpflowy modules.
     expect(window.tagging.forEachTagInString).to.be.a("function");
     expect(jumpflowy.stringToTags).to.be.a("function");
 
+    expect(jumpflowy.stringToTags(null)).to.eql([]);
     expect(jumpflowy.stringToTags("#foo @bar")).to.eql(["#foo", "@bar"]);
     expect(jumpflowy.stringToTags("#foo #foo")).to.eql(["#foo", "#foo"]);
     expect(jumpflowy.stringToTags("#@foo")).to.eql([]);
@@ -184,6 +185,7 @@ loading the expect.js and jumpflowy modules.
   function whenUsingDoesStringHaveTag() {
     expect(jumpflowy.doesStringHaveTag).to.be.a("function");
 
+    expect(jumpflowy.doesStringHaveTag("#foo", null)).to.be(false);
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("#foo", "#fool")).to.be(false);
     expect(jumpflowy.doesStringHaveTag("#foo", "#fo")).to.be(false);
@@ -299,6 +301,10 @@ loading the expect.js and jumpflowy modules.
 
     const fnToTest = jumpflowy.experimental.stringToTagArgsText;
 
+    expect(fnToTest("#foo", null)).to.be(null);
+    expect(fnToTest("#foo", "#foo")).to.be(null);
+    expect(fnToTest("#foo", "#foo #bar(1,2)")).to.be(null);
+    expect(fnToTest("#foo", "#foo-(1,2)")).to.be(null);
     expect(fnToTest("#foo", "#foo(1)")).to.be("1");
     expect(fnToTest("#foo", "#foo (1)")).to.be("1");
     expect(fnToTest("#foo", "#foo( 1) ")).to.be("1");

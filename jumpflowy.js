@@ -62,6 +62,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 
   /**
    * Returns the tags found in the given string.
+   * Returns the empty set if none are found, or if given null.
    *
    * Note: Tags containing punctuation may produce unexpected results.
    * Suggested best practice: freely use '-' and '_' and ':'
@@ -86,7 +87,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * @param {string} tagToMatch The tag to match.
    * @param {string} s The string to test.
    * @returns {boolean} True if and only if the given string has the
-   *                    exact given tag, ignoring case.
+   *                    exact given tag, ignoring case. Otherwise false.
    * @see {@link stringToTags} For notes, caveats regarding tag handling.
    */
   function doesStringHaveTag(tagToMatch, s) {
@@ -161,6 +162,8 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 
   /**
    * @param {function} textPredicate The predicate to apply to each string.
+   *                                 The predicate should handle null values,
+   *                                 as the root node has a null name and note.
    * @param {projectRef} node The node to test.
    * @returns {boolean} Whether textPredicate returns true for either the node's
    *                    name or note.
