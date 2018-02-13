@@ -174,7 +174,6 @@ loading the expect.js and jumpflowy modules.
       }
 
       // Expect these characters to prevent matching of the tag
-      // eslint-disable-next-line quotes
       for (let c of '`@#$&%^*=+{}|<>\\"') {
         const tagsFound = jumpflowy.stringToTags(` ${baseTag}${c} `);
         expect(tagsFound).to.be.empty();
