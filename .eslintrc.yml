@@ -30,4 +30,6 @@ rules:
   comma-dangle:
     - error
     - only-multiline
+  no-trailing-spaces:
+    - error
 
