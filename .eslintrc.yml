@@ -3,6 +3,8 @@ parserOptions:
 env:
   browser: true
   es6: true
+  greasemonkey: true
+  jquery: true
 extends: 'eslint:recommended'
 rules:
   indent:
