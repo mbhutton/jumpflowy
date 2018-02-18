@@ -13,7 +13,7 @@ loading the expect.js and jumpflowy modules.
   const expect = window.expect;
   const jumpflowy = window.jumpflowy;
 
-  /** Tests existence and behaviour of common projectRef functions. */
+  /** Tests existence and behaviour of common ProjectRef functions. */
   function expectProjectRefFunctions(node) {
     expect(node.getName).to.be.a("function");
     expect(node.getNote).to.be.a("function");
@@ -27,7 +27,7 @@ loading the expect.js and jumpflowy modules.
     expect(node.getNumDescendants()).to.be.a("number");
   }
 
-  /** Tests getRootNode, and the projectRef type. */
+  /** Tests getRootNode, and the ProjectRef type. */
   function whenUsingGetRootNodeAndProjectRefFunctions() {
     expect(jumpflowy.getRootNode).to.be.a("function");
 
@@ -92,8 +92,8 @@ loading the expect.js and jumpflowy modules.
     const alwaysFalse = () => false;
 
     /**
-     * @param {Array.projectRef} nodes
-     * @returns {Array.string}
+     * @param {Array<ProjectRef>} The nodes
+     * @returns {Array<string | null>} The names of the nodes
      */
     function mapNodesToNames(nodes) {
       return nodes.map(node => node.getName());

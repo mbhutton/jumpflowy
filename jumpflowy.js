@@ -19,7 +19,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   // JumpFlowy implementation starts
 
   /**
-   * @returns {projectRef} The root node of the WorkFlowy account
+   * @returns {ProjectRef} The root node of the WorkFlowy account
    *                       currently logged into.
    */
   function getRootNode() {
@@ -30,7 +30,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * Applies the given function to the given node
    * and each of its descendants, as a depth first search.
    * @param {function} functionToApply The function to apply to each visited node.
-   * @param {projectRef} searchRoot The root node of the search.
+   * @param {ProjectRef} searchRoot The root node of the search.
    * @returns {void}
    */
   function applyToEachNode(functionToApply, searchRoot) {
@@ -43,10 +43,10 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
-   * @param {function} nodePredicate A function (projectRef -> boolean) which
+   * @param {function} nodePredicate A function (ProjectRef -> boolean) which
    *                                 returns whether or not a node is a match.
-   * @param {projectRef} searchRoot The root node of the search.
-   * @returns {Array.projectRef} The matching nodes, in order or appearance.
+   * @param {ProjectRef} searchRoot The root node of the search.
+   * @returns {Array<ProjectRef>} The matching nodes, in order or appearance.
    */
   function findMatchingNodes(nodePredicate, searchRoot) {
     const matches = Array();
@@ -69,7 +69,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * as part of tags, being careful to avoid ':' as a suffix.
    *
    * @param {string} s The string to split.
-   * @returns {Array.string} An array of tags found in the string.
+   * @returns {Array<string>} An array of tags found in the string.
    */
   function stringToTags(s) {
     const results = Array();
@@ -148,7 +148,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {projectRef} node The node to extract the args text from.
+   * @param {ProjectRef} node The node to extract the args text from.
    * @returns {string} The trimmed arguments string, or null if no call found.
    * @see {@link stringToTagArgsText} For semantics.
    */
@@ -164,7 +164,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
    * @param {function} textPredicate The predicate to apply to each string.
    *                                 The predicate should handle null values,
    *                                 as the root node has a null name and note.
-   * @param {projectRef} node The node to test.
+   * @param {ProjectRef} node The node to test.
    * @returns {boolean} Whether textPredicate returns true for either the node's
    *                    name or note.
    */
@@ -174,7 +174,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {projectRef} node The node to test.
+   * @param {ProjectRef} node The node to test.
    * @returns {boolean} Whether the given node has the exact given tag, ignoring case.
    */
   function doesNodeHaveTag(tagToMatch, node) {
@@ -190,7 +190,7 @@ JumpFlowy: WorkFlowy extension/library for search and navigation.
   }
 
   /**
-   * @param {projectRef} node The node to query.
+   * @param {ProjectRef} node The node to query.
    * @returns {number} When the node was last modified, in seconds since
    *                   unix epoch. For the root node, returns the time the
    *                   user joined WorkFlowy.
