@@ -32,4 +32,5 @@ rules:
     - only-multiline
   no-trailing-spaces:
     - error
-
+  no-warning-comments:
+    - warn
