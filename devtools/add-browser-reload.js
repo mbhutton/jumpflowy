@@ -10,6 +10,10 @@
 // @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/devtools/add-browser-reload.js
 // ==/UserScript==
 
+// ESLint globals:
+/* global IS_MOBILE:false IS_MAC_OS:false IS_CHROME:false */ // From WorkFlowy
+/* global toastr:false */ // Others
+
 /*
   A utility to assist reloading of jumpflowy.js and integration tests,
   by providing a button, a keyboard shortcut and a function to reload both
@@ -131,13 +135,13 @@
   }
 
   function toastrIfAvailable(message, methodName) {
-    if (typeof window.toastr !== "undefined" && window.toastr !== null) {
-      if (typeof window.toastr[methodName] === "function") {
-        window.toastr[methodName](message);
+    if (typeof toastr !== "undefined" && toastr !== null) {
+      if (typeof toastr[methodName] === "function") {
+        toastr[methodName](message);
       } else {
-        window.toastr.info(`${methodName}: ${message}`);
+        toastr.info(`${methodName}: ${message}`);
         const errorMessage = "Invalid toastr level: " + methodName;
-        window.toastr.error(errorMessage);
+        toastr.error(errorMessage);
         console.error(errorMessage);
       }
     }
@@ -148,22 +152,22 @@
     toastrIfAvailable(message, "info");
   }
 
-  if (window.IS_CHROME) {
+  if (IS_CHROME) {
     hostPort = "http://localhost:17362";
 
     addReloadButton();
     addReloadFunction();
 
     // Wait a while before adding the reload shortcut,
-    // as window.IS_MAC_OS isn't set immediately.
+    // as IS_MAC_OS isn't set immediately.
     setTimeout(() => {
-      if (window.IS_MAC_OS) {
+      if (IS_MAC_OS) {
         addShortcut();
       } else {
         console.log("Not macOS, so not adding ctrl-r reloading shortcut.");
       }
     }, 4000);
-  } else if (window.IS_MOBILE) {
+  } else if (IS_MOBILE) {
     // HandyFlowy
     const rawAnswer = prompt("Reload from which ngrok URL?");
     if (rawAnswer !== null && rawAnswer !== "") {

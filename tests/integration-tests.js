@@ -7,11 +7,12 @@ loading the expect.js and jumpflowy modules.
 
 /* eslint-disable no-console, valid-jsdoc */
 
+// ESLint globals:
+/* global project_tree:false global_project_tree_object:false */ // From WorkFlowy
+/* global toastr:false expect:false jumpflowy:false */ // Others
+
 (function() {
   "use strict";
-
-  const expect = window.expect;
-  const jumpflowy = window.jumpflowy;
 
   /** Tests existence and behaviour of common ProjectRef functions. */
   function expectProjectRefFunctions(node) {
@@ -31,9 +32,9 @@ loading the expect.js and jumpflowy modules.
   function whenUsingGetRootNodeAndProjectRefFunctions() {
     expect(jumpflowy.getRootNode).to.be.a("function");
 
-    expect(window.project_tree).to.be.an("object");
-    expect(window.project_tree.getMainProjectTree).to.be.a("function");
-    const mainProjectTree = window.project_tree.getMainProjectTree();
+    expect(project_tree).to.be.an("object");
+    expect(project_tree.getMainProjectTree).to.be.a("function");
+    const mainProjectTree = project_tree.getMainProjectTree();
     expect(mainProjectTree).to.be.an("object");
     expect(mainProjectTree.getRootProjectReference).to.be.a("function");
 
@@ -249,7 +250,7 @@ loading the expect.js and jumpflowy modules.
       expect(tree).to.not.be(null);
       expect(tree.dateJoinedTimestampInSeconds).to.be.a("number");
       const treeObject = node.getProjectTreeObject();
-      const global_tree_obj = window.global_project_tree_object;
+      const global_tree_obj = global_project_tree_object;
       expect(global_tree_obj.getLastModified).to.be.a("function");
 
       if (node.getProjectId() === jumpflowy.getRootNode().getProjectId()) {
@@ -317,13 +318,13 @@ loading the expect.js and jumpflowy modules.
   }
 
   function toastrIfAvailable(message, methodName) {
-    if (typeof window.toastr !== "undefined" && window.toastr !== null) {
-      if (typeof window.toastr[methodName] === "function") {
-        window.toastr[methodName](message);
+    if (typeof toastr !== "undefined" && toastr !== null) {
+      if (typeof toastr[methodName] === "function") {
+        toastr[methodName](message);
       } else {
-        window.toastr.info(`${methodName}: ${message}`);
+        toastr.info(`${methodName}: ${message}`);
         const errorMessage = "Invalid toastr level: " + methodName;
-        window.toastr.error(errorMessage);
+        toastr.error(errorMessage);
         console.error(errorMessage);
       }
     }

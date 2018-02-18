@@ -15,14 +15,16 @@ finding and updating the previous version in place. An alert reminds the
 user to remove the old version and to move the new version into place.
 */
 
-(function() {
+//ESLint globals:
+/* global webkit:false */
 
+(function() {
   const baseUrl = "https://bitbucket.org/mbhutton/jumpflowy/raw/";
   const gitBranch = "master";
   const jumpflowyPath = "/jumpflowy.js";
 
   function showToast(text) {
-    window.webkit.messageHandlers.Toast.postMessage(text);
+    webkit.messageHandlers.Toast.postMessage(text);
   }
 
   function scriptToHandyFlowyImportUrl(scriptName, javascript) {
@@ -36,7 +38,7 @@ user to remove the old version and to move the new version into place.
     try {
       // Note: alert *before* opening the URL, to avoid crashing HandyFlowy
       alert("Afterwards, move new script and remove its older versions");
-      window.open(importUrl);
+      open(importUrl);
     } catch (er) {
       alert("Failed to open import URL due to error: " + er.message);
     }
