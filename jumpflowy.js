@@ -153,6 +153,32 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @param {ProjectRef} node The node
+   * @returns {string} The plain text version of the node's name,
+   *                   or the empty string if the root node.
+   */
+  function nodeToPlainTextName(node) {
+    const treeObj = node.getProjectTreeObject();
+    if (treeObj === null) {
+      return ""; // Root node
+    }
+    return global_project_tree_object.getNameInPlainText(treeObj);
+  }
+
+  /**
+   * @param {ProjectRef} node The node
+   * @returns {string} The plain text version of the node's note,
+   *                   or the empty string if the root node.
+   */
+  function nodeToPlainTextNote(node) {
+    const treeObj = node.getProjectTreeObject();
+    if (treeObj === null) {
+      return ""; // Root node
+    }
+    return global_project_tree_object.getNoteInPlainText(treeObj);
+  }
+
+  /**
    * @param {string} tagToMatch The tag to match.
    * @param {ProjectRef} node The node to extract the args text from.
    * @returns {string} The trimmed arguments string, or null if no call found.
@@ -225,6 +251,8 @@ global project_tree:false tagging:false date_time:false
     getCurrentTimeSec: getCurrentTimeSec,
     getRootNode: getRootNode,
     nodeToLastModifiedSec: nodeToLastModifiedSec,
+    nodeToPlainTextName: nodeToPlainTextName,
+    nodeToPlainTextNote: nodeToPlainTextNote,
     stringToTags: stringToTags,
 
     experimental: {

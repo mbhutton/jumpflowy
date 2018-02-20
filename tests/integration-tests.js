@@ -26,6 +26,7 @@ loading the expect.js and jumpflowy modules.
     expect(node.getChildren()).to.be.an("array");
     expect(node.getNumDescendants).to.be.a("function");
     expect(node.getNumDescendants()).to.be.a("number");
+    expect(node.getProjectTreeObject).to.be.a("function");
   }
 
   /** Tests getRootNode, and the ProjectRef type. */
@@ -49,6 +50,7 @@ loading the expect.js and jumpflowy modules.
     expect(rootNode.getProjectId()).to.be("None");
     expect(rootNode.getAncestors()).to.be.empty();
     expect(rootNode.getChildren()).to.not.be.empty();
+    expect(rootNode.getProjectTreeObject()).to.be(null);
 
     const firstChildOfRoot = rootNode.getChildren()[0];
 
@@ -63,6 +65,7 @@ loading the expect.js and jumpflowy modules.
     expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
       rootNode.getNumDescendants()
     );
+    expect(firstChildOfRoot.getProjectTreeObject()).to.be.an("object");
   }
 
   /** Returns the one and only node with the given note text, or fails. */
@@ -82,6 +85,17 @@ loading the expect.js and jumpflowy modules.
       );
     }
     return matches[0];
+  }
+
+  function getOnlyChildOf(node) {
+    if (node === null) {
+      expect.fail("Node was null");
+    }
+    const children = node.getChildren();
+    if (children === null || children.length !== 1) {
+      expect.fail("Node has no children or multiple children");
+    }
+    return children[0];
   }
 
   /** Tests for applyToEachNode and findMatchingNodes functions. */
@@ -205,19 +219,13 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
   }
 
-  const mocks = (function() {
-    return {
-      nodeWithNameAndNote: (name, note) => ({
-        getName: () => name,
-        getNote: () => note
-      })
-    };
-  })();
-
   function whenUsingDoesNodeNameOrNoteMatch() {
     expect(jumpflowy.doesNodeNameOrNoteMatch).to.be.a("function");
 
-    const node = mocks.nodeWithNameAndNote("someName", "someNote");
+    const parentNode = getUniqueNodeByNoteOrFail(
+      "test/JumpFlowy/whenUsingDoesNodeNameOrNoteMatch"
+    );
+    const node = getOnlyChildOf(parentNode);
     const fnToTest = jumpflowy.doesNodeNameOrNoteMatch;
 
     expect(fnToTest(t => t === "someName", node)).to.be(true);
@@ -230,13 +238,42 @@ loading the expect.js and jumpflowy modules.
   function whenUsingDoesNodeHaveTag() {
     expect(jumpflowy.doesNodeHaveTag).to.be.a("function");
 
-    const node = mocks.nodeWithNameAndNote("someName #foo", "someNote @bar");
+    const parentNode = getUniqueNodeByNoteOrFail(
+      "test/JumpFlowy/whenUsingDoesNodeHaveTag"
+    );
+    const node = getOnlyChildOf(parentNode);
+
     expect(jumpflowy.doesNodeHaveTag("#foo", node)).to.be(true);
     expect(jumpflowy.doesNodeHaveTag("foo", node)).to.be(false);
     expect(jumpflowy.doesNodeHaveTag("@bar", node)).to.be(true);
     expect(jumpflowy.doesNodeHaveTag("bar", node)).to.be(false);
     expect(jumpflowy.doesNodeHaveTag("#baz", node)).to.be(false);
     expect(jumpflowy.doesNodeHaveTag("baz", node)).to.be(false);
+  }
+
+  function whenUsingNodeToPlainTextName() {
+    expect(jumpflowy.nodeToPlainTextName).to.be.a("function");
+    expect(global_project_tree_object.getNameInPlainText).to.be.a("function");
+
+    const node = getUniqueNodeByNoteOrFail(
+      "test/JumpFlowy/whenUsingNodeToPlainTextName"
+    );
+    expect(jumpflowy.nodeToPlainTextName(node)).to.be("applePie");
+    const rootNode = jumpflowy.getRootNode();
+    expect(jumpflowy.nodeToPlainTextName(rootNode)).to.be("");
+  }
+
+  function whenUsingNodeToPlainTextNote() {
+    expect(jumpflowy.nodeToPlainTextNote).to.be.a("function");
+    expect(global_project_tree_object.getNoteInPlainText).to.be.a("function");
+
+    const node = getUniqueNodeByNoteOrFail(
+      "test/JumpFlowy/whenUsingNodeToPlainTextNote"
+    );
+    const child = node.getChildren()[0];
+    expect(jumpflowy.nodeToPlainTextNote(child)).to.be("bananaCake");
+    const rootNode = jumpflowy.getRootNode();
+    expect(jumpflowy.nodeToPlainTextNote(rootNode)).to.be("");
   }
 
   /** Tests for nodeToLastModifiedSec and for assumptions related to it. */
@@ -290,7 +327,10 @@ loading the expect.js and jumpflowy modules.
   function whenUsingNodeToTagArgsText() {
     expect(jumpflowy.experimental.nodeToTagArgsText).to.be.a("function");
 
-    const node = mocks.nodeWithNameAndNote("SomeName #foo(a, b, c)");
+    const parentNode = getUniqueNodeByNoteOrFail(
+      "test/JumpFlowy/whenUsingNodeToTagArgsText"
+    );
+    const node = getOnlyChildOf(parentNode);
     expect(jumpflowy.experimental.nodeToTagArgsText("#foo", node)).to.be(
       "a, b, c"
     );
@@ -357,10 +397,13 @@ loading the expect.js and jumpflowy modules.
       whenUsingDoesNodeHaveTag();
       whenUsingNodeToLastModifiedSec();
       whenUsingNodeToTagArgsText();
+      whenUsingNodeToPlainTextName();
+      whenUsingNodeToPlainTextNote();
       whenUsingStringToTagArgsText();
       showSuccess("SUCCESS: Tests passed.");
     } catch (error) {
       showError("FAILURE: Tests failed: " + error.message);
+      throw error;
     }
   }
 
