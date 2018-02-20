@@ -71,7 +71,7 @@ loading the expect.js and jumpflowy modules.
   /** Returns the one and only node with the given note text, or fails. */
   function getUniqueNodeByNoteOrFail(noteText) {
     const matches = jumpflowy.findMatchingNodes(
-      node => node.getNote() === noteText,
+      node => jumpflowy.nodeToPlainTextNote(node) === noteText,
       jumpflowy.getRootNode()
     );
     if (matches.length === 0) {
@@ -108,10 +108,10 @@ loading the expect.js and jumpflowy modules.
 
     /**
      * @param {Array<ProjectRef>} The nodes
-     * @returns {Array<string | null>} The names of the nodes
+     * @returns {Array<string | null>} The plain text names of the nodes
      */
-    function mapNodesToNames(nodes) {
-      return nodes.map(node => node.getName());
+    function mapNodesToPlainTextNames(nodes) {
+      return nodes.map(node => jumpflowy.nodeToPlainTextName(node));
     }
 
     const searchRoot = getUniqueNodeByNoteOrFail(
@@ -126,18 +126,18 @@ loading the expect.js and jumpflowy modules.
     const expectedNames = ["search root", "a", "b", "c", "d", "e"];
     expect(allNodes.length).to.be(expectedNames.length);
     expect(allNodes.length).to.be(searchRoot.getNumDescendants() + 1);
-    const actualNames = mapNodesToNames(allNodes);
+    const actualNames = mapNodesToPlainTextNames(allNodes);
     expect(actualNames).to.eql(expectedNames);
 
     function isNameSingleVowel(node) {
-      const name = node.getName();
+      const name = jumpflowy.nodeToPlainTextName(node);
       return name.length === 1 && "aeiouAEIOU".includes(name);
     }
     const nodesWithSingleVowel = jumpflowy.findMatchingNodes(
       isNameSingleVowel,
       searchRoot
     );
-    expect(mapNodesToNames(nodesWithSingleVowel)).to.eql(["a", "e"]);
+    expect(mapNodesToPlainTextNames(nodesWithSingleVowel)).to.eql(["a", "e"]);
 
     // Test that applyToEachNode is applied for each node in order
     const foundNames = Array(0);

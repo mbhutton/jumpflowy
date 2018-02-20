@@ -185,11 +185,14 @@ global project_tree:false tagging:false date_time:false
    * @see {@link stringToTagArgsText} For semantics.
    */
   function nodeToTagArgsText(tagToMatch, node) {
-    const resultForName = stringToTagArgsText(tagToMatch, node.getName());
+    const resultForName = stringToTagArgsText(
+      tagToMatch,
+      nodeToPlainTextName(node)
+    );
     if (resultForName !== null) {
       return resultForName;
     }
-    return stringToTagArgsText(tagToMatch, node.getNote());
+    return stringToTagArgsText(tagToMatch, nodeToPlainTextNote(node));
   }
 
   /**
@@ -201,7 +204,10 @@ global project_tree:false tagging:false date_time:false
    *                    name or note.
    */
   function doesNodeNameOrNoteMatch(textPredicate, node) {
-    return textPredicate(node.getName()) || textPredicate(node.getNote());
+    return (
+      textPredicate(nodeToPlainTextName(node)) ||
+      textPredicate(nodeToPlainTextNote(node))
+    );
   }
 
   /**
