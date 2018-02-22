@@ -325,21 +325,21 @@ loading the expect.js and jumpflowy modules.
   }
 
   function whenUsingNodeToTagArgsText() {
-    expect(jumpflowy.experimental.nodeToTagArgsText).to.be.a("function");
+    expect(jumpflowy.beta.nodeToTagArgsText).to.be.a("function");
 
     const parentNode = getUniqueNodeByNoteOrFail(
       "test/JumpFlowy/whenUsingNodeToTagArgsText"
     );
     const node = getOnlyChildOf(parentNode);
-    expect(jumpflowy.experimental.nodeToTagArgsText("#foo", node)).to.be(
+    expect(jumpflowy.beta.nodeToTagArgsText("#foo", node)).to.be(
       "a, b, c"
     );
   }
 
   function whenUsingStringToTagArgsText() {
-    expect(jumpflowy.experimental.stringToTagArgsText).to.be.a("function");
+    expect(jumpflowy.beta.stringToTagArgsText).to.be.a("function");
 
-    const fnToTest = jumpflowy.experimental.stringToTagArgsText;
+    const fnToTest = jumpflowy.beta.stringToTagArgsText;
 
     expect(fnToTest("#foo", null)).to.be(null);
     expect(fnToTest("#foo", "#foo")).to.be(null);

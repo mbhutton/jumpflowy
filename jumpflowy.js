@@ -267,7 +267,7 @@ global project_tree:false tagging:false date_time:false
     nodeToPlainTextNote: nodeToPlainTextNote,
     stringToTags: stringToTags,
 
-    experimental: {
+    beta: {
       nodeToTagArgsText: nodeToTagArgsText,
       stringToTagArgsText: stringToTagArgsText
     }
