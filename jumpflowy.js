@@ -252,6 +252,24 @@ global project_tree:false tagging:false date_time:false
     return joinedSec + lastModSecSinceJoining;
   }
 
+  ////////////////////////////////////
+  // Alpha section starts.
+  //
+  // The code in this section should be considered under development rather
+  // than stable: the functionality is expected to change, and the functions
+  // do not form a stable API.
+  // Functions defined here are exposed via the 'jumpflowy.alpha' namespace.
+  // As code here stabilises, it will be moved above this section, with
+  // functions moved into the main 'jumpflowy' namespace.
+  ////////////////////////////////////
+
+  const alpha = {
+  };
+
+  ////////////////////////////////////
+  // Alpha section ends.
+  ////////////////////////////////////
+
   // Return jumpflowy object
   return {
     // Alphabetical order
@@ -270,6 +288,8 @@ global project_tree:false tagging:false date_time:false
     beta: {
       nodeToTagArgsText: nodeToTagArgsText,
       stringToTagArgsText: stringToTagArgsText
-    }
+    },
+
+    alpha: alpha
   };
 });
