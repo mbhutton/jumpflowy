@@ -272,6 +272,41 @@ global project_tree:false tagging:false date_time:false
     window.jumpflowy.alpha.cleanUp();
   }
 
+  /**
+   * @param {ProjectRef} node The node whose path to get
+   * @returns {Array<ProjectRef>} An array starting with the root and ending
+   *                              with the node.
+   */
+  function nodeToPathAsNodes(node) {
+    return node
+      .getAncestors() // parent ... root
+      .slice()
+      .reverse() // root ... parent
+      .concat(node); // root ... parent, node
+  }
+
+  /**
+   * @param {ProjectRef} nodeA Some node
+   * @param {ProjectRef} nodeB Another node
+   * @returns {ProjectRef} The closest common ancestor of both nodes, inclusive.
+   */
+  function findClosestCommonAncestor(nodeA, nodeB) {
+    const pathA = nodeToPathAsNodes(nodeA);
+    const pathB = nodeToPathAsNodes(nodeB);
+    const minLength = Math.min(pathA.length, pathB.length);
+
+    let i;
+    for (i = 0; i < minLength; i++) {
+      if (pathA[i].getProjectId() !== pathB[i].getProjectId()) {
+        break;
+      }
+    }
+    if (i === 0) {
+      throw "Nodes shared no common root";
+    }
+    return pathA[i - 1];
+  }
+
   let cleanedUp = false;
 
   function cleanUp() {
@@ -283,6 +318,8 @@ global project_tree:false tagging:false date_time:false
 
   const alpha = {
     cleanUp: cleanUp,
+    findClosestCommonAncestor: findClosestCommonAncestor,
+    nodeToPathAsNodes: nodeToPathAsNodes,
   };
 
   ////////////////////////////////////
