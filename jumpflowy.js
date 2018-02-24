@@ -263,7 +263,26 @@ global project_tree:false tagging:false date_time:false
   // functions moved into the main 'jumpflowy' namespace.
   ////////////////////////////////////
 
+  // Clean up any previous instance of JumpFlowy
+  if (
+    typeof window.jumpflowy !== "undefined" &&
+    typeof window.jumpflowy.alpha !== "undefined" &&
+    typeof window.jumpflowy.alpha.cleanUp !== "undefined"
+  ) {
+    window.jumpflowy.alpha.cleanUp();
+  }
+
+  let cleanedUp = false;
+
+  function cleanUp() {
+    if (cleanedUp) {
+      return;
+    }
+    cleanedUp = true;
+  }
+
   const alpha = {
+    cleanUp: cleanUp,
   };
 
   ////////////////////////////////////
