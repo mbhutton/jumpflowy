@@ -273,6 +273,22 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @param {ProjectRef} node The node to query
+   * @returns {boolean} Whether the given node is the root node
+   */
+  function isRootNode(node) {
+    return node.getProjectId() === "None";
+  }
+
+  /**
+   * @returns {string} The long (non-truncated) project ID of the
+   *                   node which is currently zoomed into.
+   */
+  function getZoomedNodeAsLongId() {
+    return location_history.getCurrentLocation()._zoomedProjectId;
+  }
+
+  /**
    * @param {ProjectRef} node The node whose path to get
    * @returns {Array<ProjectRef>} An array starting with the root and ending
    *                              with the node.
@@ -319,6 +335,8 @@ global project_tree:false tagging:false date_time:false
   const alpha = {
     cleanUp: cleanUp,
     findClosestCommonAncestor: findClosestCommonAncestor,
+    getZoomedNodeAsLongId: getZoomedNodeAsLongId,
+    isRootNode: isRootNode,
     nodeToPathAsNodes: nodeToPathAsNodes,
   };
 
