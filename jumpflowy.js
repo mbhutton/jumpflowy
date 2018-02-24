@@ -372,7 +372,9 @@ global project_tree:false tagging:false date_time:false
     let result = "";
     for (let line of lines) {
       for (let segment of line.split('"')) {
-        result += `"${segment}" `;
+        if (segment.trim() !== "") {
+          result += `"${segment}" `;
+        }
       }
     }
     return result;
