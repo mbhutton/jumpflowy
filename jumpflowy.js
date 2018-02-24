@@ -323,6 +323,61 @@ global project_tree:false tagging:false date_time:false
     return pathA[i - 1];
   }
 
+  function nodesToSearchUrl(nodes) {
+    return (
+      "https://workflowy.com/#?q=" +
+      encodeURIComponent(nodesToSearchTermText(nodes))
+    );
+  }
+
+  function nodesToSearchTermText(nodes) {
+    const searchesOrNulls = nodes.map(n => nodeToSearchTermText(n));
+    const searches = searchesOrNulls.filter(x => x !== null);
+    return searches.join(" OR ");
+  }
+
+  /**
+   * @param {ProjectRef} node The node to build the search string for
+   * @returns {string | null} The unescaped search term to use for finding the given node,
+   *                          or null if this is the root node.
+   */
+  function nodeToSearchTermText(node) {
+    if (isRootNode(node)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "nodeToSearchTermText(node) called with the root node of the document."
+      );
+      return null;
+    }
+    const currentTimeSec = getCurrentTimeSec();
+    const nodeLastModifiedSec = nodeToLastModifiedSec(node);
+    const modifiedHowLongAgoSec = currentTimeSec - nodeLastModifiedSec;
+    const modifiedHowLongAgoMinutes = Math.ceil(modifiedHowLongAgoSec / 60);
+    const timeClause = `last-changed:${modifiedHowLongAgoMinutes +
+      1} -last-changed:${modifiedHowLongAgoMinutes - 1} `;
+    const nameClause = splitNameOrStringByDoubleQuotes(
+      nodeToPlainTextName(node)
+    );
+    const noteClause = splitNameOrStringByDoubleQuotes(
+      nodeToPlainTextNote(node)
+    );
+    return timeClause + nameClause + noteClause;
+  }
+
+  function splitNameOrStringByDoubleQuotes(s) {
+    const lines = s.match(/[^\r\n]+/g);
+    if (lines === null || lines.length === 0) {
+      return "";
+    }
+    let result = "";
+    for (let line of lines) {
+      for (let segment of line.split('"')) {
+        result += `"${segment}" `;
+      }
+    }
+    return result;
+  }
+
   let cleanedUp = false;
 
   function cleanUp() {
@@ -333,11 +388,16 @@ global project_tree:false tagging:false date_time:false
   }
 
   const alpha = {
+    // Alphabetical order
     cleanUp: cleanUp,
     findClosestCommonAncestor: findClosestCommonAncestor,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     isRootNode: isRootNode,
     nodeToPathAsNodes: nodeToPathAsNodes,
+    nodeToSearchTermText: nodeToSearchTermText,
+    nodesToSearchTermText: nodesToSearchTermText,
+    nodesToSearchUrl: nodesToSearchUrl,
+    splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
   };
 
   ////////////////////////////////////
