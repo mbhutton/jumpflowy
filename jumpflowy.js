@@ -448,6 +448,83 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @template T
+   * @param {function} doesABeatB A function which return whether A beats B.
+   * @param {Array<T>} results The current results array, ordered
+   *                           [null, null, ..., 2nd best, best].
+   * @param {T} candidate The candidate item.
+   * @returns {void}
+   * Note: optimised for large numbers of calls, with small results sizes.
+   */
+  function insertIntoSortedResults(doesABeatB, results, candidate) {
+    if (candidate === undefined || candidate === null) {
+      return;
+    }
+    let insertAt = -1;
+    for (let i = 0; i < results.length; i++) {
+      const toReplace = results[i];
+      if (toReplace === null || doesABeatB(candidate, toReplace)) {
+        insertAt = i;
+      } else {
+        break;
+      }
+    }
+    if (insertAt > 0) {
+      // Shift existing results to the left, from out insertion point
+      results.copyWithin(0, 1, insertAt + 1);
+    }
+    if (insertAt >= 0) {
+      results[insertAt] = candidate;
+    }
+  }
+
+  /**
+   * @returns {Array<ProjectRef>} The top nodes under the given
+   *    search root (inclusive), with higher scoring nodes first.
+   * @param {function} nodeToScoreFn A function from node (ProjectRef)
+   *    to a score (number), where higher scores are better.
+   * @param {number} minScore Nodes must have this score or higher to
+   *    be included in the results.
+   * @param {number} maxSize The results array will be at most this size.
+   * @param {ProjectRef} searchRoot The root node of the search.
+   */
+  function findTopNodesByScore(nodeToScoreFn, minScore, maxSize, searchRoot) {
+    const results = Array(maxSize).fill(null);
+    function isABetterThanB(nodeAndScoreA, nodeAndScoreB) {
+      return nodeAndScoreA[1] > nodeAndScoreB[1];
+    }
+    function forEachNode(node) {
+      const score = nodeToScoreFn(node);
+      const nodeAndScore = [node, score];
+      if (score >= minScore) {
+        insertIntoSortedResults(isABetterThanB, results, nodeAndScore);
+      }
+    }
+    applyToEachNode(forEachNode, searchRoot);
+    return results
+      .filter(x => x !== null)
+      .map(x => x[0])
+      .reverse();
+  }
+
+  /**
+   * @template T
+   * @returns {Array<T>} The the best N items from the given Array,
+   *    as scored by the given function.
+   * @param {function} isABetterThanB A function which take items A and B,
+   *    returning true if A is 'better', and false if B is 'better'.
+   * @param {number} maxSize The results array will be at most this size.
+   * @param {Iterable<T>} items The items to search.
+   */
+  function findTopItemsByComparator(isABetterThanB, maxSize, items) {
+    const results = Array(maxSize).fill(null);
+    for (let candidate in items) {
+      insertIntoSortedResults(isABetterThanB, results, candidate);
+    }
+    return results.filter(x => x !== null).reverse();
+  }
+
+  /**
    * @param {Date} date The date to format
    * @returns {string} The given date as a string in YYYY-MM-DD format.
    */
@@ -542,6 +619,8 @@ global project_tree:false tagging:false date_time:false
     dismissWfNotification: dismissWfNotification,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findNodesWithTag: findNodesWithTag,
+    findTopItemsByComparator: findTopItemsByComparator,
+    findTopNodesByScore: findTopNodesByScore,
     getNodeByLongIdOrInvalid: getNodeByLongIdOrInvalid,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     isRootNode: isRootNode,
