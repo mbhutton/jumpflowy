@@ -525,6 +525,22 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @returns {Array<ProjectRef>} Recently edited nodes, most recent first.
+   * @param {number} earliestModifiedSec Nodes edited before this are excluded.
+   * @param {number} maxSize The results array will be at most this size.
+   * @param {ProjectRef} searchRoot The root node of the search.
+   */
+  function findRecentlyEditedNodes(earliestModifiedSec, maxSize, searchRoot) {
+    const scoreFn = nodeToLastModifiedSec; // Higher timestamp is a higher score
+    return findTopNodesByScore(
+      scoreFn,
+      earliestModifiedSec,
+      maxSize,
+      searchRoot
+    );
+  }
+
+  /**
    * @param {Date} date The date to format
    * @returns {string} The given date as a string in YYYY-MM-DD format.
    */
@@ -618,6 +634,7 @@ global project_tree:false tagging:false date_time:false
     dateToYMDString: dateToYMDString,
     dismissWfNotification: dismissWfNotification,
     findClosestCommonAncestor: findClosestCommonAncestor,
+    findRecentlyEditedNodes: findRecentlyEditedNodes,
     findNodesWithTag: findNodesWithTag,
     findTopItemsByComparator: findTopItemsByComparator,
     findTopNodesByScore: findTopNodesByScore,
