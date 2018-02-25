@@ -448,6 +448,18 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @param {Date} date The date to format
+   * @returns {string} The given date as a string in YYYY-MM-DD format.
+   */
+  function dateToYMDString(date) {
+    const as2DigitString = num => num.toString().padStart(2, "0");
+    const yyyy = date.getFullYear().toString();
+    const mm = as2DigitString(date.getMonth() + 1); // Months start at 0
+    const dd = as2DigitString(date.getDate());
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  /**
    * A developer utility method to help show time taken for an operation.
    * @param {Date} startDate The start date of the operation to measure.
    * @param {string} message The message to be displayed before the time delta.
@@ -526,6 +538,7 @@ global project_tree:false tagging:false date_time:false
   const alpha = {
     // Alphabetical order
     cleanUp: cleanUp,
+    dateToYMDString: dateToYMDString,
     dismissWfNotification: dismissWfNotification,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findNodesWithTag: findNodesWithTag,
