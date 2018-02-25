@@ -428,21 +428,20 @@ global project_tree:false tagging:false date_time:false
     }
   }
 
-  function setUp() {
-    document.addEventListener("keydown", keyDownListener);
-  }
-
-  let cleanedUp = false;
-
+  /**
+   * Cleans up global state maintained by this script.
+   * Ok to call multiple times.
+   * @returns {void}
+   */
   function cleanUp() {
-    if (cleanedUp) {
-      return;
-    }
     // eslint-disable-next-line no-console
     console.log("Cleaning up");
     canonicalCodesToKeyDownFunctions.clear();
     document.removeEventListener("keydown", keyDownListener);
-    cleanedUp = true;
+  }
+
+  function setUp() {
+    document.addEventListener("keydown", keyDownListener);
   }
 
   setUp();
