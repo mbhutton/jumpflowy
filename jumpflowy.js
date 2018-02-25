@@ -436,6 +436,17 @@ global project_tree:false tagging:false date_time:false
     return findMatchingNodes(n => doesNodeHaveTag(tag, n), searchRoot);
   }
 
+  /**
+   * @param {string} longId The long (non-truncated) project ID.
+   * @returns {ProjectRef} The node with the given ID, or an invalid ProjectRef
+   *                       if the project ID is invalid. Test the validity of the
+   *                       returned node using theReturnedNode.isValid().
+   */
+  function getNodeByLongIdOrInvalid(longId) {
+    const prTree = project_tree.getMainProjectTree();
+    return prTree.getProjectReferenceByProjectId(longId);
+  }
+
   function keyDownEventToCanonicalCode(keyEvent) {
     let canonicalCode = "";
     for (let flagAndCode of [
@@ -505,6 +516,7 @@ global project_tree:false tagging:false date_time:false
     dismissWfNotification: dismissWfNotification,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findNodesWithTag: findNodesWithTag,
+    getNodeByLongIdOrInvalid: getNodeByLongIdOrInvalid,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     isRootNode: isRootNode,
     isValidCanonicalCode: isValidCanonicalCode,
