@@ -427,6 +427,15 @@ global project_tree:false tagging:false date_time:false
     return result;
   }
 
+  /**
+   * @param {string} tag The tag to find, e.g. "#foo".
+   * @param {ProjectRef} searchRoot The root node of the search.
+   * @returns {Array<ProjectRef>} The matching nodes, in order or appearance.
+   */
+  function findNodesWithTag(tag, searchRoot) {
+    return findMatchingNodes(n => doesNodeHaveTag(tag, n), searchRoot);
+  }
+
   function keyDownEventToCanonicalCode(keyEvent) {
     let canonicalCode = "";
     for (let flagAndCode of [
@@ -495,6 +504,7 @@ global project_tree:false tagging:false date_time:false
     cleanUp: cleanUp,
     dismissWfNotification: dismissWfNotification,
     findClosestCommonAncestor: findClosestCommonAncestor,
+    findNodesWithTag: findNodesWithTag,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     isRootNode: isRootNode,
     isValidCanonicalCode: isValidCanonicalCode,
