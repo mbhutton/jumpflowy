@@ -286,6 +286,21 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * Prompt for a search string, then perform a normal
+   * WorkFlowy search.
+   * @returns {void}
+   */
+  function promptThenWfSearch() {
+    $("#searchBox").val(prompt("WorkFlowy search: ", $("#searchBox").val()));
+    $("#searchBox").focus();
+    $("#searchBox").trigger(
+      $.Event("keydown", {
+        which: $.ui.keyCode.ENTER
+      })
+    );
+  }
+
+  /**
    * @returns {void} Dismisses a notification from the WorkFlowy UI, e.g. after
    *                 deleting a large tree of nodes.
    */
@@ -490,6 +505,7 @@ global project_tree:false tagging:false date_time:false
     nodesToSearchUrl: nodesToSearchUrl,
     openHere: openHere,
     openNodeHere: openNodeHere,
+    promptThenWfSearch: promptThenWfSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
   };
