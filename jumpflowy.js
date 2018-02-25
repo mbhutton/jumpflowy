@@ -272,6 +272,9 @@ global project_tree:false tagging:false date_time:false
     window.jumpflowy.alpha.cleanUp();
   }
 
+  // Global state
+  const canonicalCodesToKeyDownFunctions = new Map();
+
   /**
    * @param {ProjectRef} node The node to query
    * @returns {boolean} Whether the given node is the root node
@@ -380,14 +383,69 @@ global project_tree:false tagging:false date_time:false
     return result;
   }
 
+  function keyDownEventToCanonicalCode(keyEvent) {
+    let canonicalCode = "";
+    for (let flagAndCode of [
+      [keyEvent.ctrlKey, "ctrl"],
+      [keyEvent.shiftKey, "shift"],
+      [keyEvent.altKey, "alt"],
+      [keyEvent.metaKey, "meta"]
+    ]) {
+      if (flagAndCode[0]) {
+        canonicalCode += flagAndCode[1] + "+";
+      }
+    }
+    return canonicalCode + keyEvent.code;
+  }
+
+  function isValidCanonicalCode(canonicalCode) {
+    const result = canonicalCode.match(
+      "^(ctrl\\+)?(shift\\+)?(alt\\+)?(meta\\+)?Key.$"
+    );
+    return result !== null;
+  }
+
+  function registerFunctionForKeyDownEvent(canonicalCode, functionToApply) {
+    if (!isValidCanonicalCode(canonicalCode)) {
+      throw `${canonicalCode} is not a valid canonical key code`;
+    }
+    if (typeof functionToApply !== "function") {
+      throw "Not a function";
+    }
+    if (functionToApply.length !== 0) {
+      throw "Cannot register a callback function which takes arguments";
+    }
+    canonicalCodesToKeyDownFunctions.set(canonicalCode, functionToApply);
+  }
+
+  function keyDownListener(keyEvent) {
+    const canonicalCode = keyDownEventToCanonicalCode(keyEvent);
+    const registeredFn = canonicalCodesToKeyDownFunctions.get(canonicalCode);
+    if (registeredFn) {
+      registeredFn();
+      keyEvent.stopPropagation();
+      keyEvent.preventDefault();
+    }
+  }
+
+  function setUp() {
+    document.addEventListener("keydown", keyDownListener);
+  }
+
   let cleanedUp = false;
 
   function cleanUp() {
     if (cleanedUp) {
       return;
     }
+    // eslint-disable-next-line no-console
+    console.log("Cleaning up");
+    canonicalCodesToKeyDownFunctions.clear();
+    document.removeEventListener("keydown", keyDownListener);
     cleanedUp = true;
   }
+
+  setUp();
 
   const alpha = {
     // Alphabetical order
@@ -395,10 +453,13 @@ global project_tree:false tagging:false date_time:false
     findClosestCommonAncestor: findClosestCommonAncestor,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     isRootNode: isRootNode,
+    isValidCanonicalCode: isValidCanonicalCode,
+    keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
     nodeToPathAsNodes: nodeToPathAsNodes,
     nodeToSearchTermText: nodeToSearchTermText,
     nodesToSearchTermText: nodesToSearchTermText,
     nodesToSearchUrl: nodesToSearchUrl,
+    registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
   };
 
