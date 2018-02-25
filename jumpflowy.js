@@ -447,6 +447,19 @@ global project_tree:false tagging:false date_time:false
     return prTree.getProjectReferenceByProjectId(longId);
   }
 
+  /**
+   * A developer utility method to help show time taken for an operation.
+   * @param {Date} startDate The start date of the operation to measure.
+   * @param {string} message The message to be displayed before the time delta.
+   * @returns {void}
+   */
+  function showElapsedTime(startDate, message) {
+    const end = new Date();
+    const deltaMs = end.getTime() - startDate.getTime();
+    // eslint-disable-next-line no-console
+    console.log(`${message} (${deltaMs}ms)`);
+  }
+
   function keyDownEventToCanonicalCode(keyEvent) {
     let canonicalCode = "";
     for (let flagAndCode of [
@@ -529,6 +542,7 @@ global project_tree:false tagging:false date_time:false
     openNodeHere: openNodeHere,
     promptThenWfSearch: promptThenWfSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
+    showElapsedTime: showElapsedTime,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
   };
 
