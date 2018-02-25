@@ -285,6 +285,16 @@ global project_tree:false tagging:false date_time:false
     openHere(`https://workflowy.com/#/${projectId}${searchSuffix}`);
   }
 
+  /**
+   * @returns {void} Dismisses a notification from the WorkFlowy UI, e.g. after
+   *                 deleting a large tree of nodes.
+   */
+  function dismissWfNotification() {
+    $("#message")
+      .children(".close")
+      .click();
+  }
+
   function toSearchSuffix(rawSearchString) {
     if (rawSearchString) {
       const escapedSearchString = encodeURIComponent(rawSearchString);
@@ -468,6 +478,7 @@ global project_tree:false tagging:false date_time:false
   const alpha = {
     // Alphabetical order
     cleanUp: cleanUp,
+    dismissWfNotification: dismissWfNotification,
     findClosestCommonAncestor: findClosestCommonAncestor,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     isRootNode: isRootNode,
