@@ -275,6 +275,25 @@ global project_tree:false tagging:false date_time:false
   // Global state
   const canonicalCodesToKeyDownFunctions = new Map();
 
+  function openHere(url) {
+    open(url, "_self");
+  }
+
+  function openNodeHere(node, rawSearchString) {
+    const projectId = project_ids.truncateProjectId(node.getProjectId());
+    const searchSuffix = toSearchSuffix(rawSearchString);
+    openHere(`https://workflowy.com/#/${projectId}${searchSuffix}`);
+  }
+
+  function toSearchSuffix(rawSearchString) {
+    if (rawSearchString) {
+      const escapedSearchString = encodeURIComponent(rawSearchString);
+      return `?q=${escapedSearchString}`;
+    } else {
+      return "";
+    }
+  }
+
   /**
    * @param {ProjectRef} node The node to query
    * @returns {boolean} Whether the given node is the root node
@@ -458,6 +477,8 @@ global project_tree:false tagging:false date_time:false
     nodeToSearchTermText: nodeToSearchTermText,
     nodesToSearchTermText: nodesToSearchTermText,
     nodesToSearchUrl: nodesToSearchUrl,
+    openHere: openHere,
+    openNodeHere: openNodeHere,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
   };
