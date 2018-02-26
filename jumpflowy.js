@@ -280,6 +280,15 @@ global project_tree:false tagging:false date_time:false
     open(url, "_self");
   }
 
+  /**
+   * Note: pop-ups must be allowed from https://workflowy.com for this to work.
+   * @param {string} url The URL to open.
+   * @returns {void}
+   */
+  function openInNewTab(url) {
+    open(url, "_blank");
+  }
+
   function openNodeHere(node, rawSearchString) {
     const projectId = project_ids.truncateProjectId(node.getProjectId());
     const searchSuffix = toSearchSuffix(rawSearchString);
@@ -693,6 +702,7 @@ global project_tree:false tagging:false date_time:false
     nodesToSearchTermText: nodesToSearchTermText,
     nodesToSearchUrl: nodesToSearchUrl,
     openHere: openHere,
+    openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
     promptThenWfSearch: promptThenWfSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
