@@ -274,6 +274,7 @@ global project_tree:false tagging:false date_time:false
 
   // Global state
   const canonicalCodesToKeyDownFunctions = new Map();
+  let isCleanedUp = false;
 
   function openHere(url) {
     open(url, "_self");
@@ -541,6 +542,45 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @param {function} callbackFn The function to apply when project is loaded,
+   *                              of type (rootProject:ProjectRef) -> void.
+   * @returns {void}
+   * Notes:
+   * - The function will be prevented from running if cleanUp() has been called.
+   * Caveats:
+   * - If multiple functions are passed to this method, the callbacks
+   *   will be run in an undefined order.
+   */
+  function applyToProjectWhenLoaded(callbackFn) {
+    if (isCleanedUp) {
+      // eslint-disable-next-line no-console
+      console.debug("Not calling function, because cleanUp() already called.");
+      return;
+    }
+    const mainProjectTree = project_tree.getMainProjectTree();
+    let isLoaded = false;
+    let rootProject;
+    const timeoutMs = 350;
+
+    if (mainProjectTree !== undefined && mainProjectTree !== null) {
+      rootProject = mainProjectTree.getRootProjectReference();
+      if (rootProject !== undefined && rootProject !== null) {
+        isLoaded = true;
+      }
+    }
+    if (isLoaded) {
+      // eslint-disable-next-line no-console
+      console.log("Project now loaded. Applying function to root project...");
+      callbackFn(rootProject);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`Project not yet loaded. Waiting for ${timeoutMs}ms.`);
+      const repeat = () => applyToProjectWhenLoaded(callbackFn);
+      setTimeout(repeat, timeoutMs);
+    }
+  }
+
+  /**
    * @param {Date} date The date to format
    * @returns {string} The given date as a string in YYYY-MM-DD format.
    */
@@ -612,14 +652,18 @@ global project_tree:false tagging:false date_time:false
 
   /**
    * Cleans up global state maintained by this script.
-   * Ok to call multiple times.
+   * Ok to call multiple times, but subsequent calls have no effect.
    * @returns {void}
    */
   function cleanUp() {
+    if (isCleanedUp) {
+      return;
+    }
     // eslint-disable-next-line no-console
     console.log("Cleaning up");
     canonicalCodesToKeyDownFunctions.clear();
     document.removeEventListener("keydown", keyDownListener);
+    isCleanedUp = true;
   }
 
   function setUp() {
@@ -630,6 +674,7 @@ global project_tree:false tagging:false date_time:false
 
   const alpha = {
     // Alphabetical order
+    applyToProjectWhenLoaded: applyToProjectWhenLoaded,
     cleanUp: cleanUp,
     dateToYMDString: dateToYMDString,
     dismissWfNotification: dismissWfNotification,
