@@ -253,12 +253,12 @@ global project_tree:false tagging:false date_time:false
   }
 
   ////////////////////////////////////
-  // Alpha section starts.
+  // Nursery section starts.
   //
   // The code in this section should be considered under development rather
   // than stable: the functionality is expected to change, and the functions
   // do not form a stable API.
-  // Functions defined here are exposed via the 'jumpflowy.alpha' namespace.
+  // Functions defined here are exposed via the 'jumpflowy.nursery' namespace.
   // As code here stabilises, it will be moved above this section, with
   // functions moved into the main 'jumpflowy' namespace.
   ////////////////////////////////////
@@ -266,10 +266,10 @@ global project_tree:false tagging:false date_time:false
   // Clean up any previous instance of JumpFlowy
   if (
     typeof window.jumpflowy !== "undefined" &&
-    typeof window.jumpflowy.alpha !== "undefined" &&
-    typeof window.jumpflowy.alpha.cleanUp !== "undefined"
+    typeof window.jumpflowy.nursery !== "undefined" &&
+    typeof window.jumpflowy.nursery.cleanUp !== "undefined"
   ) {
-    window.jumpflowy.alpha.cleanUp();
+    window.jumpflowy.nursery.cleanUp();
   }
 
   // Global state
@@ -745,7 +745,7 @@ global project_tree:false tagging:false date_time:false
 
   setUp();
 
-  const alpha = {
+  const nursery = {
     // Alphabetical order
     applyToProjectWhenLoaded: applyToProjectWhenLoaded,
     cleanUp: cleanUp,
@@ -777,7 +777,7 @@ global project_tree:false tagging:false date_time:false
   };
 
   ////////////////////////////////////
-  // Alpha section ends.
+  // Nursery section ends.
   ////////////////////////////////////
 
   // Return jumpflowy object
@@ -797,6 +797,6 @@ global project_tree:false tagging:false date_time:false
     stringToTagArgsText: stringToTagArgsText,
     stringToTags: stringToTags,
 
-    alpha: alpha
+    nursery: nursery
   };
 });
