@@ -793,12 +793,9 @@ global project_tree:false tagging:false date_time:false
     nodeToLastModifiedSec: nodeToLastModifiedSec,
     nodeToPlainTextName: nodeToPlainTextName,
     nodeToPlainTextNote: nodeToPlainTextNote,
+    nodeToTagArgsText: nodeToTagArgsText,
+    stringToTagArgsText: stringToTagArgsText,
     stringToTags: stringToTags,
-
-    beta: {
-      nodeToTagArgsText: nodeToTagArgsText,
-      stringToTagArgsText: stringToTagArgsText
-    },
 
     alpha: alpha
   };
