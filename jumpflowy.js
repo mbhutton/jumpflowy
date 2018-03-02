@@ -660,6 +660,60 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * Logs some very basic info about the current document to the console,
+   * showing an alert if any tests fail.
+   * @returns {void}
+   */
+  function showShortReport() {
+    const rootProject = getRootNode();
+
+    let text = "WorkFlowy report:\n";
+    let hasFailed = false;
+    let currentTest = null;
+
+    function add(message) {
+      text += message + "\n";
+    }
+
+    function pass(message) {
+      add("[PASS] (" + currentTest + "): " + message);
+    }
+
+    function fail(message) {
+      add("[FAIL] (" + currentTest + "): " + message);
+      hasFailed = true;
+    }
+
+    currentTest = "Check platform";
+    if (window.IS_IOS) {
+      pass("iOS.");
+    } else if (window.IS_CHROME) {
+      pass("Chrome.");
+    } else {
+      fail("Running in unknown platform.");
+    }
+
+    currentTest = "Count starred pages";
+    if (window.IS_IOS) {
+      pass("Skipping starred pages check: not available on this platform.");
+    } else if (window.IS_CHROME) {
+      const starredLocationsCount = window.getStarredLocations().length;
+      pass("Starred locations found: " + starredLocationsCount);
+    }
+
+    currentTest = "Count total nodes";
+    let totalNodes = 0;
+    applyToEachNode(() => totalNodes++, rootProject);
+    pass(totalNodes + ".");
+
+    // eslint-disable-next-line no-console
+    console.log(text);
+    if (hasFailed) {
+      alert(text);
+    }
+  }
+
+  /**
    * Cleans up global state maintained by this script.
    * Ok to call multiple times, but subsequent calls have no effect.
    * @returns {void}
@@ -708,6 +762,7 @@ global project_tree:false tagging:false date_time:false
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     showElapsedTime: showElapsedTime,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
+    showShortReport: showShortReport,
   };
 
   ////////////////////////////////////
