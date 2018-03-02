@@ -713,6 +713,16 @@ global project_tree:false tagging:false date_time:false
     }
   }
 
+  function searchZoomedAndMostRecentlyEdited() {
+    const recentNode = findRecentlyEditedNodes(0, 1, getRootNode())[0];
+    const zoomedAsLongId = getZoomedNodeAsLongId();
+    const prTree = project_tree.getMainProjectTree();
+    const zoomedNode = prTree.getProjectReferenceByProjectId(zoomedAsLongId);
+    const newZoom = findClosestCommonAncestor(recentNode, zoomedNode);
+    const searchText = nodesToSearchTermText([recentNode, zoomedNode]);
+    openNodeHere(newZoom, searchText);
+  }
+
   /**
    * Cleans up global state maintained by this script.
    * Ok to call multiple times, but subsequent calls have no effect.
@@ -760,6 +770,7 @@ global project_tree:false tagging:false date_time:false
     openNodeHere: openNodeHere,
     promptThenWfSearch: promptThenWfSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
+    searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
     showElapsedTime: showElapsedTime,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
     showShortReport: showShortReport,
