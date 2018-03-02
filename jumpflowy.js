@@ -35,7 +35,7 @@ global project_tree:false tagging:false date_time:false
   /**
    * Applies the given function to the given node
    * and each of its descendants, as a depth first search.
-   * @param {function} functionToApply The function to apply to each visited node.
+   * @param {function} functionToApply The function to apply to each node.
    * @param {ProjectRef} searchRoot The root node of the search.
    * @returns {void}
    */
@@ -161,7 +161,7 @@ global project_tree:false tagging:false date_time:false
   /**
    * @param {ProjectRef} node The node
    * @returns {string} The plain text version of the node's name,
-   *                   or the empty string if the root node.
+   *                   or the empty string if it is the root node.
    */
   function nodeToPlainTextName(node) {
     const treeObj = node.getProjectTreeObject();
@@ -174,7 +174,7 @@ global project_tree:false tagging:false date_time:false
   /**
    * @param {ProjectRef} node The node
    * @returns {string} The plain text version of the node's note,
-   *                   or the empty string if the root node.
+   *                   or the empty string if it is the root node.
    */
   function nodeToPlainTextNote(node) {
     const treeObj = node.getProjectTreeObject();
@@ -219,7 +219,7 @@ global project_tree:false tagging:false date_time:false
   /**
    * @param {string} tagToMatch The tag to match.
    * @param {ProjectRef} node The node to test.
-   * @returns {boolean} Whether the given node has the exact given tag, ignoring case.
+   * @returns {boolean} Whether the node has the exact given tag, ignoring case.
    */
   function doesNodeHaveTag(tagToMatch, node) {
     const hasTagFn = text => doesStringHaveTag(tagToMatch, text);
@@ -395,8 +395,8 @@ global project_tree:false tagging:false date_time:false
 
   /**
    * @param {ProjectRef} node The node to build the search string for
-   * @returns {string | null} The unescaped search term to use for finding the given node,
-   *                          or null if this is the root node.
+   * @returns {string | null} The unescaped search term to use for finding the
+   *                          given node, or null if it is the root node.
    */
   function nodeToSearchTermText(node) {
     if (isRootNode(node)) {
@@ -449,8 +449,8 @@ global project_tree:false tagging:false date_time:false
   /**
    * @param {string} longId The long (non-truncated) project ID.
    * @returns {ProjectRef} The node with the given ID, or an invalid ProjectRef
-   *                       if the project ID is invalid. Test the validity of the
-   *                       returned node using theReturnedNode.isValid().
+   *                       if the project ID is invalid. Test the validity of
+   *                       the returned node using theReturnedNode.isValid().
    */
   function getNodeByLongIdOrInvalid(longId) {
     const prTree = project_tree.getMainProjectTree();
