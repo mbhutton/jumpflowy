@@ -723,6 +723,29 @@ global project_tree:false tagging:false date_time:false
     openNodeHere(newZoom, searchText);
   }
 
+  // Note: this function is based on https://jsfiddle.net/timdown/cCAWC/3/
+  function insertTextAtCursor(text) {
+    let sel, range;
+    if (getSelection) {
+      sel = getSelection();
+      if (sel.getRangeAt && sel.rangeCount) {
+        range = sel.getRangeAt(0);
+        range.deleteContents();
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        sel.removeAllRanges();
+        range = range.cloneRange();
+        range.selectNode(textNode);
+        range.collapse(false);
+        sel.addRange(range);
+      }
+    } else if (document.selection && document.selection.createRange) {
+      range = document.selection.createRange();
+      range.pasteHTML(text);
+      range.select();
+    }
+  }
+
   /**
    * Cleans up global state maintained by this script.
    * Ok to call multiple times, but subsequent calls have no effect.
@@ -758,6 +781,7 @@ global project_tree:false tagging:false date_time:false
     findTopNodesByScore: findTopNodesByScore,
     getNodeByLongIdOrInvalid: getNodeByLongIdOrInvalid,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
+    insertTextAtCursor: insertTextAtCursor,
     isRootNode: isRootNode,
     isValidCanonicalCode: isValidCanonicalCode,
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
