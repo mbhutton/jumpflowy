@@ -274,6 +274,7 @@ global project_tree:false tagging:false date_time:false
 
   // Global state
   const canonicalCodesToKeyDownFunctions = new Map();
+  const builtInAbbreviationsMap = new Map();
   let isCleanedUp = false;
 
   function openHere(url) {
@@ -751,6 +752,120 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @returns {string} The expanded form of the given abbreviation, or null if
+   *                   no such expansion is found. Gives preference to user
+   *                   defined #abbrev(theAbbrev theExpansion) expansions,
+   *                   falling back to the built-in expansions.
+   * @param {string} abbreviation The abbreviation to expand.
+   */
+  function expandAbbreviation(abbreviation) {
+    if (abbreviation === null || abbreviation === "") {
+      return null;
+    }
+    if (abbreviation !== abbreviation.trim()) {
+      expandAbbreviation(abbreviation.trim());
+    }
+
+    const customAbbrevs = _buildCustomAbbreviationsMap();
+    const allAbbrevs = new Map([...builtInAbbreviationsMap, ...customAbbrevs]);
+
+    const fnOrValue = allAbbrevs.get(abbreviation);
+    if (!fnOrValue) {
+      return null;
+    }
+    if (typeof fnOrValue === "function") {
+      const expansion = fnOrValue();
+      if (!expansion) {
+        // eslint-disable-next-line no-console
+        console.log(`Function ${fnOrValue.name} returned ${typeof expansion}`);
+      }
+      return expansion;
+    } else {
+      return fnOrValue;
+    }
+  }
+
+  /**
+   * Prompts the user to enter an abbreviation, then expands it
+   * and inserts the expanded text at the current edit position.
+   * @see expandAbbreviation
+   * @returns {void}
+   */
+  function promptToExpandAndInsertAtCursor() {
+    const abbreviation = prompt("Type abbreviation", "ymd");
+    if (!abbreviation) {
+      return;
+    }
+    const expansion = expandAbbreviation(abbreviation);
+    if (!expansion) {
+      alert(`No expansion found for ${abbreviation}`);
+    } else if (typeof expansion === "string") {
+      insertTextAtCursor(expansion);
+    } else {
+      alert(`Invalid type of expansion: ${typeof expansion}.`);
+    }
+  }
+
+  /**
+   * @returns {Map} The user defined #abbrev(theAbbrev theExpansion)
+   *                style expansions as a Map, by abbreviation.
+   *                The Map type is string -> (function | string)
+   */
+  function _buildCustomAbbreviationsMap() {
+    const abbreviationsMap = new Map();
+    const abbrevNodes = findNodesWithTag("#abbrev", getRootNode());
+    for (let node of abbrevNodes) {
+      const argsText = nodeToTagArgsText("#abbrev", node);
+      if (argsText === null) {
+        continue;
+      }
+      const matchResult = argsText.match("^([^ ]+) +([^ ]+.*)");
+      if (matchResult) {
+        const abbrev = matchResult[1];
+        const expansion = matchResult[2];
+        if (abbreviationsMap.has(abbrev)) {
+          // eslint-disable-next-line no-console
+          console.log(`Found multiple #abbrev definitions for ${abbrev}`);
+        }
+        abbreviationsMap.set(abbrev, expansion);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(`Invalid #abbrev arguments: ${argsText}.`);
+      }
+    }
+    return abbreviationsMap;
+  }
+
+  /**
+   * Validates then adds the given expansion into builtInAbbreviationsMap.
+   * @param {string} abbreviation The abbreviation.
+   * @param {function|string} functionOrValue The expansion. Either a string, or
+   *   a function of type () -> string.
+   * @returns {void}
+   */
+  function _registerBuiltInExpansion(abbreviation, functionOrValue) {
+    if (!abbreviation) {
+      throw "abbreviation was missing";
+    }
+    if (typeof functionOrValue === "function") {
+      const fn = functionOrValue;
+      // Validate the function as being of type () -> string
+      if (fn.length !== 0) {
+        throw "Can only register text functions which take no arguments";
+      }
+      const result = fn();
+      const type = typeof result;
+      if (type !== "string") {
+        throw `${fn.name} returned type '${type}' when expecting a string.`;
+      }
+    } else if ( typeof functionOrValue !== "string") {
+      const type = typeof functionOrValue;
+      throw `Unsupported type of expansion for ${abbreviation}: ${type}`;
+    }
+    builtInAbbreviationsMap.set(abbreviation, functionOrValue);
+  }
+
+  /**
    * Cleans up global state maintained by this script.
    * Ok to call multiple times, but subsequent calls have no effect.
    * @returns {void}
@@ -763,11 +878,18 @@ global project_tree:false tagging:false date_time:false
     console.log("Cleaning up");
     canonicalCodesToKeyDownFunctions.clear();
     document.removeEventListener("keydown", keyDownListener);
+    builtInAbbreviationsMap.clear();
     isCleanedUp = true;
   }
 
   function setUp() {
-    document.addEventListener("keydown", keyDownListener);
+    applyToProjectWhenLoaded(() => {
+      if (!isCleanedUp) {
+        document.addEventListener("keydown", keyDownListener);
+        _registerBuiltInExpansion("ddate", todayAsYMDString);
+        _registerBuiltInExpansion("ymd", todayAsYMDString);
+      }
+    });
   }
 
   setUp();
@@ -778,6 +900,7 @@ global project_tree:false tagging:false date_time:false
     cleanUp: cleanUp,
     dateToYMDString: dateToYMDString,
     dismissWfNotification: dismissWfNotification,
+    expandAbbreviation: expandAbbreviation,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findRecentlyEditedNodes: findRecentlyEditedNodes,
     findNodesWithTag: findNodesWithTag,
@@ -797,6 +920,7 @@ global project_tree:false tagging:false date_time:false
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
     promptThenWfSearch: promptThenWfSearch,
+    promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
     showElapsedTime: showElapsedTime,
