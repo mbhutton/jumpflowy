@@ -601,6 +601,10 @@ global project_tree:false tagging:false date_time:false
     return `${yyyy}-${mm}-${dd}`;
   }
 
+  function todayAsYMDString() {
+    return dateToYMDString(new Date());
+  }
+
   /**
    * A developer utility method to help show time taken for an operation.
    * @param {Date} startDate The start date of the operation to measure.
@@ -798,6 +802,7 @@ global project_tree:false tagging:false date_time:false
     showElapsedTime: showElapsedTime,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
     showShortReport: showShortReport,
+    todayAsYMDString: todayAsYMDString,
   };
 
   ////////////////////////////////////
