@@ -322,6 +322,14 @@ global project_tree:false tagging:false date_time:false
       .click();
   }
 
+  function clickAddButton() {
+    $(".addButton").click();
+  }
+
+  function clickSaveButton() {
+    $(".saveButton").click();
+  }
+
   function toSearchSuffix(rawSearchString) {
     if (rawSearchString) {
       const escapedSearchString = encodeURIComponent(rawSearchString);
@@ -1021,6 +1029,8 @@ global project_tree:false tagging:false date_time:false
     // Alphabetical order
     applyToProjectWhenLoaded: applyToProjectWhenLoaded,
     cleanUp: cleanUp,
+    clickAddButton: clickAddButton,
+    clickSaveButton: clickSaveButton,
     dateToYMDString: dateToYMDString,
     dismissWfNotification: dismissWfNotification,
     expandAbbreviation: expandAbbreviation,
