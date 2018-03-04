@@ -275,6 +275,7 @@ global project_tree:false tagging:false date_time:false
   // Global state
   const canonicalCodesToKeyDownFunctions = new Map();
   const builtInAbbreviationsMap = new Map();
+  const bookmarkTag = "#bm";
   let isCleanedUp = false;
 
   function openHere(url) {
@@ -665,6 +666,128 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * Prompts the user to choose a node from among the given array of nodes,
+   * using a mix of choosing by index, or choosing by bookmark, or by text.
+   * Note: the behaviour of this method is expected to change.
+   * @param {Array<ProjectRef>} nodes The array of nodes to choose from.
+   * @returns {ProjectRef} Returns the chosen node, or null if cancelled.
+   */
+  function promptToChooseNode(nodes) {
+    // Build aliases
+    const nodeAliases = Array();
+    for (let node of nodes) {
+      const tagArgsText = nodeToTagArgsText(bookmarkTag, node);
+      if (tagArgsText && tagArgsText.trim()) {
+        nodeAliases.push(tagArgsText);
+      } else {
+        nodeAliases.push(null);
+      }
+    }
+
+    let text = "Choose from one of the following:\n";
+    for (let i = 0; i < nodes.length; i++) {
+      text += i + ": " + (nodeToPlainTextName(nodes[i]) || "<No name>") + "\n";
+    }
+    let answer = prompt(text);
+    if (answer === null) {
+      return;
+    }
+    answer = answer.trim();
+    if (answer === "") {
+      return;
+    }
+    const answerAsInt = parseInt(answer);
+    const resultNodes = Array();
+    const answerLC = answer.toLowerCase();
+    if (!isNaN(answerAsInt) && `${answerAsInt}` === answer) {
+      // It's a number
+      if (answerAsInt < 0 || answerAsInt >= nodes.length) {
+        alert("Invalid choice: " + answer);
+        return;
+      } else {
+        resultNodes.push(nodes[answerAsInt]);
+      }
+    }
+    if (resultNodes.length === 0) {
+      // Match the full alias (ignoring case)
+      for (let i = 0; i < nodes.length; i++) {
+        const alias = nodeAliases[i];
+        if (alias && alias.toLowerCase() === answerLC) {
+          resultNodes.push(nodes[i]);
+        }
+      }
+    }
+    if (resultNodes.length === 0) {
+      // Match aliases which start with the string (ignoring case)
+      for (let i = 0; i < nodes.length; i++) {
+        const alias = nodeAliases[i];
+        if (alias && alias.toLowerCase().startsWith(answerLC)) {
+          resultNodes.push(nodes[i]);
+        }
+      }
+    }
+    if (resultNodes.length === 0) {
+      // Match nodes which contains the full string in the name (ignoring case)
+      for (let node of nodes) {
+        if (nodeToPlainTextName(node).toLowerCase().includes(answerLC)) {
+          resultNodes.push(node);
+        }
+      }
+    }
+    if (resultNodes.length > 1) {
+      // Choose again amongst only the matches
+      return promptToChooseNode(resultNodes);
+    } else if (resultNodes.length === 1) {
+      return resultNodes[0];
+    } else {
+      if (confirm(`No matches for "${answer}". Try again or cancel.`)) {
+        return promptToChooseNode(nodes);
+      }
+    }
+  }
+
+  /**
+   * Will 'follow' the given node: taking an action depending on the
+   * content of the node.
+   * Note: the behaviour of this method is expected to change.
+   * @param {ProjectRef} node The node to follow.
+   * @returns {void}
+   */
+  function followNode(node) {
+    if (!node) {
+      return;
+    }
+    // For nodes whose trimmed name or note is a WorkFlowy URL, navigate to it
+    for (let nameOrNote of [
+      nodeToPlainTextName(node),
+      nodeToPlainTextNote(node)
+    ]) {
+      const trimmed = (nameOrNote || "").trim();
+      if (trimmed.match("^https://workflowy\\.com(/.*)?$")) {
+        openHere(trimmed);
+        return;
+      }
+    }
+    // Otherwise, go directly to the node itself
+    openNodeHere(node, null);
+  }
+
+  /**
+   * Prompts the user to choose from the bookmark nodes, then follows
+   * the chosen node.
+   * Note: the behaviour of this method is expected to change.
+   * @returns {void}
+   * @see followNode
+   */
+  function promptToFollowBookmark() {
+    const startTime = new Date();
+    const nodes = findNodesWithTag(bookmarkTag, getRootNode());
+    showElapsedTime(startTime, `Found nodes with ${bookmarkTag} tag`);
+    const chosenNode = promptToChooseNode(nodes);
+    followNode(chosenNode);
+  }
+
+  /**
    * Logs some very basic info about the current document to the console,
    * showing an alert if any tests fail.
    * @returns {void}
@@ -906,6 +1029,7 @@ global project_tree:false tagging:false date_time:false
     findNodesWithTag: findNodesWithTag,
     findTopItemsByComparator: findTopItemsByComparator,
     findTopNodesByScore: findTopNodesByScore,
+    followNode: followNode,
     getNodeByLongIdOrInvalid: getNodeByLongIdOrInvalid,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     insertTextAtCursor: insertTextAtCursor,
@@ -920,7 +1044,9 @@ global project_tree:false tagging:false date_time:false
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
     promptThenWfSearch: promptThenWfSearch,
+    promptToChooseNode: promptToChooseNode,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
+    promptToFollowBookmark: promptToFollowBookmark,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
     showElapsedTime: showElapsedTime,
@@ -935,7 +1061,7 @@ global project_tree:false tagging:false date_time:false
 
   // Return jumpflowy object
   return {
-    // Alphabetical order
+    // Functions by alphabetical order
     applyToEachNode: applyToEachNode,
     doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
     doesNodeHaveTag: doesNodeHaveTag,
@@ -950,6 +1076,7 @@ global project_tree:false tagging:false date_time:false
     stringToTagArgsText: stringToTagArgsText,
     stringToTags: stringToTags,
 
+    // The Nursery namespace
     nursery: nursery
   };
 });
