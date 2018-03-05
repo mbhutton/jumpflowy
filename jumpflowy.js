@@ -1,3 +1,15 @@
+// ==UserScript==
+// @name         JumpFlowy
+// @namespace    https://bitbucket.org/mbhutton/jumpflowy
+// @version      0.1.3.1
+// @description  JavaScript extensions for WorkFlowy
+// @author       Matt Hutton
+// @match        https://workflowy.com*
+// @grant        none
+// @run-at       document-end
+// @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/jumpflowy.js
+// ==/UserScript==
+
 /*
 JumpFlowy: WorkFlowy extension/library for search and navigation.
 */
