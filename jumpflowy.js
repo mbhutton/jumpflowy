@@ -792,7 +792,7 @@ global project_tree:false tagging:false date_time:false
    * performing some action depending on the content of the node.
    * Note: the behaviour of this method is expected to change.
    * @param {ProjectRef} node The node to follow.
-   * @returns {void}
+   * @returns {function} A no-arg function which 'follows' the node.
    */
   function nodeToFollowAction(node) {
     if (!node) {
