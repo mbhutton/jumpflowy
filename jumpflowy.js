@@ -273,9 +273,12 @@ global project_tree:false tagging:false date_time:false
   }
 
   // Global state
-  const canonicalCodesToKeyDownFunctions = new Map();
+  const canonicalKeyCodesToActions = new Map();
   const builtInAbbreviationsMap = new Map();
+  const bindableActionsByName = new Map();
   const bookmarkTag = "#bm";
+  const abbrevTag = "#abbrev";
+  const shortcutTag = "#shortcut";
   let isCleanedUp = false;
 
   function openHere(url) {
@@ -388,6 +391,14 @@ global project_tree:false tagging:false date_time:false
       throw "Nodes shared no common root";
     }
     return pathA[i - 1];
+  }
+
+  /**
+   * @returns {boolean} True if and only if the given string is a WorkFlowy URL.
+   * @param {string} s The string to test.
+   */
+  function isWorkFlowyUrl(s) {
+    return s && s.match("^https://workflowy\\.com(/.*)?$");
   }
 
   function nodesToSearchUrl(nodes) {
@@ -660,12 +671,12 @@ global project_tree:false tagging:false date_time:false
     if (functionToApply.length !== 0) {
       throw "Cannot register a callback function which takes arguments";
     }
-    canonicalCodesToKeyDownFunctions.set(canonicalCode, functionToApply);
+    canonicalKeyCodesToActions.set(canonicalCode, functionToApply);
   }
 
   function keyDownListener(keyEvent) {
     const canonicalCode = keyDownEventToCanonicalCode(keyEvent);
-    const registeredFn = canonicalCodesToKeyDownFunctions.get(canonicalCode);
+    const registeredFn = canonicalKeyCodesToActions.get(canonicalCode);
     if (registeredFn) {
       registeredFn();
       keyEvent.stopPropagation();
@@ -755,29 +766,42 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
-   * Will 'follow' the given node: taking an action depending on the
-   * content of the node.
+   * @param {ProjectRef} node The node to follow.
+   * @returns {void}
+   * @see nodeToFollowAction
+   */
+  function followNode(node) {
+    const action = nodeToFollowAction(node);
+    action();
+  }
+
+  /**
+   * Returns a no-arg function which will 'follow' the given node,
+   * performing some action depending on the content of the node.
    * Note: the behaviour of this method is expected to change.
    * @param {ProjectRef} node The node to follow.
    * @returns {void}
    */
-  function followNode(node) {
+  function nodeToFollowAction(node) {
     if (!node) {
-      return;
+      return () => {}; // Return a no-op
     }
-    // For nodes whose trimmed name or note is a WorkFlowy URL, navigate to it
     for (let nameOrNote of [
       nodeToPlainTextName(node),
       nodeToPlainTextNote(node)
     ]) {
       const trimmed = (nameOrNote || "").trim();
-      if (trimmed.match("^https://workflowy\\.com(/.*)?$")) {
-        openHere(trimmed);
-        return;
+      if (isWorkFlowyUrl(trimmed)) {
+        // For nodes whose trimmed name or note is a WorkFlowy URL, open it
+        return () => openHere(trimmed);
+      } else if (bindableActionsByName.has(trimmed)) {
+        // If the trimmed name or note is the name of a bindable action, call it
+        return bindableActionsByName.get(trimmed);
       }
     }
+
     // Otherwise, go directly to the node itself
-    openNodeHere(node, null);
+    return () => openNodeHere(node, null);
   }
 
   /**
@@ -944,10 +968,9 @@ global project_tree:false tagging:false date_time:false
    */
   function _buildCustomAbbreviationsMap() {
     const abbreviationsMap = new Map();
-    const abbrevNodes = findNodesWithTag("#abbrev", getRootNode());
-    for (let node of abbrevNodes) {
-      const argsText = nodeToTagArgsText("#abbrev", node);
-      if (argsText === null) {
+    for (let node of findNodesWithTag(abbrevTag, getRootNode())) {
+      const argsText = nodeToTagArgsText(abbrevTag, node);
+      if (!argsText) {
         continue;
       }
       const matchResult = argsText.match("^([^ ]+) +([^ ]+.*)");
@@ -956,12 +979,12 @@ global project_tree:false tagging:false date_time:false
         const expansion = matchResult[2];
         if (abbreviationsMap.has(abbrev)) {
           // eslint-disable-next-line no-console
-          console.log(`Found multiple #abbrev definitions for ${abbrev}`);
+          console.log(`Found multiple ${abbrevTag} definitions for ${abbrev}`);
         }
         abbreviationsMap.set(abbrev, expansion);
       } else {
         // eslint-disable-next-line no-console
-        console.log(`Invalid #abbrev arguments: ${argsText}.`);
+        console.log(`Invalid ${abbrevTag} arguments: ${argsText}.`);
       }
     }
     return abbreviationsMap;
@@ -996,6 +1019,35 @@ global project_tree:false tagging:false date_time:false
     builtInAbbreviationsMap.set(abbreviation, functionOrValue);
   }
 
+  function _registerKeyboardShortcuts() {
+    for (let node of findNodesWithTag(shortcutTag, getRootNode())) {
+      const keyCode = nodeToTagArgsText(shortcutTag, node);
+      if (!keyCode) {
+        continue;
+      }
+      if (isValidCanonicalCode(keyCode)) {
+        registerFunctionForKeyDownEvent(keyCode, nodeToFollowAction(node));
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
+      }
+    }
+  }
+
+  function _populateMapWithNoArgFunctions(map, functionsArray) {
+    for (let f of functionsArray) {
+      if (typeof f !== "function") {
+        // eslint-disable-next-line no-console
+        console.warn("Not a function: " + f);
+      } else if (f.length !== 0) {
+        // eslint-disable-next-line no-console
+        console.warn("Function takes more that zero arguments: " + f);
+      } else {
+        map.set(f.name, f);
+      }
+    }
+  }
+
   /**
    * Cleans up global state maintained by this script.
    * Ok to call multiple times, but subsequent calls have no effect.
@@ -1007,19 +1059,41 @@ global project_tree:false tagging:false date_time:false
     }
     // eslint-disable-next-line no-console
     console.log("Cleaning up");
-    canonicalCodesToKeyDownFunctions.clear();
+
+    // Keyboard shortcuts
     document.removeEventListener("keydown", keyDownListener);
+    canonicalKeyCodesToActions.clear();
+    bindableActionsByName.clear();
+
+    // Built-in expansions
     builtInAbbreviationsMap.clear();
+
     isCleanedUp = true;
   }
 
   function setUp() {
     applyToProjectWhenLoaded(() => {
-      if (!isCleanedUp) {
-        document.addEventListener("keydown", keyDownListener);
-        _registerBuiltInExpansion("ddate", todayAsYMDString);
-        _registerBuiltInExpansion("ymd", todayAsYMDString);
+      if (isCleanedUp) {
+        return;
       }
+
+      // Keyboard shortcuts
+      bindableActionsByName.clear();
+      _populateMapWithNoArgFunctions(bindableActionsByName, [
+        clickAddButton,
+        clickSaveButton,
+        dismissWfNotification,
+        promptThenWfSearch,
+        promptToExpandAndInsertAtCursor,
+        promptToFollowBookmark,
+        searchZoomedAndMostRecentlyEdited,
+        showShortReport,
+      ]);
+      _registerKeyboardShortcuts();
+      document.addEventListener("keydown", keyDownListener);
+
+      // Built-in expansions
+      _registerBuiltInExpansion("ymd", todayAsYMDString);
     });
   }
 
