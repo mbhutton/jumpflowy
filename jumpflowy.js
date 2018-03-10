@@ -371,6 +371,14 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * @returns {ProjectRef} The node which is currently zoomed into.
+   */
+  function getZoomedNode() {
+    const zoomedNodeId = getZoomedNodeAsLongId();
+    return getNodeByLongIdOrInvalid(zoomedNodeId);
+  }
+
+  /**
    * @param {ProjectRef} node The node whose path to get
    * @returns {Array<ProjectRef>} An array starting with the root and ending
    *                              with the node.
@@ -788,6 +796,16 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
+   * Calls followNode on the currently zoomed node.
+   * @see followNode
+   * @returns {void}
+   */
+  function followZoomedNode() {
+    const zoomedNode = getZoomedNode();
+    followNode(zoomedNode);
+  }
+
+  /**
    * Returns a no-arg function which will 'follow' the given node,
    * performing some action depending on the content of the node.
    * Note: the behaviour of this method is expected to change.
@@ -887,9 +905,7 @@ global project_tree:false tagging:false date_time:false
 
   function searchZoomedAndMostRecentlyEdited() {
     const recentNode = findRecentlyEditedNodes(0, 1, getRootNode())[0];
-    const zoomedAsLongId = getZoomedNodeAsLongId();
-    const prTree = project_tree.getMainProjectTree();
-    const zoomedNode = prTree.getProjectReferenceByProjectId(zoomedAsLongId);
+    const zoomedNode = getZoomedNode();
     const newZoom = findClosestCommonAncestor(recentNode, zoomedNode);
     const searchText = nodesToSearchTermText([recentNode, zoomedNode]);
     openNodeHere(newZoom, searchText);
@@ -1126,7 +1142,9 @@ global project_tree:false tagging:false date_time:false
     findTopItemsByComparator: findTopItemsByComparator,
     findTopNodesByScore: findTopNodesByScore,
     followNode: followNode,
+    followZoomedNode: followZoomedNode,
     getNodeByLongIdOrInvalid: getNodeByLongIdOrInvalid,
+    getZoomedNode: getZoomedNode,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     insertTextAtCursor: insertTextAtCursor,
     isRootNode: isRootNode,
