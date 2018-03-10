@@ -821,8 +821,8 @@ global project_tree:false tagging:false date_time:false
       nodeToPlainTextNote(node)
     ]) {
       const trimmed = (nameOrNote || "").trim();
-      if (isWorkFlowyUrl(trimmed)) {
-        // For nodes whose trimmed name or note is a WorkFlowy URL, open it
+      if (isWorkFlowyUrl(trimmed) && node.getChildren().length === 0) {
+        // For leaf nodes whose trimmed name or note is a WorkFlowy URL, open it
         return () => openHere(trimmed);
       } else if (bindableActionsByName.has(trimmed)) {
         // If the trimmed name or note is the name of a bindable action, call it
