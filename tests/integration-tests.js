@@ -107,7 +107,7 @@ loading the expect.js and jumpflowy modules.
     const alwaysFalse = () => false;
 
     /**
-     * @param {Array<ProjectRef>} The nodes
+     * @param {Array<ProjectRef>} nodes The nodes
      * @returns {Array<string | null>} The plain text names of the nodes
      */
     function mapNodesToPlainTextNames(nodes) {

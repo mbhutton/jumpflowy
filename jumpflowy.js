@@ -97,7 +97,7 @@ global project_tree:false tagging:false date_time:false
     function handleTag(location, tagFound) {
       results.push(tagFound);
     }
-    tagging.forEachTagInString(s, handleTag, 1);
+    tagging.forEachTagInString(s, handleTag, false);
     return results;
   }
 
@@ -313,12 +313,15 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
-   * Prompt for a search string, then perform a normal
-   * WorkFlowy search.
+   * Prompt for a search string, then perform a normal WorkFlowy search.
    * @returns {void}
    */
   function promptThenWfSearch() {
-    $("#searchBox").val(prompt("WorkFlowy search: ", $("#searchBox").val()));
+    // Prompt for a new search string, using the previous value as the default
+    const previousVal = $("#searchBox").val().toString();
+    const newVal = prompt("WorkFlowy search: ", previousVal);
+    // Set search string then simulate <ENTER> key press, to trigger search
+    $("#searchBox").val(newVal);
     $("#searchBox").focus();
     $("#searchBox").trigger(
       $.Event("keydown", {
@@ -418,7 +421,7 @@ global project_tree:false tagging:false date_time:false
    * @param {string} s The string to test.
    */
   function isWorkFlowyUrl(s) {
-    return s && s.match("^https://workflowy\\.com(/.*)?$");
+    return s && s.match("^https://workflowy\\.com(/.*)?$") !== null;
   }
 
   function nodesToSearchUrl(nodes) {
@@ -927,10 +930,6 @@ global project_tree:false tagging:false date_time:false
         range.collapse(false);
         sel.addRange(range);
       }
-    } else if (document.selection && document.selection.createRange) {
-      range = document.selection.createRange();
-      range.pasteHTML(text);
-      range.select();
     }
   }
 
