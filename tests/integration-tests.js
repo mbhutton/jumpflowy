@@ -11,6 +11,10 @@ loading the expect.js and jumpflowy modules.
 /* global project_tree:false global_project_tree_object:false */ // From WorkFlowy
 /* global toastr:false expect:false jumpflowy:false */ // Others
 
+// Enable TypeScript checking
+// @ts-check
+/// <reference path="../index.d.ts" />
+
 (function() {
   "use strict";
 

@@ -20,6 +20,10 @@ global project_tree:false tagging:false date_time:false
        global_project_tree_object:false project_ids:false location_history:false
 */
 
+// Enable TypeScript checking
+// @ts-check
+/// <reference path="index.d.ts" />
+
 // UMD (Universal Module Definition) boilerplate
 (function(root, umdFactory) {
   "use strict";
