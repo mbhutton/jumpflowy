@@ -4,7 +4,8 @@
 // @version      0.1.3.2
 // @description  JavaScript extensions for WorkFlowy
 // @author       Matt Hutton
-// @match        https://workflowy.com*
+// @include      https://workflowy.com
+// @include      https://workflowy.com/*
 // @grant        none
 // @run-at       document-end
 // @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/jumpflowy.user.js
