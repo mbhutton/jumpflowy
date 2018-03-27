@@ -153,7 +153,7 @@
   }
 
   if (IS_CHROME) {
-    hostPort = "http://localhost:17362";
+    hostPort = "http://127.0.0.1:17362";
 
     addReloadButton();
     addReloadFunction();
