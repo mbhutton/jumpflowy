@@ -615,15 +615,17 @@ global project_tree:false tagging:false date_time:false
       console.debug("Not calling function, because cleanUp() already called.");
       return;
     }
-    const mainProjectTree = project_tree.getMainProjectTree();
     let isLoaded = false;
     let rootProject;
     const timeoutMs = 350;
 
-    if (mainProjectTree !== undefined && mainProjectTree !== null) {
-      rootProject = mainProjectTree.getRootProjectReference();
-      if (rootProject !== undefined && rootProject !== null) {
-        isLoaded = true;
+    if (typeof project_tree !== "undefined" && project_tree !== null) {
+      const mainProjectTree = project_tree.getMainProjectTree();
+      if (mainProjectTree !== undefined && mainProjectTree !== null) {
+        rootProject = mainProjectTree.getRootProjectReference();
+        if (rootProject !== undefined && rootProject !== null) {
+          isLoaded = true;
+        }
       }
     }
     if (isLoaded) {
