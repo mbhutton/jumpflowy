@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 // ESLint globals:
-/* global IS_MOBILE:false IS_MAC_OS:false IS_CHROME:false */ // From WorkFlowy
+/* global IS_MOBILE:false IS_MAC_OS:false IS_CHROME:false IS_FIREFOX:false */ // From WorkFlowy
 /* global toastr:false */ // Others
 
 /*
@@ -28,10 +28,11 @@
 
   (2) Run ngrok http 17362, and note the generated ngrok URL.
 
-  (3) Disable cache in Chrome dev tools under the Network tab.
+  (3) Disable cache in Chrome dev tools under the Network tab,
+      or the equivalent in Firefox.
 
-  (4) Run this script once in the Chrome console to add the reload button,
-      if not already installed as a user script in Tampermonkey.
+  (4) Run this script once in the Chrome/Firefox developer console to add the
+      reload button, if not already installed as a user script in Tampermonkey.
 
   (5) Run this script in HandyFlowy to add the reload button,
       passing in the ngrok URL from above.
@@ -46,8 +47,8 @@
 
   (1) Stop the ngrok tunnel
   (2) Stop the HTTP server
-  (3) Re-enable Chrome's cache
-  (4) Close and reload WorkFlowy in Chrome
+  (3) Re-enable Chrome's/Firefox's cache
+  (4) Close and reload WorkFlowy tab in Chrome/Firefox
   (5) Close and reload HandyFlowy
 
 */
@@ -153,7 +154,7 @@
     toastrIfAvailable(message, "info");
   }
 
-  if (IS_CHROME) {
+  if (IS_CHROME || IS_FIREFOX) {
     hostPort = "http://127.0.0.1:17362";
 
     addReloadButton();

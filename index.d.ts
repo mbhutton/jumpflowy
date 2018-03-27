@@ -138,6 +138,8 @@ interface Window {
 
   IS_CHROME: boolean;
 
+  IS_FIREFOX: boolean;
+
   IS_IOS: boolean;
 
   tagging: Tagging;

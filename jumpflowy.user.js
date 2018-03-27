@@ -887,6 +887,8 @@ global project_tree:false tagging:false date_time:false
       pass("iOS.");
     } else if (window.IS_CHROME) {
       pass("Chrome.");
+    } else if (window.IS_FIREFOX) {
+      pass("Firefox.");
     } else {
       fail("Running in unknown platform.");
     }
@@ -894,7 +896,7 @@ global project_tree:false tagging:false date_time:false
     currentTest = "Count starred pages";
     if (window.IS_IOS) {
       pass("Skipping starred pages check: not available on this platform.");
-    } else if (window.IS_CHROME) {
+    } else if (window.IS_CHROME || window.IS_FIREFOX) {
       const starredLocationsCount = window.getStarredLocations().length;
       pass("Starred locations found: " + starredLocationsCount);
     }
