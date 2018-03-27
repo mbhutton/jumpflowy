@@ -3,11 +3,11 @@
 // It exists solely to help support TypeScript's static analysis.
 //
 // This file contains best effort type declarations for JumpFlowy,
-// WorkFlowy, and third party packages, added as needed to get jumpflowy.js
+// WorkFlowy, and third party packages, added as needed to get jumpflowy.user.js
 // and the integration tests to pass type checks.
 //
 // The authoritative type definitions for JumpFlowy itself are
-// annotated in JSDoc on the functions definitions in jumpflowy.js.
+// annotated in JSDoc on the functions definitions in jumpflowy.user.js.
 //****************************************************************************
 
 //****************************

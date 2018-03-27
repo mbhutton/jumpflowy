@@ -21,7 +21,7 @@ user to remove the old version and to move the new version into place.
 (function() {
   const baseUrl = "https://bitbucket.org/mbhutton/jumpflowy/raw/";
   const gitBranch = "master";
-  const jumpflowyPath = "/jumpflowy.js";
+  const jumpflowyPath = "/jumpflowy.user.js";
 
   function showToast(text) {
     webkit.messageHandlers.Toast.postMessage(text);

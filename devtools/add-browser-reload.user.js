@@ -7,7 +7,7 @@
 // @match        https://workflowy.com*
 // @grant        none
 // @run-at       document-end
-// @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/devtools/add-browser-reload.js
+// @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/devtools/add-browser-reload.user.js
 // ==/UserScript==
 
 // ESLint globals:
@@ -15,7 +15,7 @@
 /* global toastr:false */ // Others
 
 /*
-  A utility to assist reloading of jumpflowy.js and integration tests,
+  A utility to assist reloading of jumpflowy.user.js and integration tests,
   by providing a button, a keyboard shortcut and a function to reload both
   from a local web server.
 
@@ -92,7 +92,7 @@
 
     loadScript(hostPort + "/node_modules/expect.js/index.js");
     await pause(100);
-    loadScript(hostPort + "/jumpflowy.js");
+    loadScript(hostPort + "/jumpflowy.user.js");
     await pause(100);
     loadScript(hostPort + "/tests/integration-tests.js");
     console.log("Reloaded scripts.");

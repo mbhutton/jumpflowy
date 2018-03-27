@@ -7,7 +7,7 @@
 // @match        https://workflowy.com*
 // @grant        none
 // @run-at       document-end
-// @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/jumpflowy.js
+// @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/jumpflowy.user.js
 // ==/UserScript==
 
 /*

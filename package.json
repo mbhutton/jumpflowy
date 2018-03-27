@@ -2,7 +2,7 @@
   "name": "jumpflowy",
   "version": "0.1.1.1",
   "description": "WorkFlowy extension/library for search and navigation",
-  "main": "jumpflowy.js",
+  "main": "jumpflowy.user.js",
   "repository": "git@bitbucket.org:mbhutton/jumpflowy.git",
   "author": "Matt Hutton <mbhutton@gmail.com>",
   "license": "MIT",
