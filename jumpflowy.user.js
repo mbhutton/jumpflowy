@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.3.4
+// @version      0.1.3.5
 // @description  JavaScript extensions for WorkFlowy
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
