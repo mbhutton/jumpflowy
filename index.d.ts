@@ -46,10 +46,6 @@ interface JumpFlowy {
 
   nodeToPlainTextNote(node: ProjectRef): string;
 
-  nodeToTagArgsText(tagToMatch: string, node: ProjectRef): string;
-
-  stringToTagArgsText(tagToMatch: string, s: string): string;
-
   stringToTags(s: string): Array<string>;
 
   nursery: Nursery;
@@ -57,6 +53,10 @@ interface JumpFlowy {
 
 interface Nursery {
   cleanUp(): void;
+
+  nodeToTagArgsText(tagToMatch: string, node: ProjectRef): string;
+
+  stringToTagArgsText(tagToMatch: string, s: string): string;
 }
 
 //****************************

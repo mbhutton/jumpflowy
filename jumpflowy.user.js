@@ -130,50 +130,6 @@ global project_tree:false tagging:false date_time:false
     return false;
   }
 
-  const _stringToTagArgsText_CallRegExp = RegExp("^ *\\([^\\(\\)]*\\) *$");
-
-  /**
-   * An 'argument passing' mechanism, where '#foo(bar, baz)'
-   * is considered as 'passing' the string "bar, baz" to #foo.
-   * It's very rudimentary/naive: e.g. "#foo('bar)', baz')"
-   * would lead to an args string of "'bar".
-   *
-   * @param {string} tagToMatch The tag to match.
-   *                            E.g. "#foo".
-   * @param {string} s The string to extract the args text from.
-   *                   E.g. "#foo(bar, baz)".
-   * @returns {string} The trimmed arguments string, or null if no call found.
-   *                   E.g. "bar, baz".
-   */
-  function stringToTagArgsText(tagToMatch, s) {
-    // Note: doesStringHaveTag is null safe for s
-    if (!doesStringHaveTag(tagToMatch, s)) {
-      return null;
-    }
-
-    let start = 0;
-    for (;;) {
-      const tagIndex = s.indexOf(tagToMatch, start);
-      if (tagIndex === -1) {
-        return null;
-      }
-      const afterTag = tagIndex + tagToMatch.length;
-      const callOpenIndex = s.indexOf("(", afterTag);
-      if (callOpenIndex === -1) {
-        return null;
-      }
-      const callCloseIndex = s.indexOf(")", callOpenIndex + 1);
-      if (callCloseIndex === -1) {
-        return null;
-      }
-      const fullCall = s.substring(afterTag, callCloseIndex + 1);
-      if (_stringToTagArgsText_CallRegExp.test(fullCall)) {
-        return s.substring(callOpenIndex + 1, callCloseIndex).trim();
-      }
-      start = afterTag;
-    }
-  }
-
   /**
    * @param {ProjectRef} node The node
    * @returns {string} The plain text version of the node's name,
@@ -198,23 +154,6 @@ global project_tree:false tagging:false date_time:false
       return ""; // Root node
     }
     return global_project_tree_object.getNoteInPlainText(treeObj);
-  }
-
-  /**
-   * @param {string} tagToMatch The tag to match.
-   * @param {ProjectRef} node The node to extract the args text from.
-   * @returns {string} The trimmed arguments string, or null if no call found.
-   * @see {@link stringToTagArgsText} For semantics.
-   */
-  function nodeToTagArgsText(tagToMatch, node) {
-    const resultForName = stringToTagArgsText(
-      tagToMatch,
-      nodeToPlainTextName(node)
-    );
-    if (resultForName !== null) {
-      return resultForName;
-    }
-    return stringToTagArgsText(tagToMatch, nodeToPlainTextNote(node));
   }
 
   /**
@@ -359,6 +298,67 @@ global project_tree:false tagging:false date_time:false
     } else {
       return "";
     }
+  }
+
+  /**
+   * An 'argument passing' mechanism, where '#foo(bar, baz)'
+   * is considered as 'passing' the string "bar, baz" to #foo.
+   * It's very rudimentary/naive: e.g. "#foo('bar)', baz')"
+   * would lead to an args string of "'bar".
+   *
+   * @param {string} tagToMatch The tag to match.
+   *                            E.g. "#foo".
+   * @param {string} s The string to extract the args text from.
+   *                   E.g. "#foo(bar, baz)".
+   * @returns {string} The trimmed arguments string, or null if no call found.
+   *                   E.g. "bar, baz".
+   */
+  function stringToTagArgsText(tagToMatch, s) {
+    // Note: doesStringHaveTag is null safe for s
+    if (!doesStringHaveTag(tagToMatch, s)) {
+      return null;
+    }
+
+    let start = 0;
+    for (;;) {
+      const tagIndex = s.indexOf(tagToMatch, start);
+      if (tagIndex === -1) {
+        return null;
+      }
+      const afterTag = tagIndex + tagToMatch.length;
+      const callOpenIndex = s.indexOf("(", afterTag);
+      if (callOpenIndex === -1) {
+        return null;
+      }
+      const callCloseIndex = s.indexOf(")", callOpenIndex + 1);
+      if (callCloseIndex === -1) {
+        return null;
+      }
+      const fullCall = s.substring(afterTag, callCloseIndex + 1);
+      if (_stringToTagArgsText_CallRegExp.test(fullCall)) {
+        return s.substring(callOpenIndex + 1, callCloseIndex).trim();
+      }
+      start = afterTag;
+    }
+  }
+
+  const _stringToTagArgsText_CallRegExp = RegExp("^ *\\([^\\(\\)]*\\) *$");
+
+  /**
+   * @param {string} tagToMatch The tag to match.
+   * @param {ProjectRef} node The node to extract the args text from.
+   * @returns {string} The trimmed arguments string, or null if no call found.
+   * @see {@link stringToTagArgsText} For semantics.
+   */
+  function nodeToTagArgsText(tagToMatch, node) {
+    const resultForName = stringToTagArgsText(
+      tagToMatch,
+      nodeToPlainTextName(node)
+    );
+    if (resultForName !== null) {
+      return resultForName;
+    }
+    return stringToTagArgsText(tagToMatch, nodeToPlainTextNote(node));
   }
 
   /**
@@ -1159,6 +1159,7 @@ global project_tree:false tagging:false date_time:false
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
     nodeToPathAsNodes: nodeToPathAsNodes,
     nodeToSearchTermText: nodeToSearchTermText,
+    nodeToTagArgsText: nodeToTagArgsText,
     nodesToSearchTermText: nodesToSearchTermText,
     nodesToSearchUrl: nodesToSearchUrl,
     openHere: openHere,
@@ -1173,6 +1174,7 @@ global project_tree:false tagging:false date_time:false
     showElapsedTime: showElapsedTime,
     splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
     showShortReport: showShortReport,
+    stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
   };
 
@@ -1193,8 +1195,6 @@ global project_tree:false tagging:false date_time:false
     nodeToLastModifiedSec: nodeToLastModifiedSec,
     nodeToPlainTextName: nodeToPlainTextName,
     nodeToPlainTextNote: nodeToPlainTextNote,
-    nodeToTagArgsText: nodeToTagArgsText,
-    stringToTagArgsText: stringToTagArgsText,
     stringToTags: stringToTags,
 
     // The Nursery namespace
