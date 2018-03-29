@@ -19,7 +19,7 @@ user to remove the old version and to move the new version into place.
 /* global webkit:false */
 
 (function() {
-  const baseUrl = "https://bitbucket.org/mbhutton/jumpflowy/raw/";
+  const baseUrl = "https://github.com/mbhutton/jumpflowy/raw/";
   const gitBranch = "master";
   const jumpflowyPath = "/jumpflowy.user.js";
 

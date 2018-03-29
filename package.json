@@ -3,7 +3,7 @@
   "version": "0.1.1.1",
   "description": "WorkFlowy extension/library for search and navigation",
   "main": "jumpflowy.user.js",
-  "repository": "git@bitbucket.org:mbhutton/jumpflowy.git",
+  "repository": "https://github.com/mbhutton/jumpflowy.git",
   "author": "Matt Hutton <mbhutton@gmail.com>",
   "license": "MIT",
   "private": false,
