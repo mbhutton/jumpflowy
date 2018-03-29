@@ -4,8 +4,7 @@
 // @version      0.1.0.3
 // @description  Add button to reload JumpFlowy scripts from localhost server
 // @author       Matt Hutton
-// @include      https://workflowy.com
-// @include      https://workflowy.com/*
+// @match        https://workflowy.com/*
 // @grant        none
 // @run-at       document-end
 // @downloadURL  https://bitbucket.org/mbhutton/jumpflowy/raw/master/devtools/add-browser-reload.user.js
