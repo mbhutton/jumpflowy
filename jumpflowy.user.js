@@ -517,16 +517,16 @@ global project_tree:false tagging:false date_time:false
     const modifiedHowLongAgoMinutes = Math.ceil(modifiedHowLongAgoSec / 60);
     const timeClause = `last-changed:${modifiedHowLongAgoMinutes +
       1} -last-changed:${modifiedHowLongAgoMinutes - 1} `;
-    const nameClause = splitNameOrStringByDoubleQuotes(
+    const nameClause = splitStringToSearchTerms(
       nodeToPlainTextName(node)
     );
-    const noteClause = splitNameOrStringByDoubleQuotes(
+    const noteClause = splitStringToSearchTerms(
       nodeToPlainTextNote(node)
     );
     return timeClause + nameClause + noteClause;
   }
 
-  function splitNameOrStringByDoubleQuotes(s) {
+  function splitStringToSearchTerms(s) {
     const lines = s.match(/[^\r\n]+/g);
     if (lines === null || lines.length === 0) {
       return "";
@@ -1225,7 +1225,7 @@ global project_tree:false tagging:false date_time:false
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
     showElapsedTime: showElapsedTime,
     showShortReport: showShortReport,
-    splitNameOrStringByDoubleQuotes: splitNameOrStringByDoubleQuotes,
+    splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
   };
