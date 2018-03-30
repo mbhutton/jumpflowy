@@ -256,7 +256,7 @@ global project_tree:false tagging:false date_time:false
    * Prompt for a search string, then perform a normal WorkFlowy search.
    * @returns {void}
    */
-  function promptThenWfSearch() {
+  function promptToNormalSearch() {
     // Prompt for a new search string, using the previous value as the default
     const previousVal = $("#searchBox").val().toString();
     const newVal = prompt("WorkFlowy search: ", previousVal);
@@ -274,7 +274,7 @@ global project_tree:false tagging:false date_time:false
    * @returns {void} Dismisses a notification from the WorkFlowy UI, e.g. after
    *                 deleting a large tree of nodes.
    */
-  function dismissWfNotification() {
+  function dismissNotification() {
     $("#message")
       .children(".close")
       .click();
@@ -1165,8 +1165,8 @@ global project_tree:false tagging:false date_time:false
       _populateMapWithNoArgFunctions(bindableActionsByName, [
         clickAddButton,
         clickSaveButton,
-        dismissWfNotification,
-        promptThenWfSearch,
+        dismissNotification,
+        promptToNormalSearch,
         promptToExpandAndInsertAtCursor,
         promptToFollowBookmark,
         promptToChooseRegexMatch,
@@ -1190,7 +1190,7 @@ global project_tree:false tagging:false date_time:false
     clickAddButton: clickAddButton,
     clickSaveButton: clickSaveButton,
     dateToYMDString: dateToYMDString,
-    dismissWfNotification: dismissWfNotification,
+    dismissNotification: dismissNotification,
     expandAbbreviation: expandAbbreviation,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findRecentlyEditedNodes: findRecentlyEditedNodes,
@@ -1215,7 +1215,7 @@ global project_tree:false tagging:false date_time:false
     openHere: openHere,
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
-    promptThenWfSearch: promptThenWfSearch,
+    promptToNormalSearch: promptToNormalSearch,
     promptToChooseNode: promptToChooseNode,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
     promptToFollowBookmark: promptToFollowBookmark,

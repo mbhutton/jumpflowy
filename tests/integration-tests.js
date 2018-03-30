@@ -286,7 +286,7 @@ loading the expect.js and jumpflowy modules.
 
     const currentTime = jumpflowy.getCurrentTimeSec();
 
-    function testWfAssumptions(node) {
+    function testWorkFlowyAssumptions(node) {
       const tree = node.getProjectTree();
       expect(tree).to.not.be(null);
       expect(tree.dateJoinedTimestampInSeconds).to.be.a("number");
@@ -300,8 +300,8 @@ loading the expect.js and jumpflowy modules.
         expect(global_tree_obj.getLastModified(treeObject)).to.be.a("number");
       }
     }
-    testWfAssumptions(jumpflowy.getRootNode());
-    testWfAssumptions(jumpflowy.getRootNode().getChildren()[0]);
+    testWorkFlowyAssumptions(jumpflowy.getRootNode());
+    testWorkFlowyAssumptions(jumpflowy.getRootNode().getChildren()[0]);
 
     function testNode(uuid) {
       const node = getUniqueNodeByNoteOrFail(uuid);
