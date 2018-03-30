@@ -5,7 +5,7 @@ Run these tests in the browser after
 loading the expect.js and jumpflowy modules.
 */
 
-/* eslint-disable no-console, valid-jsdoc */
+/* eslint-disable valid-jsdoc */
 
 // ESLint globals:
 /* global project_tree:false global_project_tree_object:false */ // From WorkFlowy

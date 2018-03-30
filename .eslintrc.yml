@@ -36,3 +36,5 @@ rules:
     - error
   no-warning-comments:
     - warn
+  no-console:
+    - off

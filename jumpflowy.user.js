@@ -506,7 +506,6 @@ global project_tree:false tagging:false date_time:false
    */
   function nodeToSearchTermText(node) {
     if (isRootNode(node)) {
-      // eslint-disable-next-line no-console
       console.warn(
         "nodeToSearchTermText(node) called with the root node of the document."
       );
@@ -668,7 +667,6 @@ global project_tree:false tagging:false date_time:false
    */
   function applyToProjectWhenLoaded(callbackFn) {
     if (isCleanedUp) {
-      // eslint-disable-next-line no-console
       console.debug("Not calling function, because cleanUp() already called.");
       return;
     }
@@ -686,11 +684,9 @@ global project_tree:false tagging:false date_time:false
       }
     }
     if (isLoaded) {
-      // eslint-disable-next-line no-console
       console.log("Project now loaded. Applying function to root project...");
       callbackFn(rootProject);
     } else {
-      // eslint-disable-next-line no-console
       console.log(`Project not yet loaded. Waiting for ${timeoutMs}ms.`);
       const repeat = () => applyToProjectWhenLoaded(callbackFn);
       setTimeout(repeat, timeoutMs);
@@ -722,7 +718,6 @@ global project_tree:false tagging:false date_time:false
   function showElapsedTime(startDate, message) {
     const end = new Date();
     const deltaMs = end.getTime() - startDate.getTime();
-    // eslint-disable-next-line no-console
     console.log(`${message} (${deltaMs}ms)`);
   }
 
@@ -965,7 +960,6 @@ global project_tree:false tagging:false date_time:false
     applyToEachNode(() => totalNodes++, rootProject);
     pass(totalNodes + ".");
 
-    // eslint-disable-next-line no-console
     console.log(text);
     if (hasFailed) {
       alert(text);
@@ -1024,7 +1018,6 @@ global project_tree:false tagging:false date_time:false
     if (typeof fnOrValue === "function") {
       const expansion = fnOrValue();
       if (!expansion) {
-        // eslint-disable-next-line no-console
         console.log(`Function ${fnOrValue.name} returned ${typeof expansion}`);
       }
       return expansion;
@@ -1071,12 +1064,10 @@ global project_tree:false tagging:false date_time:false
         const abbrev = matchResult[1];
         const expansion = matchResult[2];
         if (abbreviationsMap.has(abbrev)) {
-          // eslint-disable-next-line no-console
           console.log(`Found multiple ${abbrevTag} definitions for ${abbrev}`);
         }
         abbreviationsMap.set(abbrev, expansion);
       } else {
-        // eslint-disable-next-line no-console
         console.log(`Invalid ${abbrevTag} arguments: ${argsText}.`);
       }
     }
@@ -1121,7 +1112,6 @@ global project_tree:false tagging:false date_time:false
       if (isValidCanonicalCode(keyCode)) {
         registerFunctionForKeyDownEvent(keyCode, nodeToFollowAction(node));
       } else {
-        // eslint-disable-next-line no-console
         console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
       }
     }
@@ -1130,10 +1120,8 @@ global project_tree:false tagging:false date_time:false
   function _populateMapWithNoArgFunctions(map, functionsArray) {
     for (let f of functionsArray) {
       if (typeof f !== "function") {
-        // eslint-disable-next-line no-console
         console.warn("Not a function: " + f);
       } else if (f.length !== 0) {
-        // eslint-disable-next-line no-console
         console.warn("Function takes more that zero arguments: " + f);
       } else {
         map.set(f.name, f);
@@ -1150,7 +1138,6 @@ global project_tree:false tagging:false date_time:false
     if (isCleanedUp) {
       return;
     }
-    // eslint-disable-next-line no-console
     console.log("Cleaning up");
 
     // Keyboard shortcuts
