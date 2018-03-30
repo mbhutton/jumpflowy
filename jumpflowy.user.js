@@ -1163,13 +1163,14 @@ global project_tree:false tagging:false date_time:false
       // Keyboard shortcuts
       bindableActionsByName.clear();
       _populateMapWithNoArgFunctions(bindableActionsByName, [
+        // Alphabetical order
         clickAddButton,
         clickSaveButton,
         dismissNotification,
-        promptToNormalLocalSearch,
         promptToExpandAndInsertAtCursor,
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
+        promptToNormalLocalSearch,
         searchZoomedAndMostRecentlyEdited,
         showShortReport,
       ]);
@@ -1216,9 +1217,9 @@ global project_tree:false tagging:false date_time:false
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
     promptToChooseNode: promptToChooseNode,
-    promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
+    promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
