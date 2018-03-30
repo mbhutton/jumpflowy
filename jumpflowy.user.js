@@ -13,7 +13,7 @@
 // ESLint globals from WorkFlowy:
 /*
 global project_tree:false tagging:false date_time:false
-       global_project_tree_object:false project_ids:false location_history:false
+       global_project_tree_object:false location_history:false
 */
 
 // Enable TypeScript checking
@@ -246,10 +246,11 @@ global project_tree:false tagging:false date_time:false
     open(url, "_blank");
   }
 
-  function openNodeHere(node, rawSearchString) {
-    const projectId = project_ids.truncateProjectId(node.getProjectId());
-    const searchSuffix = toSearchSuffix(rawSearchString);
-    openHere(`https://workflowy.com/#/${projectId}${searchSuffix}`);
+  function openNodeHere(node, searchQuery) {
+    const projectId = node.getProjectId();
+    searchQuery = searchQuery || null; // Convert empty string to null
+    const location = location_history.createLocation(projectId, searchQuery);
+    location.navigate();
   }
 
   /**
@@ -286,15 +287,6 @@ global project_tree:false tagging:false date_time:false
 
   function clickSaveButton() {
     $(".saveButton").click();
-  }
-
-  function toSearchSuffix(rawSearchString) {
-    if (rawSearchString) {
-      const escapedSearchString = encodeURIComponent(rawSearchString);
-      return `?q=${escapedSearchString}`;
-    } else {
-      return "";
-    }
   }
 
   /**
@@ -397,7 +389,7 @@ global project_tree:false tagging:false date_time:false
     } else {
       const chosenNode = promptToChooseNode(matchingNodes);
       if (chosenNode) {
-        openNodeHere(chosenNode);
+        openNodeHere(chosenNode, null);
       }
     }
   }
@@ -486,6 +478,20 @@ global project_tree:false tagging:false date_time:false
     return s && s.match("^https://workflowy\\.com(/.*)?$") !== null;
   }
 
+  /**
+   * @returns {boolean} True if and only if the given string is a WorkFlowy URL
+   *                    which represents the root node, with no search query.
+   * @param {string} s The string to test.
+   */
+  function isWorkFlowyHomeUrl(s) {
+    const validRootUrls = [
+      "https://workflowy.com",
+      "https://workflowy.com/",
+      "https://workflowy.com/#"
+    ];
+    return validRootUrls.includes(s);
+  }
+
   function nodesToSearchUrl(nodes) {
     return (
       "https://workflowy.com/#?q=" +
@@ -520,10 +526,7 @@ global project_tree:false tagging:false date_time:false
     const nameClause = splitStringToSearchTerms(
       nodeToPlainTextName(node)
     );
-    const noteClause = splitStringToSearchTerms(
-      nodeToPlainTextNote(node)
-    );
-    return timeClause + nameClause + noteClause;
+    return timeClause + nameClause;
   }
 
   function splitStringToSearchTerms(s) {
@@ -885,7 +888,11 @@ global project_tree:false tagging:false date_time:false
       const trimmed = (nameOrNote || "").trim();
       if (isWorkFlowyUrl(trimmed) && node.getChildren().length === 0) {
         // For leaf nodes whose trimmed name or note is a WorkFlowy URL, open it
-        return () => openHere(trimmed);
+        if (isWorkFlowyHomeUrl(trimmed)) {
+          return () => openNodeHere(getRootNode(), null);
+        } else {
+          return () => openHere(trimmed);
+        }
       } else if (bindableActionsByName.has(trimmed)) {
         // If the trimmed name or note is the name of a bindable action, call it
         return bindableActionsByName.get(trimmed);

@@ -127,6 +127,8 @@ interface LocationHistoryEntry {
 
 declare namespace location_history {
   function getCurrentLocation(): LocationHistoryEntry;
+
+  function createLocation(zoomedProjectId: string, searchQuery: string | null);
 }
 
 //****************************
