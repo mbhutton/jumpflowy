@@ -256,7 +256,7 @@ global project_tree:false tagging:false date_time:false
    * Prompt for a search string, then perform a normal WorkFlowy search.
    * @returns {void}
    */
-  function promptToNormalSearch() {
+  function promptToNormalLocalSearch() {
     // Prompt for a new search string, using the previous value as the default
     const previousVal = $("#searchBox").val().toString();
     const newVal = prompt("WorkFlowy search: ", previousVal);
@@ -372,7 +372,7 @@ global project_tree:false tagging:false date_time:false
    * @see findNodesMatchingRegex For how the regex is matched against the node.
    * @returns {void}
    */
-  function promptToChooseRegexMatch() {
+  function promptToFindLocalRegexMatchThenZoom() {
     const defaultSearch = lastRegexString || ".*";
     const promptString = "Search for regular expression (case insensitive):";
     const regExpString = prompt(promptString, defaultSearch);
@@ -903,7 +903,7 @@ global project_tree:false tagging:false date_time:false
    * @returns {void}
    * @see followNode
    */
-  function promptToFollowBookmark() {
+  function promptToFindGlobalBookmarkThenFollow() {
     const startTime = new Date();
     const nodes = findNodesWithTag(bookmarkTag, getRootNode());
     showElapsedTime(startTime, `Found nodes with ${bookmarkTag} tag`);
@@ -1166,10 +1166,10 @@ global project_tree:false tagging:false date_time:false
         clickAddButton,
         clickSaveButton,
         dismissNotification,
-        promptToNormalSearch,
+        promptToNormalLocalSearch,
         promptToExpandAndInsertAtCursor,
-        promptToFollowBookmark,
-        promptToChooseRegexMatch,
+        promptToFindGlobalBookmarkThenFollow,
+        promptToFindLocalRegexMatchThenZoom,
         searchZoomedAndMostRecentlyEdited,
         showShortReport,
       ]);
@@ -1216,10 +1216,10 @@ global project_tree:false tagging:false date_time:false
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
     promptToChooseNode: promptToChooseNode,
-    promptToChooseRegexMatch: promptToChooseRegexMatch,
+    promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
-    promptToFollowBookmark: promptToFollowBookmark,
-    promptToNormalSearch: promptToNormalSearch,
+    promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
+    promptToNormalLocalSearch: promptToNormalLocalSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
     showElapsedTime: showElapsedTime,
