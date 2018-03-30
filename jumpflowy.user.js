@@ -2,17 +2,13 @@
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
 // @version      0.1.3.5
-// @description  JavaScript extensions for WorkFlowy
+// @description  WorkFlowy library and user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
 // @grant        none
 // @run-at       document-end
 // @downloadURL  https://github.com/mbhutton/jumpflowy/raw/master/jumpflowy.user.js
 // ==/UserScript==
-
-/*
-JumpFlowy: WorkFlowy extension/library for search and navigation.
-*/
 
 // ESLint globals from WorkFlowy:
 /*

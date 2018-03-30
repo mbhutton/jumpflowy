@@ -1,4 +1,4 @@
-JumpFlowy: WorkFlowy extension/library for search and navigation.
+JumpFlowy: WorkFlowy library and user script for search and navigation.
 
 Target platforms:
 - HandyFlowy for iOS
