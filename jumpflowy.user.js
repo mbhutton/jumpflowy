@@ -64,7 +64,7 @@ global project_tree:false tagging:false date_time:false
    * @param {function} nodePredicate A function (ProjectRef -> boolean) which
    *                                 returns whether or not a node is a match.
    * @param {ProjectRef} searchRoot The root node of the search.
-   * @returns {Array<ProjectRef>} The matching nodes, in order or appearance.
+   * @returns {Array<ProjectRef>} The matching nodes, in order of appearance.
    */
   function findMatchingNodes(nodePredicate, searchRoot) {
     const matches = Array();
@@ -230,6 +230,7 @@ global project_tree:false tagging:false date_time:false
   const bookmarkTag = "#bm";
   const abbrevTag = "#abbrev";
   const shortcutTag = "#shortcut";
+  let lastRegexString = null;
   let isCleanedUp = false;
 
   function openHere(url) {
@@ -339,6 +340,67 @@ global project_tree:false tagging:false date_time:false
   }
 
   const _stringToTagArgsText_CallRegExp = RegExp("^ *\\([^\\(\\)]*\\) *$");
+
+  /**
+   * Finds and returns the nodes whose "combined plain text" matches the
+   * given regular expression. Here, the "combined plain text" is the node's
+   * name as plain text, plus the node's note as plain text, with a
+   * newline separating the two only when the note is non-empty.
+   *
+   * @param {RegExp} regExp The compiled regular expression to match.
+   * @param {ProjectRef} searchRoot The root node of the search.
+   * @returns {Array<ProjectRef>} The matching nodes, in order of appearance.
+   */
+  function findNodesMatchingRegex(regExp, searchRoot) {
+    if (typeof regExp !== "object" || regExp.constructor.name !== "RegExp") {
+      throw "regExp must be a compiled RegExp object. regExp: " + regExp;
+    }
+    function nodePredicate(node) {
+      const name = nodeToPlainTextName(node);
+      const note = nodeToPlainTextNote(node);
+      const combinedText = note.length === 0 ? name : `${name}\n${note}`;
+      return regExp.test(combinedText);
+    }
+    return findMatchingNodes(nodePredicate, searchRoot);
+  }
+
+  /**
+   * Prompts the user for a regular expression string (case insensitive, and
+   * defaulting to the last chosen regex), the searches for nodes under the
+   * currently zoomed node which match it, then prompts the user to choose which
+   * of the matching nodes to go to.
+   * @see findNodesMatchingRegex For how the regex is matched against the node.
+   * @returns {void}
+   */
+  function promptToChooseRegexMatch() {
+    const defaultSearch = lastRegexString || ".*";
+    const promptString = "Search for regular expression (case insensitive):";
+    const regExpString = prompt(promptString, defaultSearch);
+    if (!regExpString) {
+      return;
+    }
+    lastRegexString = regExpString;
+    let regExp;
+    try{
+      regExp = RegExp(regExpString, "i");
+    } catch (er) {
+      alert(er);
+      return;
+    }
+    const startTime = new Date();
+    const matchingNodes = findNodesMatchingRegex(regExp, getZoomedNode());
+    const message = `Found ${matchingNodes.length} matches for ${regExp}`;
+    showElapsedTime(startTime, message);
+
+    if (matchingNodes.length === 0) {
+      alert(`No nodes under current location match '${regExpString}'.`);
+    } else {
+      const chosenNode = promptToChooseNode(matchingNodes);
+      if (chosenNode) {
+        openNodeHere(chosenNode);
+      }
+    }
+  }
 
   /**
    * @param {string} tagToMatch The tag to match.
@@ -484,7 +546,7 @@ global project_tree:false tagging:false date_time:false
   /**
    * @param {string} tag The tag to find, e.g. "#foo".
    * @param {ProjectRef} searchRoot The root node of the search.
-   * @returns {Array<ProjectRef>} The matching nodes, in order or appearance.
+   * @returns {Array<ProjectRef>} The matching nodes, in order of appearance.
    */
   function findNodesWithTag(tag, searchRoot) {
     return findMatchingNodes(n => doesNodeHaveTag(tag, n), searchRoot);
@@ -1099,6 +1161,9 @@ global project_tree:false tagging:false date_time:false
     // Built-in expansions
     builtInAbbreviationsMap.clear();
 
+    // Other global state
+    lastRegexString = null;
+
     isCleanedUp = true;
   }
 
@@ -1117,6 +1182,7 @@ global project_tree:false tagging:false date_time:false
         promptThenWfSearch,
         promptToExpandAndInsertAtCursor,
         promptToFollowBookmark,
+        promptToChooseRegexMatch,
         searchZoomedAndMostRecentlyEdited,
         showShortReport,
       ]);
@@ -1141,6 +1207,7 @@ global project_tree:false tagging:false date_time:false
     expandAbbreviation: expandAbbreviation,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findRecentlyEditedNodes: findRecentlyEditedNodes,
+    findNodesMatchingRegex: findNodesMatchingRegex,
     findNodesWithTag: findNodesWithTag,
     findTopItemsByComparator: findTopItemsByComparator,
     findTopNodesByScore: findTopNodesByScore,
@@ -1165,6 +1232,7 @@ global project_tree:false tagging:false date_time:false
     promptToChooseNode: promptToChooseNode,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
     promptToFollowBookmark: promptToFollowBookmark,
+    promptToChooseRegexMatch: promptToChooseRegexMatch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
     showElapsedTime: showElapsedTime,
