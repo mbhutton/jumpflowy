@@ -972,7 +972,7 @@ global project_tree:false tagging:false date_time:false utils:false
     }
   }
 
-  function searchZoomedAndMostRecentlyEdited() {
+  function showZoomedAndMostRecentlyEdited() {
     const recentNode = findRecentlyEditedNodes(0, 1, getRootNode())[0];
     const zoomedNode = getZoomedNode();
     const newZoom = findClosestCommonAncestor(recentNode, zoomedNode);
@@ -1178,7 +1178,7 @@ global project_tree:false tagging:false date_time:false utils:false
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
-        searchZoomedAndMostRecentlyEdited,
+        showZoomedAndMostRecentlyEdited,
       ]);
       _registerKeyboardShortcuts();
       document.addEventListener("keydown", keyDownListener);
@@ -1229,7 +1229,7 @@ global project_tree:false tagging:false date_time:false utils:false
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
-    searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
+    showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
