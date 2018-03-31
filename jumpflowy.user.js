@@ -382,7 +382,7 @@ global project_tree:false tagging:false date_time:false utils:false
     const startTime = new Date();
     const matchingNodes = findNodesMatchingRegex(regExp, getZoomedNode());
     const message = `Found ${matchingNodes.length} matches for ${regExp}`;
-    showElapsedTime(startTime, message);
+    logElapsedTime(startTime, message);
 
     if (matchingNodes.length === 0) {
       alert(`No nodes under current location match '${regExpString}'.`);
@@ -717,7 +717,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * @param {string} message The message to be displayed before the time delta.
    * @returns {void}
    */
-  function showElapsedTime(startDate, message) {
+  function logElapsedTime(startDate, message) {
     const end = new Date();
     const deltaMs = end.getTime() - startDate.getTime();
     console.log(`${message} (${deltaMs}ms)`);
@@ -912,7 +912,7 @@ global project_tree:false tagging:false date_time:false utils:false
   function promptToFindGlobalBookmarkThenFollow() {
     const startTime = new Date();
     const nodes = findNodesWithTag(bookmarkTag, getRootNode());
-    showElapsedTime(startTime, `Found nodes with ${bookmarkTag} tag`);
+    logElapsedTime(startTime, `Found nodes with ${bookmarkTag} tag`);
     const chosenNode = promptToChooseNode(nodes);
     followNode(chosenNode);
   }
@@ -922,7 +922,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * showing an alert if any tests fail.
    * @returns {void}
    */
-  function showShortReport() {
+  function logShortReport() {
     const rootProject = getRootNode();
 
     let text = "WorkFlowy report:\n";
@@ -1173,12 +1173,12 @@ global project_tree:false tagging:false date_time:false utils:false
         clickAddButton,
         clickSaveButton,
         dismissNotification,
+        logShortReport,
         promptToExpandAndInsertAtCursor,
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
         searchZoomedAndMostRecentlyEdited,
-        showShortReport,
       ]);
       _registerKeyboardShortcuts();
       document.addEventListener("keydown", keyDownListener);
@@ -1214,6 +1214,8 @@ global project_tree:false tagging:false date_time:false utils:false
     isRootNode: isRootNode,
     isValidCanonicalCode: isValidCanonicalCode,
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
+    logElapsedTime: logElapsedTime,
+    logShortReport: logShortReport,
     nodeToPathAsNodes: nodeToPathAsNodes,
     nodeToTagArgsText: nodeToTagArgsText,
     nodeToVolatileSearchQuery: nodeToVolatileSearchQuery,
@@ -1228,8 +1230,6 @@ global project_tree:false tagging:false date_time:false utils:false
     promptToNormalLocalSearch: promptToNormalLocalSearch,
     registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     searchZoomedAndMostRecentlyEdited: searchZoomedAndMostRecentlyEdited,
-    showElapsedTime: showElapsedTime,
-    showShortReport: showShortReport,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
