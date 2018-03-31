@@ -111,6 +111,10 @@ declare namespace date_time {
   function getCurrentTimeInMS(): number;
 }
 
+declare namespace utils {
+  function generateUUID(): string;
+}
+
 type LocationAndTagHandler = (spanStart: number, tagFound: string) => void;
 
 interface Tagging {

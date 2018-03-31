@@ -12,7 +12,7 @@
 
 // ESLint globals from WorkFlowy:
 /*
-global project_tree:false tagging:false date_time:false
+global project_tree:false tagging:false date_time:false utils:false
        global_project_tree_object:false location_history:false
 */
 
@@ -254,14 +254,14 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
-   * Prompt for a search string, then perform a normal WorkFlowy search.
+   * Prompt for a search query, then perform a normal WorkFlowy search.
    * @returns {void}
    */
   function promptToNormalLocalSearch() {
-    // Prompt for a new search string, using the previous value as the default
+    // Prompt for a new search query, using the previous value as the default
     const previousVal = $("#searchBox").val().toString();
     const newVal = prompt("WorkFlowy search: ", previousVal);
-    // Set search string then simulate <ENTER> key press, to trigger search
+    // Set search query then simulate <ENTER> key press, to trigger search
     $("#searchBox").val(newVal);
     $("#searchBox").focus();
     $("#searchBox").trigger(
@@ -492,23 +492,29 @@ global project_tree:false tagging:false date_time:false
     return validRootUrls.includes(s);
   }
 
-  function nodesToSearchTermText(nodes) {
-    const searchesOrNulls = nodes.map(n => nodeToSearchTermText(n));
-    const searches = searchesOrNulls.filter(x => x !== null);
+  /**
+   * @param {Array<ProjectRef>} nodes The nodes to build the search query for.
+   * @returns {string | null} The search query to use for finding the
+   *                          nodes, or an unmatchable query if nodes is empty.
+   */
+  function nodesToVolatileSearchQuery(nodes) {
+    if (nodes.length === 0) {
+      // Return a search query which matches no nodes
+      return "META:NO_MATCHING_NODES_" + utils.generateUUID();
+    }
+    const searches = nodes.map(n => nodeToVolatileSearchQuery(n));
     return searches.join(" OR ");
   }
 
   /**
-   * @param {ProjectRef} node The node to build the search string for
-   * @returns {string | null} The unescaped search term to use for finding the
-   *                          given node, or null if it is the root node.
+   * @param {ProjectRef} node The node to build the search query for.
+   * @returns {string | null} The search query to use for finding the node, or
+   *                          an unmatchable query for the root node.
    */
-  function nodeToSearchTermText(node) {
+  function nodeToVolatileSearchQuery(node) {
     if (isRootNode(node)) {
-      console.warn(
-        "nodeToSearchTermText(node) called with the root node of the document."
-      );
-      return null;
+      // Return a search query which matches no nodes
+      return "META:ROOT_NODE_" + utils.generateUUID();
     }
     const currentTimeSec = getCurrentTimeSec();
     const nodeLastModifiedSec = nodeToLastModifiedSec(node);
@@ -970,8 +976,8 @@ global project_tree:false tagging:false date_time:false
     const recentNode = findRecentlyEditedNodes(0, 1, getRootNode())[0];
     const zoomedNode = getZoomedNode();
     const newZoom = findClosestCommonAncestor(recentNode, zoomedNode);
-    const searchText = nodesToSearchTermText([recentNode, zoomedNode]);
-    openNodeHere(newZoom, searchText);
+    const searchQuery = nodesToVolatileSearchQuery([recentNode, zoomedNode]);
+    openNodeHere(newZoom, searchQuery);
   }
 
   // Note: this function is based on https://jsfiddle.net/timdown/cCAWC/3/
@@ -1209,9 +1215,9 @@ global project_tree:false tagging:false date_time:false
     isValidCanonicalCode: isValidCanonicalCode,
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
     nodeToPathAsNodes: nodeToPathAsNodes,
-    nodeToSearchTermText: nodeToSearchTermText,
     nodeToTagArgsText: nodeToTagArgsText,
-    nodesToSearchTermText: nodesToSearchTermText,
+    nodeToVolatileSearchQuery: nodeToVolatileSearchQuery,
+    nodesToVolatileSearchQuery: nodesToVolatileSearchQuery,
     openHere: openHere,
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
