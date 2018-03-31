@@ -492,13 +492,6 @@ global project_tree:false tagging:false date_time:false
     return validRootUrls.includes(s);
   }
 
-  function nodesToSearchUrl(nodes) {
-    return (
-      "https://workflowy.com/#?q=" +
-      encodeURIComponent(nodesToSearchTermText(nodes))
-    );
-  }
-
   function nodesToSearchTermText(nodes) {
     const searchesOrNulls = nodes.map(n => nodeToSearchTermText(n));
     const searches = searchesOrNulls.filter(x => x !== null);
@@ -1219,7 +1212,6 @@ global project_tree:false tagging:false date_time:false
     nodeToSearchTermText: nodeToSearchTermText,
     nodeToTagArgsText: nodeToTagArgsText,
     nodesToSearchTermText: nodesToSearchTermText,
-    nodesToSearchUrl: nodesToSearchUrl,
     openHere: openHere,
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
