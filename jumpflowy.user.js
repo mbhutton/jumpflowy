@@ -259,7 +259,9 @@ global project_tree:false tagging:false date_time:false utils:false
    */
   function promptToNormalLocalSearch() {
     // Prompt for a new search query, using the previous value as the default
-    const previousVal = $("#searchBox").val().toString();
+    const previousVal = $("#searchBox")
+      .val()
+      .toString();
     const newVal = prompt("WorkFlowy search: ", previousVal);
     // Set search query then simulate <ENTER> key press, to trigger search
     $("#searchBox").val(newVal);
@@ -373,7 +375,7 @@ global project_tree:false tagging:false date_time:false utils:false
     }
     lastRegexString = regExpString;
     let regExp;
-    try{
+    try {
       regExp = RegExp(regExpString, "i");
     } catch (er) {
       alert(er);
@@ -522,9 +524,7 @@ global project_tree:false tagging:false date_time:false utils:false
     const modifiedHowLongAgoMinutes = Math.ceil(modifiedHowLongAgoSec / 60);
     const timeClause = `last-changed:${modifiedHowLongAgoMinutes +
       1} -last-changed:${modifiedHowLongAgoMinutes - 1} `;
-    const nameClause = splitStringToSearchTerms(
-      nodeToPlainTextName(node)
-    );
+    const nameClause = splitStringToSearchTerms(nodeToPlainTextName(node));
     return timeClause + nameClause;
   }
 
@@ -832,7 +832,8 @@ global project_tree:false tagging:false date_time:false utils:false
     if (resultNodes.length === 0) {
       // Match nodes which contains the full string in the name (ignoring case)
       for (let node of nodes) {
-        if (nodeToPlainTextName(node).toLowerCase().includes(answerLC)) {
+        const plainTextNameLC = nodeToPlainTextName(node).toLowerCase();
+        if (plainTextNameLC.includes(answerLC)) {
           resultNodes.push(node);
         }
       }
@@ -1102,7 +1103,7 @@ global project_tree:false tagging:false date_time:false utils:false
       if (type !== "string") {
         throw `${fn.name} returned type '${type}' when expecting a string.`;
       }
-    } else if ( typeof functionOrValue !== "string") {
+    } else if (typeof functionOrValue !== "string") {
       const type = typeof functionOrValue;
       throw `Unsupported type of expansion for ${abbreviation}: ${type}`;
     }
