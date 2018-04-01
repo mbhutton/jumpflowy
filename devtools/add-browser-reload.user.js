@@ -26,6 +26,7 @@
       The port must match the port used elsewhere in this script.
 
   (2) Run ngrok http 17362, and note the generated ngrok URL.
+      (Only when testing HandyFlowy)
 
   (3) Disable cache in Chrome dev tools under the Network tab,
       or the equivalent in Firefox.
@@ -36,7 +37,7 @@
   (5) Run this script in HandyFlowy to add the reload button,
       passing in the ngrok URL from above.
 
-  To reload each time, either:
+  To reload and run the integration tests each time, either:
 
   (A) Type reloadJumpFlowy() in the console, or
   (B) Press ctrl-r when focused on the WF doc, or
