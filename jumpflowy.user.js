@@ -667,7 +667,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * - If multiple functions are passed to this method, the callbacks
    *   will be run in an undefined order.
    */
-  function applyToProjectWhenLoaded(callbackFn) {
+  function callAfterProjectLoaded(callbackFn) {
     if (isCleanedUp) {
       console.debug("Not calling function, because cleanUp() already called.");
       return;
@@ -686,11 +686,11 @@ global project_tree:false tagging:false date_time:false utils:false
       }
     }
     if (isLoaded) {
-      console.log("Project now loaded. Applying function to root project...");
+      console.log("Project now loaded. Calling function.");
       callbackFn(rootProject);
     } else {
       console.log(`Project not yet loaded. Waiting for ${timeoutMs}ms.`);
-      const repeat = () => applyToProjectWhenLoaded(callbackFn);
+      const repeat = () => callAfterProjectLoaded(callbackFn);
       setTimeout(repeat, timeoutMs);
     }
   }
@@ -1162,7 +1162,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   function setUp() {
-    applyToProjectWhenLoaded(() => {
+    callAfterProjectLoaded(() => {
       if (isCleanedUp) {
         return;
       }
@@ -1195,7 +1195,7 @@ global project_tree:false tagging:false date_time:false utils:false
   const nursery = {
     // Alphabetical order
     // Maintenance note: keep this list in sync with README.md
-    applyToProjectWhenLoaded: applyToProjectWhenLoaded,
+    callAfterProjectLoaded: callAfterProjectLoaded,
     cleanUp: cleanUp,
     clickAddButton: clickAddButton,
     clickSaveButton: clickSaveButton,
