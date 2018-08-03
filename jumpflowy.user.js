@@ -1171,6 +1171,7 @@ global project_tree:false tagging:false date_time:false utils:false
       bindableActionsByName.clear();
       _populateMapWithNoArgFunctions(bindableActionsByName, [
         // Alphabetical order
+        // Maintenance note: keep this list in sync with README.md
         clickAddButton,
         clickSaveButton,
         dismissNotification,
@@ -1193,6 +1194,7 @@ global project_tree:false tagging:false date_time:false utils:false
 
   const nursery = {
     // Alphabetical order
+    // Maintenance note: keep this list in sync with README.md
     applyToProjectWhenLoaded: applyToProjectWhenLoaded,
     cleanUp: cleanUp,
     clickAddButton: clickAddButton,
@@ -1243,6 +1245,7 @@ global project_tree:false tagging:false date_time:false utils:false
   // Return jumpflowy object
   return {
     // Functions by alphabetical order
+    // Maintenance note: keep this list in sync with README.md
     applyToEachNode: applyToEachNode,
     doesNodeHaveTag: doesNodeHaveTag,
     doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
