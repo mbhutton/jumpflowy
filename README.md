@@ -1,3 +1,5 @@
+**Note: _This library / user script is currently broken._ It was based on non-public APIs which have changed.**
+
 # JumpFlowy
 
 An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script which adds search, navigation, and keyboard shortcut features to WorkFlowy.
