@@ -2,7 +2,7 @@
 
 # JumpFlowy
 
-An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script which adds search, navigation, and keyboard shortcut features to WorkFlowy.
+A Chrome/Firefox user script which adds search, navigation, and keyboard shortcut features to WorkFlowy.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -11,7 +11,7 @@ An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script
 - [Target audience](#target-audience)
 - [Target platforms](#target-platforms)
 - [Documentation and examples](#documentation-and-examples)
-- [Getting started as a user script user](#getting-started-as-a-user-script-user)
+- [Getting started](#getting-started)
   - [Install the JumpFlowy user script](#install-the-jumpflowy-user-script)
   - [Configuration of triggers and actions](#configuration-of-triggers-and-actions)
     - [Keyboard shortcut triggers](#keyboard-shortcut-triggers)
@@ -19,15 +19,10 @@ An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script
     - [Configuration Examples](#configuration-examples)
     - [Follow actions](#follow-actions)
     - [Suggestions for what to configure](#suggestions-for-what-to-configure)
-- [How to use JumpFlowy as a library](#how-to-use-jumpflowy-as-a-library)
-    - [Suggestions for getting started](#suggestions-for-getting-started)
-    - [As a UMD (Universal Module Definition) module](#as-a-umd-universal-module-definition-module)
-- [Functions](#functions)
-    - [Functions in the core `jumpflowy` namespace](#functions-in-the-core-jumpflowy-namespace)
-    - [Functions in the `jumpflowy.nursery` namespace](#functions-in-the-jumpflowynursery-namespace)
-- [Running the tests](#running-the-tests)
-- [Linting](#linting)
-- [Contributing](#contributing)
+- [Developing JumpFlowy](#developing-jumpflowy)
+  - [Running the tests](#running-the-tests)
+  - [Linting](#linting)
+  - [Contributing](#contributing)
 - [Versioning and backwards compatibility](#versioning-and-backwards-compatibility)
 - [Authors](#authors)
 - [License](#license)
@@ -38,7 +33,6 @@ An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script
 ## Target audience
 
 - WorkFlowy users who need more search and navigation capabilities
-- JavaScript developers who want to write extensions, bookmarklets, and user-scripts for WorkFlowy
 
 ## Target platforms
 
@@ -51,11 +45,9 @@ An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script
 
 The documentation and examples consist of:
 - This README file
-- The documentation on the functions in the `jumpflowy.user.js` file,
-  written in JSDoc annotation format with descriptions and type annotations
 - A small example [JumpFlowy configuration](https://workflowy.com/s/mMo.Wdwdc5DDD3)
 
-## Getting started as a user script user
+## Getting started
 
 ### Install the JumpFlowy user script
 
@@ -149,106 +141,25 @@ As a general guide:
 - Add a handful of keyboard shortcuts (`#shortcut(...)`) to frequently visited locations which don't change (e.g. top level 'work' or 'personal' sections).
 - Add bookmarks or shortcuts for some subset of the named functions, just those which seem useful to you.
 
-## How to use JumpFlowy as a library
+## Developing JumpFlowy
 
-#### Suggestions for getting started
-
-- Open up the developer console in Chrome/Firefox, and experiment with the functions in the `jumpflowy` and `jumpflowy.nursery` namespaces.
-  - Try typing these in the console:
-    - `WF.rootItem().getNumDescendants()`
-    - `zoomed = jumpflowy.nursery.getZoomedNode(); jumpflowy.nodeToPlainTextName(zoomed);`
-
-#### As a UMD (Universal Module Definition) module
-
-JumpFlowy's implementation follows the UMD pattern. As such, it should be possible to import it as a module using a JavaScript module loader.
-Disclaimer: JumpFlowy has not yet been tested/used as a module in this way. Please get in touch (e.g. via a Github issue) if you run into any issues when trying this.
-
-## Functions
-
-See the function comments in [`jumpflowy.user.js`](https://github.com/mbhutton/jumpflowy/blob/master/jumpflowy.user.js) for descriptions, parameter types and returns types for these functions.
-
-#### Functions in the core `jumpflowy` namespace
-
-These are the core functions, which are least likely to change.
-
-- `applyToEachNode`
-- `doesNodeHaveTag`
-- `doesNodeNameOrNoteMatch`
-- `doesStringHaveTag`
-- `findMatchingNodes`
-- `getCurrentTimeSec`
-- `nodeToLastModifiedSec`
-- `nodeToPlainTextName`
-- `nodeToPlainTextNote`
-- `stringToTags`
-
-#### Functions in the `jumpflowy.nursery` namespace
-
-These are newer functions, which are more likely to change than those in the core package.
-
-- `callAfterProjectLoaded`
-- `cleanUp`
-- `clickAddButton`
-- `clickSaveButton`
-- `dateToYMDString`
-- `dismissNotification`
-- `expandAbbreviation`
-- `findClosestCommonAncestor`
-- `findNodesMatchingRegex`
-- `findNodesWithTag`
-- `findRecentlyEditedNodes`
-- `findTopItemsByComparator`
-- `findTopNodesByScore`
-- `followNode`
-- `followZoomedNode`
-- `getNodeByLongIdOrInvalid`
-- `getZoomedNode`
-- `getZoomedNodeAsLongId`
-- `insertTextAtCursor`
-- `isRootNode`
-- `isValidCanonicalCode`
-- `keyDownEventToCanonicalCode`
-- `logElapsedTime`
-- `logShortReport`
-- `nodeToPathAsNodes`
-- `nodeToTagArgsText`
-- `nodeToVolatileSearchQuery`
-- `nodesToVolatileSearchQuery`
-- `openHere`
-- `openInNewTab`
-- `openNodeHere`
-- `promptToChooseNode`
-- `promptToExpandAndInsertAtCursor`
-- `promptToFindGlobalBookmarkThenFollow`
-- `promptToFindLocalRegexMatchThenZoom`
-- `promptToNormalLocalSearch`
-- `registerFunctionForKeyDownEvent`
-- `showZoomedAndMostRecentlyEdited`
-- `splitStringToSearchTerms`
-- `stringToTagArgsText`
-- `todayAsYMDString`
-
-## Running the tests
+### Running the tests
 
 To run the tests, see the instructions at the top of [add-browser-reload.user.js](https://github.com/mbhutton/jumpflowy/blob/master/devtools/add-browser-reload.user.js).
 
-## Linting
+### Linting
 
 - Some static type checking is performed through the use of `VS Code`, by using `JSDoc` function annotations and a `TypeScript` declaration file.
 - Linting is done by by `ESLint`.
 - `prettier` is used for formatting.
 
-## Contributing
+### Contributing
 
 Pull requests and bug reports are very welcome.
 
 ## Versioning and backwards compatibility
 
-At this stage, expect some breaking changes to happen even at minor version changes, especially within the `jumpflowy.nursery` namespace. The functions within the `jumpflowy` namespace however are more stable, and less likely to change.
-
-If you need a stable library, then either depend on a release tag, or raise a Github issue stating which nursery function you need to be stabilised.
-
-Released versions are available as [tags in this repository](https://github.com/mbhutton/jumpflowy/tags).
+At this early stage while jumpflowy is still under active development, expect some breaking changes to happen even at minor version changes.
 
 ## Authors
 
