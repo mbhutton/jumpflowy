@@ -8,7 +8,7 @@ loading the expect.js and jumpflowy modules.
 /* eslint-disable valid-jsdoc */
 
 // ESLint globals:
-/* global project_tree:false global_project_tree_object:false */ // From WorkFlowy
+/* global project_tree:false global_project_tree_object:false WF:false */ // From WorkFlowy
 /* global toastr:false expect:false jumpflowy:false */ // Others
 
 // Enable TypeScript checking
