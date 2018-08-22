@@ -14,6 +14,7 @@
 /*
 global project_tree:false tagging:false date_time:false utils:false
        global_project_tree_object:false location_history:false
+       WF:false
 */
 
 // Enable TypeScript checking
@@ -35,14 +36,6 @@ global project_tree:false tagging:false date_time:false utils:false
 })(typeof self !== "undefined" ? self : this, function() {
   "use strict";
   // JumpFlowy implementation starts
-
-  /**
-   * @returns {ProjectRef} The root node of the WorkFlowy account
-   *                       currently logged into.
-   */
-  function getRootNode() {
-    return project_tree.getMainProjectTree().getRootProjectReference();
-  }
 
   /**
    * Applies the given function to the given node
@@ -889,7 +882,7 @@ global project_tree:false tagging:false date_time:false utils:false
       if (isWorkFlowyUrl(trimmed) && node.getChildren().length === 0) {
         // For leaf nodes whose trimmed name or note is a WorkFlowy URL, open it
         if (isWorkFlowyHomeUrl(trimmed)) {
-          return () => openNodeHere(getRootNode(), null);
+          return () => openNodeHere(WF.rootItem(), null);
         } else {
           return () => openHere(trimmed);
         }
@@ -912,7 +905,7 @@ global project_tree:false tagging:false date_time:false utils:false
    */
   function promptToFindGlobalBookmarkThenFollow() {
     const startTime = new Date();
-    const nodes = findNodesWithTag(bookmarkTag, getRootNode());
+    const nodes = findNodesWithTag(bookmarkTag, WF.rootItem());
     logElapsedTime(startTime, `Found nodes with ${bookmarkTag} tag`);
     const chosenNode = promptToChooseNode(nodes);
     followNode(chosenNode);
@@ -924,7 +917,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * @returns {void}
    */
   function logShortReport() {
-    const rootProject = getRootNode();
+    const rootProject = WF.rootItem();
 
     let text = "WorkFlowy report:\n";
     let hasFailed = false;
@@ -974,7 +967,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   function showZoomedAndMostRecentlyEdited() {
-    const recentNode = findRecentlyEditedNodes(0, 1, getRootNode())[0];
+    const recentNode = findRecentlyEditedNodes(0, 1, WF.rootItem())[0];
     const zoomedNode = getZoomedNode();
     const newZoom = findClosestCommonAncestor(recentNode, zoomedNode);
     const searchQuery = nodesToVolatileSearchQuery([recentNode, zoomedNode]);
@@ -1061,7 +1054,7 @@ global project_tree:false tagging:false date_time:false utils:false
    */
   function _buildCustomAbbreviationsMap() {
     const abbreviationsMap = new Map();
-    for (let node of findNodesWithTag(abbrevTag, getRootNode())) {
+    for (let node of findNodesWithTag(abbrevTag, WF.rootItem())) {
       const argsText = nodeToTagArgsText(abbrevTag, node);
       if (!argsText) {
         continue;
@@ -1111,7 +1104,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   function _registerKeyboardShortcuts() {
-    for (let node of findNodesWithTag(shortcutTag, getRootNode())) {
+    for (let node of findNodesWithTag(shortcutTag, WF.rootItem())) {
       const keyCode = nodeToTagArgsText(shortcutTag, node);
       if (!keyCode) {
         continue;
@@ -1252,7 +1245,6 @@ global project_tree:false tagging:false date_time:false utils:false
     doesStringHaveTag: doesStringHaveTag,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
-    getRootNode: getRootNode,
     nodeToLastModifiedSec: nodeToLastModifiedSec,
     nodeToPlainTextName: nodeToPlainTextName,
     nodeToPlainTextNote: nodeToPlainTextNote,

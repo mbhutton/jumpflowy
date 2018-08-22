@@ -157,7 +157,7 @@ As a general guide:
 
 - Open up the developer console in Chrome/Firefox, and experiment with the functions in the `jumpflowy` and `jumpflowy.nursery` namespaces.
   - Try typing these in the console:
-    - `jumpflowy.getRootNode().getNumDescendants()`
+    - `WF.rootItem().getNumDescendants()`
     - `zoomed = jumpflowy.nursery.getZoomedNode(); jumpflowy.nodeToPlainTextName(zoomed);`
 - Create and add your own user script using Tampermonkey, optionally using one of the example scripts as a starting point.
 
@@ -185,7 +185,6 @@ These are the core functions, which are least likely to change.
 - `doesStringHaveTag`
 - `findMatchingNodes`
 - `getCurrentTimeSec`
-- `getRootNode`
 - `nodeToLastModifiedSec`
 - `nodeToPlainTextName`
 - `nodeToPlainTextNote`

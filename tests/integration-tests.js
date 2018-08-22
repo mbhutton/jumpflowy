@@ -33,9 +33,9 @@ loading the expect.js and jumpflowy modules.
     expect(node.getProjectTreeObject).to.be.a("function");
   }
 
-  /** Tests getRootNode, and the ProjectRef type. */
-  function whenUsingGetRootNodeAndProjectRefFunctions() {
-    expect(jumpflowy.getRootNode).to.be.a("function");
+  /** Tests the ProjectRef type. */
+  function whenUsingProjectRefFunctions() {
+    expect(WF.rootItem).to.be.a("function");
 
     expect(project_tree).to.be.an("object");
     expect(project_tree.getMainProjectTree).to.be.a("function");
@@ -44,7 +44,7 @@ loading the expect.js and jumpflowy modules.
     expect(mainProjectTree.getRootProjectReference).to.be.a("function");
 
     const rootNodeViaTree = mainProjectTree.getRootProjectReference();
-    const rootNode = jumpflowy.getRootNode();
+    const rootNode = WF.rootItem();
     expect(rootNode).to.be.an("object");
     expect(rootNodeViaTree.getProjectId()).to.be(rootNode.getProjectId());
 
@@ -76,7 +76,7 @@ loading the expect.js and jumpflowy modules.
   function getUniqueNodeByNoteOrFail(noteText) {
     const matches = jumpflowy.findMatchingNodes(
       node => jumpflowy.nodeToPlainTextNote(node) === noteText,
-      jumpflowy.getRootNode()
+      WF.rootItem()
     );
     if (matches.length === 0) {
       expect.fail(
@@ -263,7 +263,7 @@ loading the expect.js and jumpflowy modules.
       "test/JumpFlowy/whenUsingNodeToPlainTextName"
     );
     expect(jumpflowy.nodeToPlainTextName(node)).to.be("applePie");
-    const rootNode = jumpflowy.getRootNode();
+    const rootNode = WF.rootItem();
     expect(jumpflowy.nodeToPlainTextName(rootNode)).to.be("");
   }
 
@@ -276,7 +276,7 @@ loading the expect.js and jumpflowy modules.
     );
     const child = node.getChildren()[0];
     expect(jumpflowy.nodeToPlainTextNote(child)).to.be("bananaCake");
-    const rootNode = jumpflowy.getRootNode();
+    const rootNode = WF.rootItem();
     expect(jumpflowy.nodeToPlainTextNote(rootNode)).to.be("");
   }
 
@@ -294,14 +294,14 @@ loading the expect.js and jumpflowy modules.
       const global_tree_obj = global_project_tree_object;
       expect(global_tree_obj.getLastModified).to.be.a("function");
 
-      if (node.getProjectId() === jumpflowy.getRootNode().getProjectId()) {
+      if (node.getProjectId() === WF.rootItem().getProjectId()) {
         expect(treeObject).to.be(null);
       } else {
         expect(global_tree_obj.getLastModified(treeObject)).to.be.a("number");
       }
     }
-    testWorkFlowyAssumptions(jumpflowy.getRootNode());
-    testWorkFlowyAssumptions(jumpflowy.getRootNode().getChildren()[0]);
+    testWorkFlowyAssumptions(WF.rootItem());
+    testWorkFlowyAssumptions(WF.rootItem().getChildren()[0]);
 
     function testNode(uuid) {
       const node = getUniqueNodeByNoteOrFail(uuid);
@@ -316,7 +316,7 @@ loading the expect.js and jumpflowy modules.
     testNode("9c6ede17-831d-b04c-7a97-a825f0fd4bf0"); // Embedded
 
     function testRootNodeJoinedDate() {
-      const root = jumpflowy.getRootNode();
+      const root = WF.rootItem();
       const joinedAt = root.getProjectTree().dateJoinedTimestampInSeconds;
       expect(jumpflowy.nodeToLastModifiedSec(root)).to.be(joinedAt);
 
@@ -392,7 +392,7 @@ loading the expect.js and jumpflowy modules.
   function runAllTests() {
     showInfo("Starting tests...");
     try {
-      whenUsingGetRootNodeAndProjectRefFunctions();
+      whenUsingProjectRefFunctions();
       whenUsingFindMatchingNodesAndApplyToEachNode();
       whenUsingGetCurrentTimeSec();
       whenUsingStringToTags();

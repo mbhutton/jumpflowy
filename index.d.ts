@@ -38,8 +38,6 @@ interface JumpFlowy {
 
   getCurrentTimeSec(): number;
 
-  getRootNode(): ProjectRef;
-
   nodeToLastModifiedSec(node: ProjectRef): number;
 
   nodeToPlainTextName(node: ProjectRef): string;
@@ -91,6 +89,9 @@ interface ProjectTree {
 
 interface ProjectTreeObject {}
 
+declare namespace WF {
+  function rootItem(): ProjectRef
+}
 declare namespace project_tree {
   function getMainProjectTree(): ProjectTree;
 }
