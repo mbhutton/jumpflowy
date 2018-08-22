@@ -18,8 +18,8 @@ loading the expect.js and jumpflowy modules.
 (function() {
   "use strict";
 
-  /** Tests existence and behaviour of common ProjectRef functions. */
-  function expectProjectRefFunctions(node) {
+  /** Tests existence and behaviour of common Item functions. */
+  function expectItemFunctions(node) {
     expect(node.getName).to.be.a("function");
     expect(node.getNote).to.be.a("function");
     expect(node.getProjectId).to.be.a("function");
@@ -33,8 +33,8 @@ loading the expect.js and jumpflowy modules.
     expect(node.getProjectTreeObject).to.be.a("function");
   }
 
-  /** Tests the ProjectRef type. */
-  function whenUsingProjectRefFunctions() {
+  /** Tests the Item type. */
+  function whenUsingItemFunctions() {
     expect(WF.rootItem).to.be.a("function");
 
     expect(project_tree).to.be.an("object");
@@ -48,7 +48,7 @@ loading the expect.js and jumpflowy modules.
     expect(rootNode).to.be.an("object");
     expect(rootNodeViaTree.getProjectId()).to.be(rootNode.getProjectId());
 
-    expectProjectRefFunctions(rootNode);
+    expectItemFunctions(rootNode);
     expect(rootNode.getName()).to.be(null);
     expect(rootNode.getNote()).to.be(null);
     expect(rootNode.getProjectId()).to.be("None");
@@ -58,7 +58,7 @@ loading the expect.js and jumpflowy modules.
 
     const firstChildOfRoot = rootNode.getChildren()[0];
 
-    expectProjectRefFunctions(firstChildOfRoot);
+    expectItemFunctions(firstChildOfRoot);
     expect(firstChildOfRoot.getName()).not.to.be(null);
     expect(firstChildOfRoot.getNote()).not.to.be(null);
     expect(firstChildOfRoot.getProjectId()).to.not.be(rootNode.getProjectId());
@@ -111,7 +111,7 @@ loading the expect.js and jumpflowy modules.
     const alwaysFalse = () => false;
 
     /**
-     * @param {Array<ProjectRef>} nodes The nodes
+     * @param {Array<Item>} nodes The nodes
      * @returns {Array<string | null>} The plain text names of the nodes
      */
     function mapNodesToPlainTextNames(nodes) {
@@ -392,7 +392,7 @@ loading the expect.js and jumpflowy modules.
   function runAllTests() {
     showInfo("Starting tests...");
     try {
-      whenUsingProjectRefFunctions();
+      whenUsingItemFunctions();
       whenUsingFindMatchingNodesAndApplyToEachNode();
       whenUsingGetCurrentTimeSec();
       whenUsingStringToTags();

@@ -18,31 +18,31 @@ declare const jumpflowy: JumpFlowy;
 
 type TextPredicate = (s: string) => boolean;
 
-type NodePredicate = (node: ProjectRef) => boolean;
+type NodePredicate = (node: Item) => boolean;
 
-type NodeHandler = (node: ProjectRef) => void;
+type NodeHandler = (node: Item) => void;
 
 interface JumpFlowy {
   applyToEachNode(functionToApply: NodeHandler,
-                  searchRoot: ProjectRef): void;
+                  searchRoot: Item): void;
 
-  doesNodeHaveTag(tagToMatch: string, node: ProjectRef): boolean;
+  doesNodeHaveTag(tagToMatch: string, node: Item): boolean;
 
   doesNodeNameOrNoteMatch(textPredicate: TextPredicate,
-                          node: ProjectRef): boolean;
+                          node: Item): boolean;
 
   doesStringHaveTag(tagToMatch: string, s: string): boolean;
 
   findMatchingNodes(nodePredicate: NodePredicate,
-                    searchRoot: ProjectRef): Array<ProjectRef>;
+                    searchRoot: Item): Array<Item>;
 
   getCurrentTimeSec(): number;
 
-  nodeToLastModifiedSec(node: ProjectRef): number;
+  nodeToLastModifiedSec(node: Item): number;
 
-  nodeToPlainTextName(node: ProjectRef): string;
+  nodeToPlainTextName(node: Item): string;
 
-  nodeToPlainTextNote(node: ProjectRef): string;
+  nodeToPlainTextNote(node: Item): string;
 
   stringToTags(s: string): Array<string>;
 
@@ -52,7 +52,7 @@ interface JumpFlowy {
 interface Nursery {
   cleanUp(): void;
 
-  nodeToTagArgsText(tagToMatch: string, node: ProjectRef): string;
+  nodeToTagArgsText(tagToMatch: string, node: Item): string;
 
   stringToTagArgsText(tagToMatch: string, s: string): string;
 }
@@ -61,10 +61,10 @@ interface Nursery {
 // WorkFlowy types
 //****************************
 
-interface ProjectRef {
-  getAncestors(): Array<ProjectRef>;
+interface Item {
+  getAncestors(): Array<Item>;
 
-  getChildren(): Array<ProjectRef>;
+  getChildren(): Array<Item>;
 
   getName(): string | null;
 
@@ -80,17 +80,17 @@ interface ProjectRef {
 }
 
 interface ProjectTree {
-  getRootProjectReference(): ProjectRef;
+  getRootProjectReference(): Item;
 
   dateJoinedTimestampInSeconds: number;
 
-  getProjectReferenceByProjectId(projectId: string): ProjectRef;
+  getProjectReferenceByProjectId(projectId: string): Item;
 }
 
 interface ProjectTreeObject {}
 
 declare namespace WF {
-  function rootItem(): ProjectRef
+  function rootItem(): Item
 }
 declare namespace project_tree {
   function getMainProjectTree(): ProjectTree;

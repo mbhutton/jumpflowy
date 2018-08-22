@@ -41,7 +41,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * Applies the given function to the given node
    * and each of its descendants, as a depth first search.
    * @param {function} functionToApply The function to apply to each node.
-   * @param {ProjectRef} searchRoot The root node of the search.
+   * @param {Item} searchRoot The root node of the search.
    * @returns {void}
    */
   function applyToEachNode(functionToApply, searchRoot) {
@@ -54,10 +54,10 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {function} nodePredicate A function (ProjectRef -> boolean) which
+   * @param {function} nodePredicate A function (Item -> boolean) which
    *                                 returns whether or not a node is a match.
-   * @param {ProjectRef} searchRoot The root node of the search.
-   * @returns {Array<ProjectRef>} The matching nodes, in order of appearance.
+   * @param {Item} searchRoot The root node of the search.
+   * @returns {Array<Item>} The matching nodes, in order of appearance.
    */
   function findMatchingNodes(nodePredicate, searchRoot) {
     const matches = Array();
@@ -120,7 +120,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node
+   * @param {Item} node The node
    * @returns {string} The plain text version of the node's name,
    *                   or the empty string if it is the root node.
    */
@@ -133,7 +133,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node
+   * @param {Item} node The node
    * @returns {string} The plain text version of the node's note,
    *                   or the empty string if it is the root node.
    */
@@ -149,7 +149,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * @param {function} textPredicate The predicate to apply to each string.
    *                                 The predicate should handle null values,
    *                                 as the root node has a null name and note.
-   * @param {ProjectRef} node The node to test.
+   * @param {Item} node The node to test.
    * @returns {boolean} Whether textPredicate returns true for either the node's
    *                    name or note.
    */
@@ -162,7 +162,7 @@ global project_tree:false tagging:false date_time:false utils:false
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {ProjectRef} node The node to test.
+   * @param {Item} node The node to test.
    * @returns {boolean} Whether the node has the exact given tag, ignoring case.
    */
   function doesNodeHaveTag(tagToMatch, node) {
@@ -178,7 +178,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node to query.
+   * @param {Item} node The node to query.
    * @returns {number} When the node was last modified, in seconds since
    *                   unix epoch. For the root node, returns the time the
    *                   user joined WorkFlowy.
@@ -335,8 +335,8 @@ global project_tree:false tagging:false date_time:false utils:false
    * newline separating the two only when the note is non-empty.
    *
    * @param {RegExp} regExp The compiled regular expression to match.
-   * @param {ProjectRef} searchRoot The root node of the search.
-   * @returns {Array<ProjectRef>} The matching nodes, in order of appearance.
+   * @param {Item} searchRoot The root node of the search.
+   * @returns {Array<Item>} The matching nodes, in order of appearance.
    */
   function findNodesMatchingRegex(regExp, searchRoot) {
     if (typeof regExp !== "object" || regExp.constructor.name !== "RegExp") {
@@ -391,7 +391,7 @@ global project_tree:false tagging:false date_time:false utils:false
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {ProjectRef} node The node to extract the args text from.
+   * @param {Item} node The node to extract the args text from.
    * @returns {string} The trimmed arguments string, or null if no call found.
    * @see {@link stringToTagArgsText} For semantics.
    */
@@ -407,7 +407,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node to query
+   * @param {Item} node The node to query
    * @returns {boolean} Whether the given node is the root node
    */
   function isRootNode(node) {
@@ -423,7 +423,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @returns {ProjectRef} The node which is currently zoomed into.
+   * @returns {Item} The node which is currently zoomed into.
    */
   function getZoomedNode() {
     const zoomedNodeId = getZoomedNodeAsLongId();
@@ -431,8 +431,8 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node whose path to get
-   * @returns {Array<ProjectRef>} An array starting with the root and ending
+   * @param {Item} node The node whose path to get
+   * @returns {Array<Item>} An array starting with the root and ending
    *                              with the node.
    */
   function nodeToPathAsNodes(node) {
@@ -444,9 +444,9 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} nodeA Some node
-   * @param {ProjectRef} nodeB Another node
-   * @returns {ProjectRef} The closest common ancestor of both nodes, inclusive.
+   * @param {Item} nodeA Some node
+   * @param {Item} nodeB Another node
+   * @returns {Item} The closest common ancestor of both nodes, inclusive.
    */
   function findClosestCommonAncestor(nodeA, nodeB) {
     const pathA = nodeToPathAsNodes(nodeA);
@@ -488,7 +488,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {Array<ProjectRef>} nodes The nodes to build the search query for.
+   * @param {Array<Item>} nodes The nodes to build the search query for.
    * @returns {string | null} The search query to use for finding the
    *                          nodes, or an unmatchable query if nodes is empty.
    */
@@ -502,7 +502,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node to build the search query for.
+   * @param {Item} node The node to build the search query for.
    * @returns {string | null} The search query to use for finding the node, or
    *                          an unmatchable query for the root node.
    */
@@ -539,8 +539,8 @@ global project_tree:false tagging:false date_time:false utils:false
 
   /**
    * @param {string} tag The tag to find, e.g. "#foo".
-   * @param {ProjectRef} searchRoot The root node of the search.
-   * @returns {Array<ProjectRef>} The matching nodes, in order of appearance.
+   * @param {Item} searchRoot The root node of the search.
+   * @returns {Array<Item>} The matching nodes, in order of appearance.
    */
   function findNodesWithTag(tag, searchRoot) {
     return findMatchingNodes(n => doesNodeHaveTag(tag, n), searchRoot);
@@ -548,7 +548,7 @@ global project_tree:false tagging:false date_time:false utils:false
 
   /**
    * @param {string} longId The long (non-truncated) project ID.
-   * @returns {ProjectRef} The node with the given ID, or an invalid ProjectRef
+   * @returns {Item} The node with the given ID, or an invalid Item
    *                       if the project ID is invalid. Test the validity of
    *                       the returned node using theReturnedNode.isValid().
    */
@@ -589,14 +589,14 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @returns {Array<ProjectRef>} The top nodes under the given
+   * @returns {Array<Item>} The top nodes under the given
    *    search root (inclusive), with higher scoring nodes first.
-   * @param {function} nodeToScoreFn A function from node (ProjectRef)
+   * @param {function} nodeToScoreFn A function from node (Item)
    *    to a score (number), where higher scores are better.
    * @param {number} minScore Nodes must have this score or higher to
    *    be included in the results.
    * @param {number} maxSize The results array will be at most this size.
-   * @param {ProjectRef} searchRoot The root node of the search.
+   * @param {Item} searchRoot The root node of the search.
    */
   function findTopNodesByScore(nodeToScoreFn, minScore, maxSize, searchRoot) {
     const results = Array(maxSize).fill(null);
@@ -635,10 +635,10 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @returns {Array<ProjectRef>} Recently edited nodes, most recent first.
+   * @returns {Array<Item>} Recently edited nodes, most recent first.
    * @param {number} earliestModifiedSec Nodes edited before this are excluded.
    * @param {number} maxSize The results array will be at most this size.
-   * @param {ProjectRef} searchRoot The root node of the search.
+   * @param {Item} searchRoot The root node of the search.
    */
   function findRecentlyEditedNodes(earliestModifiedSec, maxSize, searchRoot) {
     const scoreFn = nodeToLastModifiedSec; // Higher timestamp is a higher score
@@ -652,7 +652,7 @@ global project_tree:false tagging:false date_time:false utils:false
 
   /**
    * @param {function} callbackFn The function to apply when project is loaded,
-   *                              of type (rootProject:ProjectRef) -> void.
+   *                              of type (rootProject:Item) -> void.
    * @returns {void}
    * Notes:
    * - The function will be prevented from running if cleanUp() has been called.
@@ -765,8 +765,8 @@ global project_tree:false tagging:false date_time:false utils:false
    * Prompts the user to choose a node from among the given array of nodes,
    * using a mix of choosing by index, or choosing by bookmark, or by text.
    * Note: the behaviour of this method is expected to change.
-   * @param {Array<ProjectRef>} nodes The array of nodes to choose from.
-   * @returns {ProjectRef} Returns the chosen node, or null if cancelled.
+   * @param {Array<Item>} nodes The array of nodes to choose from.
+   * @returns {Item} Returns the chosen node, or null if cancelled.
    */
   function promptToChooseNode(nodes) {
     // Build aliases
@@ -844,7 +844,7 @@ global project_tree:false tagging:false date_time:false utils:false
   }
 
   /**
-   * @param {ProjectRef} node The node to follow.
+   * @param {Item} node The node to follow.
    * @returns {void}
    * @see nodeToFollowAction
    */
@@ -867,7 +867,7 @@ global project_tree:false tagging:false date_time:false utils:false
    * Returns a no-arg function which will 'follow' the given node,
    * performing some action depending on the content of the node.
    * Note: the behaviour of this method is expected to change.
-   * @param {ProjectRef} node The node to follow.
+   * @param {Item} node The node to follow.
    * @returns {function} A no-arg function which 'follows' the node.
    */
   function nodeToFollowAction(node) {
