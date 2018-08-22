@@ -21,7 +21,6 @@ An unofficial JavaScript library for WorkFlowy, and a Chrome/Firefox user script
     - [Suggestions for what to configure](#suggestions-for-what-to-configure)
 - [How to use JumpFlowy as a library](#how-to-use-jumpflowy-as-a-library)
     - [Suggestions for getting started](#suggestions-for-getting-started)
-    - [From within your own user script](#from-within-your-own-user-script)
     - [As a UMD (Universal Module Definition) module](#as-a-umd-universal-module-definition-module)
 - [Functions](#functions)
     - [Functions in the core `jumpflowy` namespace](#functions-in-the-core-jumpflowy-namespace)
@@ -55,7 +54,6 @@ The documentation and examples consist of:
 - The documentation on the functions in the `jumpflowy.user.js` file,
   written in JSDoc annotation format with descriptions and type annotations
 - A small example [JumpFlowy configuration](https://workflowy.com/s/mMo.Wdwdc5DDD3)
-- The example user scripts in the [examples](https://github.com/mbhutton/jumpflowy/tree/master/examples) folder
 
 ## Getting started as a user script user
 
@@ -159,12 +157,6 @@ As a general guide:
   - Try typing these in the console:
     - `WF.rootItem().getNumDescendants()`
     - `zoomed = jumpflowy.nursery.getZoomedNode(); jumpflowy.nodeToPlainTextName(zoomed);`
-- Create and add your own user script using Tampermonkey, optionally using one of the example scripts as a starting point.
-
-#### From within your own user script
-
-The easiest way to build your own features on top of JumpFlowy is to write your own Tampermonkey user script, and *@require* the full `jumpflowy.user.js` script.
-See the user scripts in the [examples](https://github.com/mbhutton/jumpflowy/tree/master/examples) folder.
 
 #### As a UMD (Universal Module Definition) module
 
