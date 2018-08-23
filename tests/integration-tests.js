@@ -14,6 +14,7 @@ loading the expect.js and jumpflowy modules.
 // Enable TypeScript checking
 // @ts-check
 /// <reference path="../index.d.ts" />
+/// <reference path="../types/workflowy-api.d.ts" />
 
 (function() {
   "use strict";

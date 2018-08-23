@@ -20,6 +20,7 @@ global project_tree:false tagging:false date_time:false utils:false
 // Enable TypeScript checking
 // @ts-check
 /// <reference path="index.d.ts" />
+/// <reference path="types/workflowy-api.d.ts" />
 
 // UMD (Universal Module Definition) boilerplate
 (function(root, umdFactory) {

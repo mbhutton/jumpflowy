@@ -89,9 +89,6 @@ interface ProjectTree {
 
 interface ProjectTreeObject {}
 
-declare namespace WF {
-  function rootItem(): Item
-}
 declare namespace project_tree {
   function getMainProjectTree(): ProjectTree;
 }
