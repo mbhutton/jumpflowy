@@ -12,7 +12,7 @@
 
 // ESLint globals from WorkFlowy:
 /*
-global project_tree:false date_time:false
+global project_tree:false
        global_project_tree_object:false location_history:false
        WF:false
 */
@@ -152,26 +152,26 @@ global project_tree:false date_time:false
    * @returns {number} The current clock time in seconds since Unix epoch.
    */
   function getCurrentTimeSec() {
-    return Math.floor(date_time.getCurrentTimeInMS() / 1000);
+    return dateToSecondsSinceEpoch(new Date());
+  }
+
+  /**
+   * @param {Date} date The given date.
+   * @return {number} Seconds from epoch to the given date, rounding down.
+   */
+  function dateToSecondsSinceEpoch(date) {
+    return Math.floor(date.getTime() / 1000);
   }
 
   /**
    * @param {Item} node The node to query.
    * @returns {number} When the node was last modified, in seconds since
-   *                   unix epoch. For the root node, returns the time the
-   *                   user joined WorkFlowy.
+   *                   unix epoch. For the root node, returns zero.
    */
   function nodeToLastModifiedSec(node) {
-    const tree = node.getProjectTree();
-    const joinedSec = tree.dateJoinedTimestampInSeconds;
-    const treeObject = node.getProjectTreeObject();
-    // treeObject is null for the root node
-    if (treeObject === null) {
-      return joinedSec;
-    }
-    const global_tree_obj = global_project_tree_object;
-    const lastModSecSinceJoining = global_tree_obj.getLastModified(treeObject);
-    return joinedSec + lastModSecSinceJoining;
+    return isRootNode(node)
+      ? 0
+      : dateToSecondsSinceEpoch(node.getLastModifiedDate());
   }
 
   ////////////////////////////////////

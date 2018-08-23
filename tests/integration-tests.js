@@ -294,15 +294,11 @@ loading the expect.js and jumpflowy modules.
     function testWorkFlowyAssumptions(node) {
       const tree = node.getProjectTree();
       expect(tree).to.not.be(null);
-      expect(tree.dateJoinedTimestampInSeconds).to.be.a("number");
-      const treeObject = node.getProjectTreeObject();
-      const global_tree_obj = global_project_tree_object;
-      expect(global_tree_obj.getLastModified).to.be.a("function");
 
       if (node.getProjectId() === WF.rootItem().getProjectId()) {
-        expect(treeObject).to.be(null);
+        expect(node.getLastModifiedDate()).to.be(null);
       } else {
-        expect(global_tree_obj.getLastModified(treeObject)).to.be.a("number");
+        expect(node.getLastModifiedDate()).to.be.a("number");
       }
     }
     testWorkFlowyAssumptions(WF.rootItem());
@@ -322,13 +318,10 @@ loading the expect.js and jumpflowy modules.
 
     function testRootNodeJoinedDate() {
       const root = WF.rootItem();
-      const joinedAt = root.getProjectTree().dateJoinedTimestampInSeconds;
-      expect(jumpflowy.nodeToLastModifiedSec(root)).to.be(joinedAt);
 
       const child = root.getChildren()[0];
-      const childJoinedAt = child.getProjectTree().dateJoinedTimestampInSeconds;
       const childLastMod = jumpflowy.nodeToLastModifiedSec(child);
-      expect(childLastMod).to.be.within(childJoinedAt, currentTime + 1);
+      expect(childLastMod).to.be.below(currentTime + 1);
     }
     testRootNodeJoinedDate();
   }

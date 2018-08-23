@@ -62,6 +62,8 @@ interface Item {
 
   getChildren(): Array<Item>;
 
+  getLastModifiedDate(): Date;
+
   getName(): string | null;
 
   getNameInPlainText(): string | null;
@@ -82,8 +84,6 @@ interface Item {
 interface ProjectTree {
   getRootProjectReference(): Item;
 
-  dateJoinedTimestampInSeconds: number;
-
   getProjectReferenceByProjectId(projectId: string): Item;
 }
 
@@ -94,8 +94,6 @@ declare namespace project_tree {
 }
 
 declare namespace global_project_tree_object {
-  function getLastModified(t: ProjectTreeObject): number;
-
   function getNameInPlainText(t: ProjectTreeObject): string;
 
   function getNoteInPlainText(t: ProjectTreeObject): string;
@@ -103,10 +101,6 @@ declare namespace global_project_tree_object {
 
 declare namespace project_ids {
   function truncateProjectId(s: string): string;
-}
-
-declare namespace date_time {
-  function getCurrentTimeInMS(): number;
 }
 
 type LocationAndTagHandler = (spanStart: number, tagFound: string) => void;
