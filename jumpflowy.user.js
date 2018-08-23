@@ -12,9 +12,7 @@
 
 // ESLint globals from WorkFlowy:
 /*
-global project_tree:false
-       global_project_tree_object:false
-       WF:false
+global WF:false
 */
 
 // Enable TypeScript checking
@@ -113,11 +111,7 @@ global project_tree:false
    *                   or the empty string if it is the root node.
    */
   function nodeToPlainTextName(node) {
-    const treeObj = node.getProjectTreeObject();
-    if (treeObj === null) {
-      return ""; // Root node
-    }
-    return global_project_tree_object.getNameInPlainText(treeObj);
+    return node.getNameInPlainText() || "";
   }
 
   /**
@@ -126,11 +120,7 @@ global project_tree:false
    *                   or the empty string if it is the root node.
    */
   function nodeToPlainTextNote(node) {
-    const treeObj = node.getProjectTreeObject();
-    if (treeObj === null) {
-      return ""; // Root node
-    }
-    return global_project_tree_object.getNoteInPlainText(treeObj);
+    return node.getNoteInPlainText() || "";
   }
 
   /**
@@ -401,7 +391,7 @@ global project_tree:false
    */
   function getZoomedNode() {
     const zoomedNodeId = getZoomedNodeAsLongId();
-    return getNodeByLongIdOrInvalid(zoomedNodeId);
+    return WF.getItemById(zoomedNodeId);
   }
 
   /**
@@ -521,17 +511,6 @@ global project_tree:false
   }
 
   /**
-   * @param {string} longId The long (non-truncated) project ID.
-   * @returns {Item} The node with the given ID, or an invalid Item
-   *                       if the project ID is invalid. Test the validity of
-   *                       the returned node using theReturnedNode.isValid().
-   */
-  function getNodeByLongIdOrInvalid(longId) {
-    const prTree = project_tree.getMainProjectTree();
-    return prTree.getProjectReferenceByProjectId(longId);
-  }
-
-  /**
    * @template T
    * @param {function} doesABeatB A function which return whether A beats B.
    * @param {Array<T>} results The current results array, ordered
@@ -643,10 +622,9 @@ global project_tree:false
     let rootProject;
     const timeoutMs = 350;
 
-    if (typeof project_tree !== "undefined" && project_tree !== null) {
-      const mainProjectTree = project_tree.getMainProjectTree();
-      if (mainProjectTree !== undefined && mainProjectTree !== null) {
-        rootProject = mainProjectTree.getRootProjectReference();
+    if (typeof WF !== "undefined" && WF !== null) {
+      if (WF.rootItem !== undefined && WF.rootItem !== null) {
+        rootProject = WF.rootItem();
         if (rootProject !== undefined && rootProject !== null) {
           isLoaded = true;
         }
@@ -1177,7 +1155,6 @@ global project_tree:false
     findTopNodesByScore: findTopNodesByScore,
     followNode: followNode,
     followZoomedNode: followZoomedNode,
-    getNodeByLongIdOrInvalid: getNodeByLongIdOrInvalid,
     getZoomedNode: getZoomedNode,
     getZoomedNodeAsLongId: getZoomedNodeAsLongId,
     insertTextAtCursor: insertTextAtCursor,

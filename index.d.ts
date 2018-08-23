@@ -77,28 +77,6 @@ interface Item {
   getNumDescendants(): number;
 
   getProjectId(): string;
-
-  getProjectTree(): ProjectTree;
-
-  getProjectTreeObject(): ProjectTreeObject;
-}
-
-interface ProjectTree {
-  getRootProjectReference(): Item;
-
-  getProjectReferenceByProjectId(projectId: string): Item;
-}
-
-interface ProjectTreeObject {}
-
-declare namespace project_tree {
-  function getMainProjectTree(): ProjectTree;
-}
-
-declare namespace global_project_tree_object {
-  function getNameInPlainText(t: ProjectTreeObject): string;
-
-  function getNoteInPlainText(t: ProjectTreeObject): string;
 }
 
 //****************************

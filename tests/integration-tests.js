@@ -8,7 +8,7 @@ loading the expect.js and jumpflowy modules.
 /* eslint-disable valid-jsdoc */
 
 // ESLint globals:
-/* global project_tree:false global_project_tree_object:false WF:false */ // From WorkFlowy
+/* global WF:false */ // From WorkFlowy
 /* global toastr:false expect:false jumpflowy:false */ // Others
 
 // Enable TypeScript checking
@@ -31,23 +31,14 @@ loading the expect.js and jumpflowy modules.
     expect(node.getChildren()).to.be.an("array");
     expect(node.getNumDescendants).to.be.a("function");
     expect(node.getNumDescendants()).to.be.a("number");
-    expect(node.getProjectTreeObject).to.be.a("function");
   }
 
   /** Tests the Item type. */
   function whenUsingItemFunctions() {
     expect(WF.rootItem).to.be.a("function");
 
-    expect(project_tree).to.be.an("object");
-    expect(project_tree.getMainProjectTree).to.be.a("function");
-    const mainProjectTree = project_tree.getMainProjectTree();
-    expect(mainProjectTree).to.be.an("object");
-    expect(mainProjectTree.getRootProjectReference).to.be.a("function");
-
-    const rootNodeViaTree = mainProjectTree.getRootProjectReference();
     const rootNode = WF.rootItem();
     expect(rootNode).to.be.an("object");
-    expect(rootNodeViaTree.getProjectId()).to.be(rootNode.getProjectId());
 
     expectItemFunctions(rootNode);
     expect(rootNode.getName()).to.be(null);
@@ -55,7 +46,6 @@ loading the expect.js and jumpflowy modules.
     expect(rootNode.getProjectId()).to.be("None");
     expect(rootNode.getAncestors()).to.be.empty();
     expect(rootNode.getChildren()).to.not.be.empty();
-    expect(rootNode.getProjectTreeObject()).to.be(null);
 
     const firstChildOfRoot = rootNode.getChildren()[0];
 
@@ -70,7 +60,6 @@ loading the expect.js and jumpflowy modules.
     expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
       rootNode.getNumDescendants()
     );
-    expect(firstChildOfRoot.getProjectTreeObject()).to.be.an("object");
   }
 
   /** Returns the one and only node with the given note text, or fails. */
@@ -262,7 +251,7 @@ loading the expect.js and jumpflowy modules.
 
   function whenUsingNodeToPlainTextName() {
     expect(jumpflowy.nodeToPlainTextName).to.be.a("function");
-    expect(global_project_tree_object.getNameInPlainText).to.be.a("function");
+    expect(WF.rootItem().getNameInPlainText).to.be.a("function");
 
     const node = getUniqueNodeByNoteOrFail(
       "test/JumpFlowy/whenUsingNodeToPlainTextName"
@@ -274,7 +263,7 @@ loading the expect.js and jumpflowy modules.
 
   function whenUsingNodeToPlainTextNote() {
     expect(jumpflowy.nodeToPlainTextNote).to.be.a("function");
-    expect(global_project_tree_object.getNoteInPlainText).to.be.a("function");
+    expect(WF.rootItem().getNoteInPlainText).to.be.a("function");
 
     const node = getUniqueNodeByNoteOrFail(
       "test/JumpFlowy/whenUsingNodeToPlainTextNote"
@@ -292,9 +281,6 @@ loading the expect.js and jumpflowy modules.
     const currentTime = jumpflowy.getCurrentTimeSec();
 
     function testWorkFlowyAssumptions(node) {
-      const tree = node.getProjectTree();
-      expect(tree).to.not.be(null);
-
       if (node.getProjectId() === WF.rootItem().getProjectId()) {
         expect(node.getLastModifiedDate()).to.be(null);
       } else {
