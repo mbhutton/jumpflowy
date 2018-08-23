@@ -12,7 +12,7 @@
 
 // ESLint globals from WorkFlowy:
 /*
-global project_tree:false tagging:false date_time:false utils:false
+global project_tree:false tagging:false date_time:false
        global_project_tree_object:false location_history:false
        WF:false
 */
@@ -224,6 +224,7 @@ global project_tree:false tagging:false date_time:false utils:false
   const bookmarkTag = "#bm";
   const abbrevTag = "#abbrev";
   const shortcutTag = "#shortcut";
+  const searchQueryToMatchNoItems = "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
   let isCleanedUp = false;
 
@@ -496,7 +497,7 @@ global project_tree:false tagging:false date_time:false utils:false
   function nodesToVolatileSearchQuery(nodes) {
     if (nodes.length === 0) {
       // Return a search query which matches no nodes
-      return "META:NO_MATCHING_NODES_" + utils.generateUUID();
+      return searchQueryToMatchNoItems;
     }
     const searches = nodes.map(n => nodeToVolatileSearchQuery(n));
     return searches.join(" OR ");
@@ -510,7 +511,7 @@ global project_tree:false tagging:false date_time:false utils:false
   function nodeToVolatileSearchQuery(node) {
     if (isRootNode(node)) {
       // Return a search query which matches no nodes
-      return "META:ROOT_NODE_" + utils.generateUUID();
+      return searchQueryToMatchNoItems;
     }
     const currentTimeSec = getCurrentTimeSec();
     const nodeLastModifiedSec = nodeToLastModifiedSec(node);
