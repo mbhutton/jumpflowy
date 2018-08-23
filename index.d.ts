@@ -101,10 +101,6 @@ declare namespace global_project_tree_object {
   function getNoteInPlainText(t: ProjectTreeObject): string;
 }
 
-declare namespace project_ids {
-  function truncateProjectId(s: string): string;
-}
-
 //****************************
 // Window object
 //****************************
