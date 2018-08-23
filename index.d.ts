@@ -62,6 +62,8 @@ interface Item {
 
   getChildren(): Array<Item>;
 
+  getId(): string;
+
   getLastModifiedDate(): Date;
 
   getName(): string | null;
@@ -101,18 +103,6 @@ declare namespace global_project_tree_object {
 
 declare namespace project_ids {
   function truncateProjectId(s: string): string;
-}
-
-type LocationAndTagHandler = (spanStart: number, tagFound: string) => void;
-
-interface LocationHistoryEntry {
-  _zoomedProjectId: string;
-}
-
-declare namespace location_history {
-  function getCurrentLocation(): LocationHistoryEntry;
-
-  function createLocation(zoomedProjectId: string, searchQuery: string | null);
 }
 
 //****************************

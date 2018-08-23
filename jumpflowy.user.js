@@ -13,7 +13,7 @@
 // ESLint globals from WorkFlowy:
 /*
 global project_tree:false
-       global_project_tree_object:false location_history:false
+       global_project_tree_object:false
        WF:false
 */
 
@@ -219,10 +219,10 @@ global project_tree:false
   }
 
   function openNodeHere(node, searchQuery) {
-    const projectId = node.getProjectId();
-    searchQuery = searchQuery || null; // Convert empty string to null
-    const location = location_history.createLocation(projectId, searchQuery);
-    location.navigate();
+    WF.zoomTo(node);
+    if (searchQuery) {
+      WF.search(searchQuery);
+    }
   }
 
   /**
@@ -393,7 +393,7 @@ global project_tree:false
    *                   node which is currently zoomed into.
    */
   function getZoomedNodeAsLongId() {
-    return location_history.getCurrentLocation()._zoomedProjectId;
+    return WF.currentItem().getId();
   }
 
   /**
