@@ -3,7 +3,11 @@
 //****************************************************************************
 
 declare namespace WF {
+
+  function getItemTags(item: Item): Array<{index: number, tag: string}>
+
   function rootItem(): Item
 
   function starredItems(): Array<Item>
+
 }

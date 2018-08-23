@@ -160,8 +160,9 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.getCurrentTimeSec()).to.be.within(1517855243, 7287926400);
   }
 
+  /*
   function whenUsingStringToTags() {
-    expect(window.tagging.forEachTagInString).to.be.a("function");
+    expect(WF.getItemTags).to.be.a("function");
     expect(jumpflowy.stringToTags).to.be.a("function");
 
     expect(jumpflowy.stringToTags(null)).to.eql([]);
@@ -200,7 +201,9 @@ loading the expect.js and jumpflowy modules.
       }
     }
   }
+  */
 
+  /*
   function whenUsingDoesStringHaveTag() {
     expect(jumpflowy.doesStringHaveTag).to.be.a("function");
 
@@ -223,6 +226,7 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo(a,b)")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
   }
+  */
 
   function whenUsingDoesNodeNameOrNoteMatch() {
     expect(jumpflowy.doesNodeNameOrNoteMatch).to.be.a("function");
@@ -244,7 +248,7 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesNodeHaveTag).to.be.a("function");
 
     const parentNode = getUniqueNodeByNoteOrFail(
-      "test/JumpFlowy/whenUsingDoesNodeHaveTag"
+      "test/JumpFlowy/whenUsingDoesItemHaveTag"
     );
     const node = getOnlyChildOf(parentNode);
 
@@ -396,8 +400,8 @@ loading the expect.js and jumpflowy modules.
       whenUsingItemFunctions();
       whenUsingFindMatchingNodesAndApplyToEachNode();
       whenUsingGetCurrentTimeSec();
-      whenUsingStringToTags();
-      whenUsingDoesStringHaveTag();
+      //whenUsingStringToTags();
+      //whenUsingDoesStringHaveTag();
       whenUsingDoesNodeNameOrNoteMatch();
       whenUsingDoesNodeHaveTag();
       whenUsingNodeToLastModifiedSec();

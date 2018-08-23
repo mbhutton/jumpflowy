@@ -31,8 +31,6 @@ interface JumpFlowy {
   doesNodeNameOrNoteMatch(textPredicate: TextPredicate,
                           node: Item): boolean;
 
-  doesStringHaveTag(tagToMatch: string, s: string): boolean;
-
   findMatchingNodes(nodePredicate: NodePredicate,
                     searchRoot: Item): Array<Item>;
 
@@ -43,8 +41,6 @@ interface JumpFlowy {
   nodeToPlainTextName(node: Item): string;
 
   nodeToPlainTextNote(node: Item): string;
-
-  stringToTags(s: string): Array<string>;
 
   nursery: Nursery;
 }
@@ -68,7 +64,11 @@ interface Item {
 
   getName(): string | null;
 
+  getNameInPlainText(): string | null;
+
   getNote(): string | null;
+
+  getNoteInPlainText(): string | null;
 
   getNumDescendants(): number;
 
@@ -111,14 +111,6 @@ declare namespace date_time {
 
 type LocationAndTagHandler = (spanStart: number, tagFound: string) => void;
 
-interface Tagging {
-  forEachTagInString(s: string,
-                     f: LocationAndTagHandler,
-                     setToFalse: boolean): void;
-}
-
-declare const tagging: Tagging;
-
 interface LocationHistoryEntry {
   _zoomedProjectId: string;
 }
@@ -139,8 +131,6 @@ interface Window {
   IS_FIREFOX: boolean;
 
   IS_IOS: boolean;
-
-  tagging: Tagging;
 
   jumpflowy: JumpFlowy;
 }

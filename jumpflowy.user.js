@@ -12,7 +12,7 @@
 
 // ESLint globals from WorkFlowy:
 /*
-global project_tree:false tagging:false date_time:false
+global project_tree:false date_time:false
        global_project_tree_object:false location_history:false
        WF:false
 */
@@ -73,46 +73,33 @@ global project_tree:false tagging:false date_time:false
   }
 
   /**
-   * Returns the tags found in the given string.
-   * Returns the empty set if none are found, or if given null.
+   * Returns the tags found in the given item.
+   * Returns the empty set if none are found.
    *
    * Note: Tags containing punctuation may produce unexpected results.
    * Suggested best practice: freely use '-' and '_' and ':'
    * as part of tags, being careful to avoid ':' as a suffix.
    *
-   * @param {string} s The string to split.
-   * @returns {Array<string>} An array of tags found in the string.
+   * @param {Item} item The item to query.
+   * @returns {Array<string>} An array of tags found in the item.
    */
-  function stringToTags(s) {
-    const results = Array();
-    if (s === null) {
-      return results;
-    }
-    function handleTag(location, tagFound) {
-      results.push(tagFound);
-    }
-    tagging.forEachTagInString(s, handleTag, false);
-    return results;
+  function itemToTags(item) {
+    let indexesAndTags = WF.getItemTags(item);
+    return indexesAndTags.map(x => x.tag);
   }
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {string} s The string to test.
-   * @returns {boolean} True if and only if the given string has the
+   * @param {Item} node The item to test.
+   * @returns {boolean} True if and only if the given item has the
    *                    exact given tag, ignoring case. Otherwise false.
-   * @see {@link stringToTags} For notes, caveats regarding tag handling.
+   * @see {@link itemToTags} For notes, caveats regarding tag handling.
    */
-  function doesStringHaveTag(tagToMatch, s) {
-    if (s === null) {
+  function doesNodeHaveTag(tagToMatch, node) {
+    if (node === null) {
       return false;
     }
-    // Optimise for the case where most strings will not have the tag,
-    // by quickly eliminating cases where the tag is definitely not there.
-    // This gives a ~3x speed up in the common case where the tag is rare.
-    if (s.indexOf(tagToMatch) === -1) {
-      return false;
-    }
-    for (let tag of stringToTags(s)) {
+    for (let tag of itemToTags(node)) {
       if (tag.toLowerCase() === tagToMatch.toLowerCase()) {
         return true;
       }
@@ -159,16 +146,6 @@ global project_tree:false tagging:false date_time:false
       textPredicate(nodeToPlainTextName(node)) ||
       textPredicate(nodeToPlainTextNote(node))
     );
-  }
-
-  /**
-   * @param {string} tagToMatch The tag to match.
-   * @param {Item} node The node to test.
-   * @returns {boolean} Whether the node has the exact given tag, ignoring case.
-   */
-  function doesNodeHaveTag(tagToMatch, node) {
-    const hasTagFn = text => doesStringHaveTag(tagToMatch, text);
-    return doesNodeNameOrNoteMatch(hasTagFn, node);
   }
 
   /**
@@ -300,11 +277,6 @@ global project_tree:false tagging:false date_time:false
    *                   E.g. "bar, baz".
    */
   function stringToTagArgsText(tagToMatch, s) {
-    // Note: doesStringHaveTag is null safe for s
-    if (!doesStringHaveTag(tagToMatch, s)) {
-      return null;
-    }
-
     let start = 0;
     for (;;) {
       const tagIndex = s.indexOf(tagToMatch, start);
@@ -1244,13 +1216,12 @@ global project_tree:false tagging:false date_time:false
     applyToEachNode: applyToEachNode,
     doesNodeHaveTag: doesNodeHaveTag,
     doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
-    doesStringHaveTag: doesStringHaveTag,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
+    itemToTags: itemToTags,
     nodeToLastModifiedSec: nodeToLastModifiedSec,
     nodeToPlainTextName: nodeToPlainTextName,
     nodeToPlainTextNote: nodeToPlainTextNote,
-    stringToTags: stringToTags,
 
     // The Nursery namespace
     nursery: nursery
