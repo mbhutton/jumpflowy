@@ -4,4 +4,6 @@
 
 declare namespace WF {
   function rootItem(): Item
+
+  function starredItems(): Array<Item>
 }

@@ -953,7 +953,7 @@ global project_tree:false tagging:false date_time:false
     if (window.IS_IOS) {
       pass("Skipping starred pages check: not available on this platform.");
     } else if (window.IS_CHROME || window.IS_FIREFOX) {
-      const starredLocationsCount = window.getStarredLocations().length;
+      const starredLocationsCount = WF.starredItems().length;
       pass("Starred locations found: " + starredLocationsCount);
     }
 

@@ -134,8 +134,6 @@ declare namespace location_history {
 //****************************
 
 interface Window {
-  getStarredLocations(): string;
-
   IS_CHROME: boolean;
 
   IS_FIREFOX: boolean;
