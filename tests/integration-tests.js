@@ -284,7 +284,7 @@ loading the expect.js and jumpflowy modules.
       if (node.getProjectId() === WF.rootItem().getProjectId()) {
         expect(node.getLastModifiedDate()).to.be(null);
       } else {
-        expect(node.getLastModifiedDate()).to.be.a("number");
+        expect(node.getLastModifiedDate()).to.be.a(Date);
       }
     }
     testWorkFlowyAssumptions(WF.rootItem());
