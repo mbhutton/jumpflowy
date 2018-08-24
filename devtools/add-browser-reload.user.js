@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Add JumpFlowy reload button
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.0.6
+// @version      0.1.0.7
 // @description  Add button to reload JumpFlowy scripts from localhost server
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
+// @match        https://dev.workflowy.com/*
 // @grant        none
 // @run-at       document-end
 // @downloadURL  https://github.com/mbhutton/jumpflowy/raw/master/devtools/add-browser-reload.user.js
