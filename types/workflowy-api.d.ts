@@ -8,7 +8,9 @@ declare namespace WF {
 
   function getItemById(id: string): Item
 
-  function getItemTags(item: Item): Array<{index: number, tag: string}>
+  function getItemNameTags(item: Item): Array<{index: number, tag: string}>
+
+  function getItemNoteTags(item: Item): Array<{index: number, tag: string}>
 
   function rootItem(): Item
 

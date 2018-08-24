@@ -82,8 +82,10 @@ global WF:false
    * @returns {Array<string>} An array of tags found in the item.
    */
   function itemToTags(item) {
-    let indexesAndTags = WF.getItemTags(item);
-    return indexesAndTags.map(x => x.tag);
+    const tagsForName = WF.getItemNameTags(item);
+    const tagsForNote = WF.getItemNoteTags(item);
+    const allTags = tagsForName.concat(tagsForNote);
+    return allTags.map(x => x.tag);
   }
 
   /**
@@ -267,6 +269,9 @@ global WF:false
    *                   E.g. "bar, baz".
    */
   function stringToTagArgsText(tagToMatch, s) {
+    if (s === null || s === "") {
+      return null;
+    }
     let start = 0;
     for (;;) {
       const tagIndex = s.indexOf(tagToMatch, start);
