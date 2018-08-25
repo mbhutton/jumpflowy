@@ -31,6 +31,8 @@ interface JumpFlowy {
   doesNodeNameOrNoteMatch(textPredicate: TextPredicate,
                           node: Item): boolean;
 
+  doesStringHaveTag(tagToMatch: string, s: string): boolean
+
   findMatchingNodes(nodePredicate: NodePredicate,
                     searchRoot: Item): Array<Item>;
 

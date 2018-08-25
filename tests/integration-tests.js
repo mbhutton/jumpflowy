@@ -192,17 +192,17 @@ loading the expect.js and jumpflowy modules.
   }
   */
 
-  /*
   function whenUsingDoesStringHaveTag() {
     expect(jumpflowy.doesStringHaveTag).to.be.a("function");
 
     expect(jumpflowy.doesStringHaveTag("#foo", null)).to.be(false);
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#FoO", "#fOo")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("#foo", "#fool")).to.be(false);
     expect(jumpflowy.doesStringHaveTag("#foo", "#fo")).to.be(false);
     expect(jumpflowy.doesStringHaveTag("foo", "#foo")).to.be(false);
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo ")).to.be(true);
-    expect(jumpflowy.doesStringHaveTag("#foo", " #foo ")).to.be(true);
+    expect(jumpflowy.doesStringHaveTag("#foo", " #foo")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("#foo", " #foo ")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("@foo", "@foo")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("#foo", "@foo")).to.be(false);
@@ -215,7 +215,6 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo(a,b)")).to.be(true);
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
   }
-  */
 
   function whenUsingDoesNodeNameOrNoteMatch() {
     expect(jumpflowy.doesNodeNameOrNoteMatch).to.be.a("function");
@@ -380,7 +379,7 @@ loading the expect.js and jumpflowy modules.
       whenUsingFindMatchingNodesAndApplyToEachNode();
       whenUsingGetCurrentTimeSec();
       //whenUsingStringToTags();
-      //whenUsingDoesStringHaveTag();
+      whenUsingDoesStringHaveTag();
       whenUsingDoesNodeNameOrNoteMatch();
       whenUsingDoesNodeHaveTag();
       whenUsingNodeToLastModifiedSec();

@@ -99,12 +99,9 @@ global WF:false
     if (node === null) {
       return false;
     }
-    for (let tag of itemToTags(node)) {
-      if (tag.toLowerCase() === tagToMatch.toLowerCase()) {
-        return true;
-      }
-    }
-    return false;
+
+    return doesStringHaveTag(tagToMatch, node.getNameInPlainText())
+      || doesStringHaveTag(tagToMatch, node.getNoteInPlainText());
   }
 
   /**
@@ -253,6 +250,44 @@ global WF:false
 
   function clickSaveButton() {
     $(".saveButton").click();
+  }
+
+  /**
+   * @param {string} tagToMatch The tag to match.
+   * @param {string} s The string to test.
+   * @returns {boolean} True if and only if the given string has the
+   *                    exact given tag, ignoring case. Otherwise false.
+   * @see {@link itemToTags} For notes, caveats regarding tag handling.
+   */
+  function doesStringHaveTag(tagToMatch, s) {
+    if (s === null || tagToMatch === null) {
+      return false;
+    }
+
+    // Ignore case
+    tagToMatch = tagToMatch.toLowerCase();
+    s = s.toLowerCase();
+
+    let nextStart = 0;
+    let matched = false;
+    for (;;) {
+      const tagIndex = s.indexOf(tagToMatch, nextStart);
+      if (tagIndex === -1) {
+        break; // Non-match: tag not found
+      }
+      if (tagToMatch.match(/^[@#]/) === null) {
+        break; // Non-match: invalid tagToMatch
+      }
+      const afterTag = tagIndex + tagToMatch.length;
+      nextStart = afterTag;
+      if (s.substring(afterTag).match(/^[:]?[a-z0-9-_]/)) {
+        continue; // This is a longer tag than tagToMatch, so keep looking
+      } else {
+        matched = true;
+        break;
+      }
+    }
+    return matched;
   }
 
   /**
@@ -1198,6 +1233,7 @@ global WF:false
     applyToEachNode: applyToEachNode,
     doesNodeHaveTag: doesNodeHaveTag,
     doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
+    doesStringHaveTag: doesStringHaveTag,
     findMatchingNodes: findMatchingNodes,
     getCurrentTimeSec: getCurrentTimeSec,
     itemToTags: itemToTags,
