@@ -532,7 +532,9 @@ global WF:false
     for (let line of lines) {
       for (let segment of line.split('"')) {
         if (segment.trim() !== "") {
-          result += `"${segment}" `;
+          // Use 2 spaces here, to work around a WorkFlowy bug
+          // where "a"  "b c" works, but "a" "b c" does not.
+          result += `  "${segment}"`;
         }
       }
     }
