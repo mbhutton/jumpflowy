@@ -239,9 +239,7 @@ global WF:false
    *                 deleting a large tree of nodes.
    */
   function dismissNotification() {
-    $("#message")
-      .children(".close")
-      .click();
+    WF.hideMessage();
   }
 
   function clickAddButton() {
