@@ -16,10 +16,10 @@ declare namespace WF {
 
   function rootItem(): Item
 
-  function search(query: string)
+  function search(query: string): void
 
   function starredItems(): Array<Item>
 
-  function zoomTo(item: Item)
+  function zoomTo(item: Item): void
 
 }
