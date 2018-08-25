@@ -5,6 +5,7 @@
 // @description  WorkFlowy library and user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
+// @match        https://dev.workflowy.com/*
 // @grant        none
 // @run-at       document-end
 // @downloadURL  https://github.com/mbhutton/jumpflowy/raw/master/jumpflowy.user.js
@@ -195,7 +196,7 @@ global WF:false
   let isCleanedUp = false;
 
   function openHere(url) {
-    open(url, "_self");
+    _openWithoutChangingWfDomain(url, "_self");
   }
 
   /**
@@ -204,7 +205,27 @@ global WF:false
    * @returns {void}
    */
   function openInNewTab(url) {
-    open(url, "_blank");
+    _openWithoutChangingWfDomain(url, "_blank");
+  }
+
+  /**
+   * Opens the given URL in the given target page, rewriting the URL as
+   * necessary to avoid crossing between workflowy.com and dev.workflowy.com.
+   * @param {string} url The URL to open.
+   * @param {string} target The target page.
+   * @returns {void}
+   */
+  function _openWithoutChangingWfDomain(url, target) {
+    const prodOrigin = "https://workflowy.com";
+    const devOrigin = "https://dev.workflowy.com";
+    const isDev = location.origin === devOrigin;
+    const isProd = location.origin === prodOrigin;
+    if (isDev && url.startsWith(prodOrigin)) {
+      url = devOrigin + url.substring(prodOrigin.length);
+    } else if (isProd && url.startsWith(devOrigin)) {
+      url = prodOrigin + url.substring(devOrigin.length);
+    }
+    open(url, target);
   }
 
   function openNodeHere(node, searchQuery) {
@@ -484,7 +505,10 @@ global WF:false
     const validRootUrls = [
       "https://workflowy.com",
       "https://workflowy.com/",
-      "https://workflowy.com/#"
+      "https://workflowy.com/#",
+      "https://dev.workflowy.com",
+      "https://dev.workflowy.com/",
+      "https://dev.workflowy.com/#",
     ];
     return validRootUrls.includes(s);
   }
