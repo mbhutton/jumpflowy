@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.5.0
+// @version      0.1.5.1
 // @description  WorkFlowy library and user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -683,13 +683,17 @@ global WF:false
       return;
     }
     let isLoaded = false;
-    let rootProject;
+    let rootProject = null;
     const timeoutMs = 350;
 
     if (typeof WF !== "undefined" && WF !== null) {
       if (WF.rootItem !== undefined && WF.rootItem !== null) {
-        rootProject = WF.rootItem();
-        if (rootProject !== undefined && rootProject !== null) {
+        try {
+          rootProject = WF.rootItem();
+        } catch (er) {
+          // This is expected while waiting for the project to load
+        }
+        if (rootProject !== null) {
           isLoaded = true;
         }
       }
