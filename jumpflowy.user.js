@@ -195,8 +195,13 @@ global WF:false
   let lastRegexString = null;
   let isCleanedUp = false;
 
+  const prodOrigin = "https://workflowy.com";
+  const devOrigin = "https://dev.workflowy.com";
+  const isDevDomain = location.origin === devOrigin;
+  const originalWindowOpenFn = window.open;
+
   function openHere(url) {
-    _openWithoutChangingWfDomain(url, "_self");
+    open(url, "_self");
   }
 
   /**
@@ -205,27 +210,28 @@ global WF:false
    * @returns {void}
    */
   function openInNewTab(url) {
-    _openWithoutChangingWfDomain(url, "_blank");
+    open(url, "_blank");
   }
 
   /**
-   * Opens the given URL in the given target page, rewriting the URL as
+   * An alternative to window.open which rewrites the URL as
    * necessary to avoid crossing between workflowy.com and dev.workflowy.com.
+   * Intended primarily for use on the dev domain, but also usable in prod.
    * @param {string} url The URL to open.
-   * @param {string} target The target page.
-   * @returns {void}
+   * @param {string} target (See documentation for window.open)
+   * @param {string} features (See documentation for window.open)
+   * @param {boolean} replace (See documentation for window.open)
+   * @returns {Window} (See documentation for window.open)
    */
-  function _openWithoutChangingWfDomain(url, target) {
-    const prodOrigin = "https://workflowy.com";
-    const devOrigin = "https://dev.workflowy.com";
-    const isDev = location.origin === devOrigin;
-    const isProd = location.origin === prodOrigin;
-    if (isDev && url.startsWith(prodOrigin)) {
+  function _openWithoutChangingWfDomain(url, target, features, replace) {
+    const isProdDomain = !isDevDomain;
+    if (isDevDomain && url.startsWith(prodOrigin)) {
       url = devOrigin + url.substring(prodOrigin.length);
-    } else if (isProd && url.startsWith(devOrigin)) {
+    } else if (isProdDomain && url.startsWith(devOrigin)) {
       url = prodOrigin + url.substring(devOrigin.length);
     }
-    open(url, target);
+    target = target || (isWorkFlowyUrl(url) ? "_self" : "_blank");
+    return originalWindowOpenFn(url, target, features, replace);
   }
 
   function openNodeHere(node, searchQuery) {
@@ -1162,6 +1168,11 @@ global WF:false
     }
     console.log("Cleaning up");
 
+    if (isDevDomain) {
+      window.open = originalWindowOpenFn;
+      console.log("Restored original window.open function");
+    }
+
     // Keyboard shortcuts
     document.removeEventListener("keydown", keyDownListener);
     canonicalKeyCodesToActions.clear();
@@ -1206,6 +1217,11 @@ global WF:false
 
       // Built-in expansions
       _registerBuiltInExpansion("ymd", todayAsYMDString);
+
+      if (isDevDomain) {
+        window.open = _openWithoutChangingWfDomain;
+        console.log("Overrode window.open function, because on dev domain");
+      }
     });
   }
 
