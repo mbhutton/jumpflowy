@@ -1184,7 +1184,9 @@ global WF:false
       bindableActionsByName.clear();
       _populateMapWithNoArgFunctions(bindableActionsByName, [
         // Alphabetical order
+        // *******************************************************
         // Maintenance note: keep this list in sync with README.md
+        // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         clickAddButton,
         clickSaveButton,
         dismissNotification,
@@ -1194,6 +1196,8 @@ global WF:false
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
         showZoomedAndMostRecentlyEdited,
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // *******************************************************
       ]);
       _registerKeyboardShortcuts();
       document.addEventListener("keydown", keyDownListener);
@@ -1207,7 +1211,6 @@ global WF:false
 
   const nursery = {
     // Alphabetical order
-    // Maintenance note: keep this list in sync with README.md
     callAfterProjectLoaded: callAfterProjectLoaded,
     cleanUp: cleanUp,
     clickAddButton: clickAddButton,
@@ -1257,7 +1260,6 @@ global WF:false
   // Return jumpflowy object
   return {
     // Functions by alphabetical order
-    // Maintenance note: keep this list in sync with README.md
     applyToEachNode: applyToEachNode,
     doesNodeHaveTag: doesNodeHaveTag,
     doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
