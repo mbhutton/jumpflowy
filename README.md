@@ -124,6 +124,8 @@ The available named functions:
 - `clickAddButton`
 - `clickSaveButton`
 - `dismissNotification`
+- `editCurrentItem`
+- `editParentOfFocusedItem`
 - `logShortReport`
 - `promptToExpandAndInsertAtCursor`
 - `promptToFindGlobalBookmarkThenFollow`

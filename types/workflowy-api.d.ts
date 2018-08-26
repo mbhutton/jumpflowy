@@ -8,6 +8,10 @@ declare namespace WF {
 
   function currentItem(): Item
 
+  function editItemName(item: Item): void
+
+  function editItemNote(item: Item): void
+
   function focusedItem(): Item
 
   function getItemById(id: string): Item

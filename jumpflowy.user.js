@@ -1002,6 +1002,28 @@ global WF:false
     openNodeHere(newZoom, searchQuery);
   }
 
+  function editCurrentItem() {
+    const currentItem = WF.currentItem();
+    if (!isRootNode(currentItem)) {
+      WF.editItemName(currentItem);
+    }
+  }
+
+  function editParentOfFocusedItem() {
+    const focusedItem = WF.focusedItem();
+    if (focusedItem === null || isRootNode(focusedItem)) {
+      return;
+    }
+    const parentItem = focusedItem.getParent();
+    if (focusedItem.getId() === WF.currentItem().getId()) {
+      // Zoom out one level
+      WF.zoomTo(parentItem);
+    }
+    if (!isRootNode(parentItem)) {
+      WF.editItemName(parentItem);
+    }
+  }
+
   // Note: this function is based on https://jsfiddle.net/timdown/cCAWC/3/
   function insertTextAtCursor(text) {
     let sel, range;
@@ -1203,6 +1225,8 @@ global WF:false
         clickAddButton,
         clickSaveButton,
         dismissNotification,
+        editCurrentItem,
+        editParentOfFocusedItem,
         logShortReport,
         promptToExpandAndInsertAtCursor,
         promptToFindGlobalBookmarkThenFollow,
@@ -1235,6 +1259,8 @@ global WF:false
     clickSaveButton: clickSaveButton,
     dateToYMDString: dateToYMDString,
     dismissNotification: dismissNotification,
+    editCurrentItem: editCurrentItem,
+    editParentOfFocusedItem: editParentOfFocusedItem,
     expandAbbreviation: expandAbbreviation,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findNodesMatchingRegex: findNodesMatchingRegex,
