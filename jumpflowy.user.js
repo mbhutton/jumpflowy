@@ -495,7 +495,7 @@ global WF:false
    * @param {string} s The string to test.
    */
   function isWorkFlowyUrl(s) {
-    return s && s.match("^https://workflowy\\.com(/.*)?$") !== null;
+    return s && s.match("^https://(dev\\.)?workflowy\\.com(/.*)?$") !== null;
   }
 
   /**
