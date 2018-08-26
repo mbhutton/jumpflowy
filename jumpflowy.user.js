@@ -232,6 +232,8 @@ global WF:false
     WF.zoomTo(node);
     if (searchQuery) {
       WF.search(searchQuery);
+    } else {
+      WF.clearSearch();
     }
   }
 

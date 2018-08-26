@@ -4,7 +4,11 @@
 
 declare namespace WF {
 
+  function clearSearch(): void
+
   function currentItem(): Item
+
+  function focusedItem(): Item
 
   function getItemById(id: string): Item
 
