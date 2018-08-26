@@ -127,6 +127,7 @@ The available named functions:
 - `editCurrentItem`
 - `editParentOfFocusedItem`
 - `logShortReport`
+- `openFirstLinkInFocusedItem`
 - `promptToExpandAndInsertAtCursor`
 - `promptToFindGlobalBookmarkThenFollow`
 - `promptToFindLocalRegexMatchThenZoom`

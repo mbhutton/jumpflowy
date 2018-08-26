@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.5.3
+// @version      0.1.5.4
 // @description  WorkFlowy library and user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -892,6 +892,31 @@ global WF:false
   }
 
   /**
+   * Finds and opens the first (if any) http/https link in the focused item.
+   * @returns {void}
+   */
+  function openFirstLinkInFocusedItem() {
+    const focusedItem = WF.focusedItem();
+    if (focusedItem === null || isRootNode(focusedItem)) {
+      return;
+    }
+    for (let nameOrNote of [
+      nodeToPlainTextName(focusedItem),
+      nodeToPlainTextNote(focusedItem)
+    ]) {
+      const matchResult = nameOrNote.match(/https?:\/\/[^\s]+/);
+      if (matchResult) {
+        const url = matchResult[0].trim();
+        if (isWorkFlowyUrl(url)) {
+          openHere(url);
+        } else {
+          openInNewTab(url);
+        }
+      }
+    }
+  }
+
+  /**
    * Returns a no-arg function which will 'follow' the given node,
    * performing some action depending on the content of the node.
    * Note: the behaviour of this method is expected to change.
@@ -1228,6 +1253,7 @@ global WF:false
         editCurrentItem,
         editParentOfFocusedItem,
         logShortReport,
+        openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
@@ -1282,6 +1308,7 @@ global WF:false
     nodeToTagArgsText: nodeToTagArgsText,
     nodeToVolatileSearchQuery: nodeToVolatileSearchQuery,
     nodesToVolatileSearchQuery: nodesToVolatileSearchQuery,
+    openFirstLinkInFocusedItem: openFirstLinkInFocusedItem,
     openHere: openHere,
     openInNewTab: openInNewTab,
     openNodeHere: openNodeHere,
