@@ -122,7 +122,6 @@ For a description of what each of these named functions do, find its comments in
 The available named functions:
 
 - `clickAddButton`
-- `clickSaveButton`
 - `dismissNotification`
 - `editCurrentItem`
 - `editParentOfFocusedItem`

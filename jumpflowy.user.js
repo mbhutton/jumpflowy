@@ -275,10 +275,6 @@ global WF:false
     $(".addButton").click();
   }
 
-  function clickSaveButton() {
-    $(".saveButton").click();
-  }
-
   /**
    * @param {string} tagToMatch The tag to match.
    * @param {string} s The string to test.
@@ -1248,7 +1244,6 @@ global WF:false
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         clickAddButton,
-        clickSaveButton,
         dismissNotification,
         editCurrentItem,
         editParentOfFocusedItem,
@@ -1282,7 +1277,6 @@ global WF:false
     callAfterProjectLoaded: callAfterProjectLoaded,
     cleanUp: cleanUp,
     clickAddButton: clickAddButton,
-    clickSaveButton: clickSaveButton,
     dateToYMDString: dateToYMDString,
     dismissNotification: dismissNotification,
     editCurrentItem: editCurrentItem,
