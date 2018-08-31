@@ -1025,8 +1025,13 @@ global WF:false
     }
   }
 
+  /**
+   * Finds the focused item (using the current item as fallback),
+   * and puts the cursor in the name of that item's parent.
+   * @returns {void}
+   */
   function editParentOfFocusedItem() {
-    const focusedItem = WF.focusedItem();
+    const focusedItem = WF.focusedItem() || WF.currentItem();
     if (focusedItem === null || isRootItem(focusedItem)) {
       return;
     }
