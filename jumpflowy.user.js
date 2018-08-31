@@ -438,7 +438,7 @@ global WF:false
    * @returns {boolean} Whether the given item is the root item
    */
   function isRootItem(item) {
-    return item.getProjectId() === "None";
+    return item.getId() === "None";
   }
 
   /**
@@ -482,7 +482,7 @@ global WF:false
 
     let i;
     for (i = 0; i < minLength; i++) {
-      if (pathA[i].getProjectId() !== pathB[i].getProjectId()) {
+      if (pathA[i].getId() !== pathB[i].getId()) {
         break;
       }
     }

@@ -79,8 +79,6 @@ interface Item {
   getNumDescendants(): number;
 
   getParent(): Item;
-
-  getProjectId(): string;
 }
 
 //****************************

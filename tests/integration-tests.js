@@ -23,8 +23,8 @@ loading the expect.js and jumpflowy modules.
   function expectItemFunctions(item) {
     expect(item.getName).to.be.a("function");
     expect(item.getNote).to.be.a("function");
-    expect(item.getProjectId).to.be.a("function");
-    expect(item.getProjectId()).to.be.a("string");
+    expect(item.getId).to.be.a("function");
+    expect(item.getId()).to.be.a("string");
     expect(item.getAncestors).to.be.a("function");
     expect(item.getAncestors()).to.be.an("array");
     expect(item.getChildren).to.be.a("function");
@@ -43,7 +43,7 @@ loading the expect.js and jumpflowy modules.
     expectItemFunctions(rootItem);
     expect(rootItem.getName()).to.be(null);
     expect(rootItem.getNote()).to.be(null);
-    expect(rootItem.getProjectId()).to.be("None");
+    expect(rootItem.getId()).to.be("None");
     expect(rootItem.getAncestors()).to.be.empty();
     expect(rootItem.getChildren()).to.not.be.empty();
 
@@ -52,10 +52,10 @@ loading the expect.js and jumpflowy modules.
     expectItemFunctions(firstChildOfRoot);
     expect(firstChildOfRoot.getName()).not.to.be(null);
     expect(firstChildOfRoot.getNote()).not.to.be(null);
-    expect(firstChildOfRoot.getProjectId()).to.not.be(rootItem.getProjectId());
+    expect(firstChildOfRoot.getId()).to.not.be(rootItem.getId());
     expect(firstChildOfRoot.getAncestors().length).to.be(1);
     const ancestorOfFirstChild = firstChildOfRoot.getAncestors()[0];
-    expect(ancestorOfFirstChild.getProjectId()).to.be(rootItem.getProjectId());
+    expect(ancestorOfFirstChild.getId()).to.be(rootItem.getId());
 
     expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
       rootItem.getNumDescendants()
@@ -280,7 +280,7 @@ loading the expect.js and jumpflowy modules.
     const currentTime = jumpflowy.getCurrentTimeSec();
 
     function testWorkFlowyAssumptions(item) {
-      if (item.getProjectId() === WF.rootItem().getProjectId()) {
+      if (item.getId() === WF.rootItem().getId()) {
         expect(item.getLastModifiedDate()).to.be(null);
       } else {
         expect(item.getLastModifiedDate()).to.be.a(Date);
