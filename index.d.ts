@@ -18,31 +18,31 @@ declare const jumpflowy: JumpFlowy;
 
 type TextPredicate = (s: string) => boolean;
 
-type NodePredicate = (node: Item) => boolean;
+type ItemPredicate = (item: Item) => boolean;
 
-type NodeHandler = (node: Item) => void;
+type ItemHandler = (item: Item) => void;
 
 interface JumpFlowy {
-  applyToEachNode(functionToApply: NodeHandler,
+  applyToEachItem(functionToApply: ItemHandler,
                   searchRoot: Item): void;
 
-  doesNodeHaveTag(tagToMatch: string, node: Item): boolean;
+  doesItemHaveTag(tagToMatch: string, item: Item): boolean;
 
-  doesNodeNameOrNoteMatch(textPredicate: TextPredicate,
-                          node: Item): boolean;
+  doesItemNameOrNoteMatch(textPredicate: TextPredicate,
+                          item: Item): boolean;
 
   doesStringHaveTag(tagToMatch: string, s: string): boolean
 
-  findMatchingNodes(nodePredicate: NodePredicate,
+  findMatchingItems(itemPredicate: ItemPredicate,
                     searchRoot: Item): Array<Item>;
 
   getCurrentTimeSec(): number;
 
-  nodeToLastModifiedSec(node: Item): number;
+  itemToLastModifiedSec(item: Item): number;
 
-  nodeToPlainTextName(node: Item): string;
+  itemToPlainTextName(item: Item): string;
 
-  nodeToPlainTextNote(node: Item): string;
+  itemToPlainTextNote(item: Item): string;
 
   nursery: Nursery;
 }
@@ -50,7 +50,7 @@ interface JumpFlowy {
 interface Nursery {
   cleanUp(): void;
 
-  nodeToTagArgsText(tagToMatch: string, node: Item): string;
+  itemToTagArgsText(tagToMatch: string, item: Item): string;
 
   stringToTagArgsText(tagToMatch: string, s: string): string;
 }

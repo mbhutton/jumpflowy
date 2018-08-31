@@ -20,123 +20,123 @@ loading the expect.js and jumpflowy modules.
   "use strict";
 
   /** Tests existence and behaviour of common Item functions. */
-  function expectItemFunctions(node) {
-    expect(node.getName).to.be.a("function");
-    expect(node.getNote).to.be.a("function");
-    expect(node.getProjectId).to.be.a("function");
-    expect(node.getProjectId()).to.be.a("string");
-    expect(node.getAncestors).to.be.a("function");
-    expect(node.getAncestors()).to.be.an("array");
-    expect(node.getChildren).to.be.a("function");
-    expect(node.getChildren()).to.be.an("array");
-    expect(node.getNumDescendants).to.be.a("function");
-    expect(node.getNumDescendants()).to.be.a("number");
+  function expectItemFunctions(item) {
+    expect(item.getName).to.be.a("function");
+    expect(item.getNote).to.be.a("function");
+    expect(item.getProjectId).to.be.a("function");
+    expect(item.getProjectId()).to.be.a("string");
+    expect(item.getAncestors).to.be.a("function");
+    expect(item.getAncestors()).to.be.an("array");
+    expect(item.getChildren).to.be.a("function");
+    expect(item.getChildren()).to.be.an("array");
+    expect(item.getNumDescendants).to.be.a("function");
+    expect(item.getNumDescendants()).to.be.a("number");
   }
 
   /** Tests the Item type. */
   function whenUsingItemFunctions() {
     expect(WF.rootItem).to.be.a("function");
 
-    const rootNode = WF.rootItem();
-    expect(rootNode).to.be.an("object");
+    const rootItem = WF.rootItem();
+    expect(rootItem).to.be.an("object");
 
-    expectItemFunctions(rootNode);
-    expect(rootNode.getName()).to.be(null);
-    expect(rootNode.getNote()).to.be(null);
-    expect(rootNode.getProjectId()).to.be("None");
-    expect(rootNode.getAncestors()).to.be.empty();
-    expect(rootNode.getChildren()).to.not.be.empty();
+    expectItemFunctions(rootItem);
+    expect(rootItem.getName()).to.be(null);
+    expect(rootItem.getNote()).to.be(null);
+    expect(rootItem.getProjectId()).to.be("None");
+    expect(rootItem.getAncestors()).to.be.empty();
+    expect(rootItem.getChildren()).to.not.be.empty();
 
-    const firstChildOfRoot = rootNode.getChildren()[0];
+    const firstChildOfRoot = rootItem.getChildren()[0];
 
     expectItemFunctions(firstChildOfRoot);
     expect(firstChildOfRoot.getName()).not.to.be(null);
     expect(firstChildOfRoot.getNote()).not.to.be(null);
-    expect(firstChildOfRoot.getProjectId()).to.not.be(rootNode.getProjectId());
+    expect(firstChildOfRoot.getProjectId()).to.not.be(rootItem.getProjectId());
     expect(firstChildOfRoot.getAncestors().length).to.be(1);
     const ancestorOfFirstChild = firstChildOfRoot.getAncestors()[0];
-    expect(ancestorOfFirstChild.getProjectId()).to.be(rootNode.getProjectId());
+    expect(ancestorOfFirstChild.getProjectId()).to.be(rootItem.getProjectId());
 
     expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
-      rootNode.getNumDescendants()
+      rootItem.getNumDescendants()
     );
   }
 
-  /** Returns the one and only node with the given note text, or fails. */
-  function getUniqueNodeByNoteOrFail(noteText) {
-    const matches = jumpflowy.findMatchingNodes(
-      node => jumpflowy.nodeToPlainTextNote(node) === noteText,
+  /** Returns the one and only item with the given note text, or fails. */
+  function getUniqueItemByNoteOrFail(noteText) {
+    const matches = jumpflowy.findMatchingItems(
+      item => jumpflowy.itemToPlainTextNote(item) === noteText,
       WF.rootItem()
     );
     if (matches.length === 0) {
       expect.fail(
-        `Couldn't find node with note text matching >>>${noteText}<<<.`
+        `Couldn't find item with note text matching >>>${noteText}<<<.`
       );
     }
     if (matches.length > 1) {
       expect.fail(
-        `Found multiple nodes with note text matching >>>${noteText}<<<, when expecting exactly 1.`
+        `Found multiple items with note text matching >>>${noteText}<<<, when expecting exactly 1.`
       );
     }
     return matches[0];
   }
 
-  function getOnlyChildOf(node) {
-    if (node === null) {
-      expect.fail("Node was null");
+  function getOnlyChildOf(item) {
+    if (item === null) {
+      expect.fail("Item was null");
     }
-    const children = node.getChildren();
+    const children = item.getChildren();
     if (children === null || children.length !== 1) {
-      expect.fail("Node has no children or multiple children");
+      expect.fail("Item has no children or multiple children");
     }
     return children[0];
   }
 
-  /** Tests for applyToEachNode and findMatchingNodes functions. */
-  function whenUsingFindMatchingNodesAndApplyToEachNode() {
-    expect(jumpflowy.applyToEachNode).to.be.a("function");
-    expect(jumpflowy.findMatchingNodes).to.be.a("function");
+  /** Tests for applyToEachItem and findMatchingItems functions. */
+  function whenUsingFindMatchingItemsAndApplyToEachItem() {
+    expect(jumpflowy.applyToEachItem).to.be.a("function");
+    expect(jumpflowy.findMatchingItems).to.be.a("function");
 
     const alwaysTrue = () => true;
     const alwaysFalse = () => false;
 
     /**
-     * @param {Array<Item>} nodes The nodes
-     * @returns {Array<string | null>} The plain text names of the nodes
+     * @param {Array<Item>} items The items
+     * @returns {Array<string | null>} The plain text names of the items
      */
-    function mapNodesToPlainTextNames(nodes) {
-      return nodes.map(node => jumpflowy.nodeToPlainTextName(node));
+    function mapItemsToPlainTextNames(items) {
+      return items.map(item => jumpflowy.itemToPlainTextName(item));
     }
 
-    const searchRoot = getUniqueNodeByNoteOrFail(
+    const searchRoot = getUniqueItemByNoteOrFail(
       "b611674e-b218-9580-ea39-2dda99a0e627"
     );
 
-    const noNodes = jumpflowy.findMatchingNodes(alwaysFalse, searchRoot);
-    expect(noNodes).to.be.an("array");
-    expect(noNodes).to.be.empty();
+    const noItems = jumpflowy.findMatchingItems(alwaysFalse, searchRoot);
+    expect(noItems).to.be.an("array");
+    expect(noItems).to.be.empty();
 
-    const allNodes = jumpflowy.findMatchingNodes(alwaysTrue, searchRoot);
+    const allItems = jumpflowy.findMatchingItems(alwaysTrue, searchRoot);
     const expectedNames = ["search root", "a", "b", "c", "d", "e"];
-    expect(allNodes.length).to.be(expectedNames.length);
-    expect(allNodes.length).to.be(searchRoot.getNumDescendants() + 1);
-    const actualNames = mapNodesToPlainTextNames(allNodes);
+    expect(allItems.length).to.be(expectedNames.length);
+    expect(allItems.length).to.be(searchRoot.getNumDescendants() + 1);
+    const actualNames = mapItemsToPlainTextNames(allItems);
     expect(actualNames).to.eql(expectedNames);
 
-    function isNameSingleVowel(node) {
-      const name = jumpflowy.nodeToPlainTextName(node);
+    function isNameSingleVowel(item) {
+      const name = jumpflowy.itemToPlainTextName(item);
       return name.length === 1 && "aeiouAEIOU".includes(name);
     }
-    const nodesWithSingleVowel = jumpflowy.findMatchingNodes(
+    const itemsWithSingleVowel = jumpflowy.findMatchingItems(
       isNameSingleVowel,
       searchRoot
     );
-    expect(mapNodesToPlainTextNames(nodesWithSingleVowel)).to.eql(["a", "e"]);
+    expect(mapItemsToPlainTextNames(itemsWithSingleVowel)).to.eql(["a", "e"]);
 
-    // Test that applyToEachNode is applied for each node in order
+    // Test that applyToEachItem is applied for each item in order
     const foundNames = Array(0);
-    jumpflowy.applyToEachNode(
-      node => foundNames.push(node.getName()),
+    jumpflowy.applyToEachItem(
+      item => foundNames.push(item.getName()),
       searchRoot
     );
     expect(foundNames).to.eql(expectedNames);
@@ -216,109 +216,109 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.doesStringHaveTag("#foo", "#foo (a, b)")).to.be(true);
   }
 
-  function whenUsingDoesNodeNameOrNoteMatch() {
-    expect(jumpflowy.doesNodeNameOrNoteMatch).to.be.a("function");
+  function whenUsingDoesItemNameOrNoteMatch() {
+    expect(jumpflowy.doesItemNameOrNoteMatch).to.be.a("function");
 
-    const parentNode = getUniqueNodeByNoteOrFail(
-      "test/JumpFlowy/whenUsingDoesNodeNameOrNoteMatch"
+    const parentItem = getUniqueItemByNoteOrFail(
+      "test/JumpFlowy/whenUsingDoesItemNameOrNoteMatch"
     );
-    const node = getOnlyChildOf(parentNode);
-    const fnToTest = jumpflowy.doesNodeNameOrNoteMatch;
+    const item = getOnlyChildOf(parentItem);
+    const fnToTest = jumpflowy.doesItemNameOrNoteMatch;
 
-    expect(fnToTest(t => t === "someName", node)).to.be(true);
-    expect(fnToTest(t => t === "someNote", node)).to.be(true);
-    expect(fnToTest(t => t === "someName ", node)).to.be(false);
-    expect(fnToTest(t => t === "someNote ", node)).to.be(false);
-    expect(fnToTest(t => t === "wrong", node)).to.be(false);
+    expect(fnToTest(t => t === "someName", item)).to.be(true);
+    expect(fnToTest(t => t === "someNote", item)).to.be(true);
+    expect(fnToTest(t => t === "someName ", item)).to.be(false);
+    expect(fnToTest(t => t === "someNote ", item)).to.be(false);
+    expect(fnToTest(t => t === "wrong", item)).to.be(false);
   }
 
-  function whenUsingDoesNodeHaveTag() {
-    expect(jumpflowy.doesNodeHaveTag).to.be.a("function");
+  function whenUsingDoesItemHaveTag() {
+    expect(jumpflowy.doesItemHaveTag).to.be.a("function");
 
-    const parentNode = getUniqueNodeByNoteOrFail(
+    const parentItem = getUniqueItemByNoteOrFail(
       "test/JumpFlowy/whenUsingDoesItemHaveTag"
     );
-    const node = getOnlyChildOf(parentNode);
+    const item = getOnlyChildOf(parentItem);
 
-    expect(jumpflowy.doesNodeHaveTag("#foo", node)).to.be(true);
-    expect(jumpflowy.doesNodeHaveTag("foo", node)).to.be(false);
-    expect(jumpflowy.doesNodeHaveTag("@bar", node)).to.be(true);
-    expect(jumpflowy.doesNodeHaveTag("bar", node)).to.be(false);
-    expect(jumpflowy.doesNodeHaveTag("#baz", node)).to.be(false);
-    expect(jumpflowy.doesNodeHaveTag("baz", node)).to.be(false);
+    expect(jumpflowy.doesItemHaveTag("#foo", item)).to.be(true);
+    expect(jumpflowy.doesItemHaveTag("foo", item)).to.be(false);
+    expect(jumpflowy.doesItemHaveTag("@bar", item)).to.be(true);
+    expect(jumpflowy.doesItemHaveTag("bar", item)).to.be(false);
+    expect(jumpflowy.doesItemHaveTag("#baz", item)).to.be(false);
+    expect(jumpflowy.doesItemHaveTag("baz", item)).to.be(false);
   }
 
-  function whenUsingNodeToPlainTextName() {
-    expect(jumpflowy.nodeToPlainTextName).to.be.a("function");
+  function whenUsingItemToPlainTextName() {
+    expect(jumpflowy.itemToPlainTextName).to.be.a("function");
     expect(WF.rootItem().getNameInPlainText).to.be.a("function");
 
-    const node = getUniqueNodeByNoteOrFail(
-      "test/JumpFlowy/whenUsingNodeToPlainTextName"
+    const item = getUniqueItemByNoteOrFail(
+      "test/JumpFlowy/whenUsingItemToPlainTextName"
     );
-    expect(jumpflowy.nodeToPlainTextName(node)).to.be("applePie");
-    const rootNode = WF.rootItem();
-    expect(jumpflowy.nodeToPlainTextName(rootNode)).to.be("");
+    expect(jumpflowy.itemToPlainTextName(item)).to.be("applePie");
+    const rootItem = WF.rootItem();
+    expect(jumpflowy.itemToPlainTextName(rootItem)).to.be("");
   }
 
-  function whenUsingNodeToPlainTextNote() {
-    expect(jumpflowy.nodeToPlainTextNote).to.be.a("function");
+  function whenUsingItemToPlainTextNote() {
+    expect(jumpflowy.itemToPlainTextNote).to.be.a("function");
     expect(WF.rootItem().getNoteInPlainText).to.be.a("function");
 
-    const node = getUniqueNodeByNoteOrFail(
-      "test/JumpFlowy/whenUsingNodeToPlainTextNote"
+    const item = getUniqueItemByNoteOrFail(
+      "test/JumpFlowy/whenUsingItemToPlainTextNote"
     );
-    const child = node.getChildren()[0];
-    expect(jumpflowy.nodeToPlainTextNote(child)).to.be("bananaCake");
-    const rootNode = WF.rootItem();
-    expect(jumpflowy.nodeToPlainTextNote(rootNode)).to.be("");
+    const child = item.getChildren()[0];
+    expect(jumpflowy.itemToPlainTextNote(child)).to.be("bananaCake");
+    const rootItem = WF.rootItem();
+    expect(jumpflowy.itemToPlainTextNote(rootItem)).to.be("");
   }
 
-  /** Tests for nodeToLastModifiedSec and for assumptions related to it. */
-  function whenUsingNodeToLastModifiedSec() {
-    expect(jumpflowy.nodeToLastModifiedSec).to.be.a("function");
+  /** Tests for itemToLastModifiedSec and for assumptions related to it. */
+  function whenUsingItemToLastModifiedSec() {
+    expect(jumpflowy.itemToLastModifiedSec).to.be.a("function");
 
     const currentTime = jumpflowy.getCurrentTimeSec();
 
-    function testWorkFlowyAssumptions(node) {
-      if (node.getProjectId() === WF.rootItem().getProjectId()) {
-        expect(node.getLastModifiedDate()).to.be(null);
+    function testWorkFlowyAssumptions(item) {
+      if (item.getProjectId() === WF.rootItem().getProjectId()) {
+        expect(item.getLastModifiedDate()).to.be(null);
       } else {
-        expect(node.getLastModifiedDate()).to.be.a(Date);
+        expect(item.getLastModifiedDate()).to.be.a(Date);
       }
     }
     testWorkFlowyAssumptions(WF.rootItem());
     testWorkFlowyAssumptions(WF.rootItem().getChildren()[0]);
 
-    function testNode(uuid) {
-      const node = getUniqueNodeByNoteOrFail(uuid);
-      // The expected timestamp is the name of its first child node
-      const expectedTimestampStr = node.getChildren()[0].getName();
+    function testItem(uuid) {
+      const item = getUniqueItemByNoteOrFail(uuid);
+      // The expected timestamp is the name of its first child item
+      const expectedTimestampStr = item.getChildren()[0].getName();
       const expectedTimestamp = Number(expectedTimestampStr);
-      const actualTimestamp = jumpflowy.nodeToLastModifiedSec(node);
+      const actualTimestamp = jumpflowy.itemToLastModifiedSec(item);
       expect(actualTimestamp).to.be(expectedTimestamp);
       expect(actualTimestamp).to.be.lessThan(currentTime + 1);
     }
-    testNode("7685e7f0-122e-69ff-be9f-e03bcf7d84ca"); // Internal
-    testNode("9c6ede17-831d-b04c-7a97-a825f0fd4bf0"); // Embedded
+    testItem("7685e7f0-122e-69ff-be9f-e03bcf7d84ca"); // Internal
+    testItem("9c6ede17-831d-b04c-7a97-a825f0fd4bf0"); // Embedded
 
-    function testRootNodeJoinedDate() {
+    function testRootItemJoinedDate() {
       const root = WF.rootItem();
 
       const child = root.getChildren()[0];
-      const childLastMod = jumpflowy.nodeToLastModifiedSec(child);
+      const childLastMod = jumpflowy.itemToLastModifiedSec(child);
       expect(childLastMod).to.be.below(currentTime + 1);
     }
-    testRootNodeJoinedDate();
+    testRootItemJoinedDate();
   }
 
-  function whenUsingNodeToTagArgsText() {
-    expect(jumpflowy.nursery.nodeToTagArgsText).to.be.a("function");
+  function whenUsingItemToTagArgsText() {
+    expect(jumpflowy.nursery.itemToTagArgsText).to.be.a("function");
 
-    const parentNode = getUniqueNodeByNoteOrFail(
-      "test/JumpFlowy/whenUsingNodeToTagArgsText"
+    const parentItem = getUniqueItemByNoteOrFail(
+      "test/JumpFlowy/whenUsingItemToTagArgsText"
     );
-    const node = getOnlyChildOf(parentNode);
-    expect(jumpflowy.nursery.nodeToTagArgsText("#foo", node)).to.be(
+    const item = getOnlyChildOf(parentItem);
+    expect(jumpflowy.nursery.itemToTagArgsText("#foo", item)).to.be(
       "a, b, c"
     );
   }
@@ -376,16 +376,16 @@ loading the expect.js and jumpflowy modules.
     showInfo("Starting tests...");
     try {
       whenUsingItemFunctions();
-      whenUsingFindMatchingNodesAndApplyToEachNode();
+      whenUsingFindMatchingItemsAndApplyToEachItem();
       whenUsingGetCurrentTimeSec();
       //whenUsingStringToTags();
       whenUsingDoesStringHaveTag();
-      whenUsingDoesNodeNameOrNoteMatch();
-      whenUsingDoesNodeHaveTag();
-      whenUsingNodeToLastModifiedSec();
-      whenUsingNodeToTagArgsText();
-      whenUsingNodeToPlainTextName();
-      whenUsingNodeToPlainTextNote();
+      whenUsingDoesItemNameOrNoteMatch();
+      whenUsingDoesItemHaveTag();
+      whenUsingItemToLastModifiedSec();
+      whenUsingItemToTagArgsText();
+      whenUsingItemToPlainTextName();
+      whenUsingItemToPlainTextNote();
       whenUsingStringToTagArgsText();
       showSuccess("SUCCESS: Tests passed.");
     } catch (error) {

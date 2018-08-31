@@ -38,36 +38,36 @@ global WF:false
   // JumpFlowy implementation starts
 
   /**
-   * Applies the given function to the given node
+   * Applies the given function to the given item
    * and each of its descendants, as a depth first search.
-   * @param {function} functionToApply The function to apply to each node.
-   * @param {Item} searchRoot The root node of the search.
+   * @param {function} functionToApply The function to apply to each item.
+   * @param {Item} searchRoot The root item of the search.
    * @returns {void}
    */
-  function applyToEachNode(functionToApply, searchRoot) {
+  function applyToEachItem(functionToApply, searchRoot) {
     // Apply the function
     functionToApply(searchRoot);
     // Recurse
     for (let child of searchRoot.getChildren()) {
-      applyToEachNode(functionToApply, child);
+      applyToEachItem(functionToApply, child);
     }
   }
 
   /**
-   * @param {function} nodePredicate A function (Item -> boolean) which
-   *                                 returns whether or not a node is a match.
-   * @param {Item} searchRoot The root node of the search.
-   * @returns {Array<Item>} The matching nodes, in order of appearance.
+   * @param {function} itemPredicate A function (Item -> boolean) which
+   *                                 returns whether or not an item is a match.
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Array<Item>} The matching items, in order of appearance.
    */
-  function findMatchingNodes(nodePredicate, searchRoot) {
+  function findMatchingItems(itemPredicate, searchRoot) {
     const matches = Array();
 
-    function addIfMatch(node) {
-      if (nodePredicate(node)) {
-        matches.push(node);
+    function addIfMatch(item) {
+      if (itemPredicate(item)) {
+        matches.push(item);
       }
     }
-    applyToEachNode(addIfMatch, searchRoot);
+    applyToEachItem(addIfMatch, searchRoot);
     return matches;
   }
 
@@ -91,50 +91,50 @@ global WF:false
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {Item} node The item to test.
+   * @param {Item} item The item to test.
    * @returns {boolean} True if and only if the given item has the
    *                    exact given tag, ignoring case. Otherwise false.
    * @see {@link itemToTags} For notes, caveats regarding tag handling.
    */
-  function doesNodeHaveTag(tagToMatch, node) {
-    if (node === null) {
+  function doesItemHaveTag(tagToMatch, item) {
+    if (item === null) {
       return false;
     }
 
-    return doesStringHaveTag(tagToMatch, node.getNameInPlainText())
-      || doesStringHaveTag(tagToMatch, node.getNoteInPlainText());
+    return doesStringHaveTag(tagToMatch, item.getNameInPlainText())
+      || doesStringHaveTag(tagToMatch, item.getNoteInPlainText());
   }
 
   /**
-   * @param {Item} node The node
-   * @returns {string} The plain text version of the node's name,
-   *                   or the empty string if it is the root node.
+   * @param {Item} item The item
+   * @returns {string} The plain text version of the item's name,
+   *                   or the empty string if it is the root item.
    */
-  function nodeToPlainTextName(node) {
-    return node.getNameInPlainText() || "";
+  function itemToPlainTextName(item) {
+    return item.getNameInPlainText() || "";
   }
 
   /**
-   * @param {Item} node The node
-   * @returns {string} The plain text version of the node's note,
-   *                   or the empty string if it is the root node.
+   * @param {Item} item The item
+   * @returns {string} The plain text version of the item's note,
+   *                   or the empty string if it is the root item.
    */
-  function nodeToPlainTextNote(node) {
-    return node.getNoteInPlainText() || "";
+  function itemToPlainTextNote(item) {
+    return item.getNoteInPlainText() || "";
   }
 
   /**
    * @param {function} textPredicate The predicate to apply to each string.
    *                                 The predicate should handle null values,
-   *                                 as the root node has a null name and note.
-   * @param {Item} node The node to test.
-   * @returns {boolean} Whether textPredicate returns true for either the node's
+   *                                 as the root item has a null name and note.
+   * @param {Item} item The item to test.
+   * @returns {boolean} Whether textPredicate returns true for either the item's
    *                    name or note.
    */
-  function doesNodeNameOrNoteMatch(textPredicate, node) {
+  function doesItemNameOrNoteMatch(textPredicate, item) {
     return (
-      textPredicate(nodeToPlainTextName(node)) ||
-      textPredicate(nodeToPlainTextNote(node))
+      textPredicate(itemToPlainTextName(item)) ||
+      textPredicate(itemToPlainTextNote(item))
     );
   }
 
@@ -154,14 +154,14 @@ global WF:false
   }
 
   /**
-   * @param {Item} node The node to query.
-   * @returns {number} When the node was last modified, in seconds since
-   *                   unix epoch. For the root node, returns zero.
+   * @param {Item} item The item to query.
+   * @returns {number} When the item was last modified, in seconds since
+   *                   unix epoch. For the root item, returns zero.
    */
-  function nodeToLastModifiedSec(node) {
-    return isRootNode(node)
+  function itemToLastModifiedSec(item) {
+    return isRootItem(item)
       ? 0
-      : dateToSecondsSinceEpoch(node.getLastModifiedDate());
+      : dateToSecondsSinceEpoch(item.getLastModifiedDate());
   }
 
   ////////////////////////////////////
@@ -234,8 +234,8 @@ global WF:false
     return originalWindowOpenFn(url, target, features, replace);
   }
 
-  function openNodeHere(node, searchQuery) {
-    WF.zoomTo(node);
+  function openItemHere(item, searchQuery) {
+    WF.zoomTo(item);
     if (searchQuery) {
       WF.search(searchQuery);
     } else {
@@ -265,7 +265,7 @@ global WF:false
 
   /**
    * @returns {void} Dismisses a notification from the WorkFlowy UI, e.g. after
-   *                 deleting a large tree of nodes.
+   *                 deleting a large tree of items.
    */
   function dismissNotification() {
     WF.hideMessage();
@@ -356,34 +356,34 @@ global WF:false
   const _stringToTagArgsText_CallRegExp = RegExp("^ *\\([^\\(\\)]*\\) *$");
 
   /**
-   * Finds and returns the nodes whose "combined plain text" matches the
-   * given regular expression. Here, the "combined plain text" is the node's
-   * name as plain text, plus the node's note as plain text, with a
+   * Finds and returns the items whose "combined plain text" matches the
+   * given regular expression. Here, the "combined plain text" is the item's
+   * name as plain text, plus the item's note as plain text, with a
    * newline separating the two only when the note is non-empty.
    *
    * @param {RegExp} regExp The compiled regular expression to match.
-   * @param {Item} searchRoot The root node of the search.
-   * @returns {Array<Item>} The matching nodes, in order of appearance.
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Array<Item>} The matching items, in order of appearance.
    */
-  function findNodesMatchingRegex(regExp, searchRoot) {
+  function findItemsMatchingRegex(regExp, searchRoot) {
     if (typeof regExp !== "object" || regExp.constructor.name !== "RegExp") {
       throw "regExp must be a compiled RegExp object. regExp: " + regExp;
     }
-    function nodePredicate(node) {
-      const name = nodeToPlainTextName(node);
-      const note = nodeToPlainTextNote(node);
+    function itemPredicate(item) {
+      const name = itemToPlainTextName(item);
+      const note = itemToPlainTextNote(item);
       const combinedText = note.length === 0 ? name : `${name}\n${note}`;
       return regExp.test(combinedText);
     }
-    return findMatchingNodes(nodePredicate, searchRoot);
+    return findMatchingItems(itemPredicate, searchRoot);
   }
 
   /**
    * Prompts the user for a regular expression string (case insensitive, and
-   * defaulting to the last chosen regex), the searches for nodes under the
-   * currently zoomed node which match it, then prompts the user to choose which
-   * of the matching nodes to go to.
-   * @see findNodesMatchingRegex For how the regex is matched against the node.
+   * defaulting to the last chosen regex), the searches for items under the
+   * currently zoomed item which match it, then prompts the user to choose which
+   * of the matching items to go to.
+   * @see findItemsMatchingRegex For how the regex is matched against the item.
    * @returns {void}
    */
   function promptToFindLocalRegexMatchThenZoom() {
@@ -402,82 +402,82 @@ global WF:false
       return;
     }
     const startTime = new Date();
-    const matchingNodes = findNodesMatchingRegex(regExp, getZoomedNode());
-    const message = `Found ${matchingNodes.length} matches for ${regExp}`;
+    const matchingItems = findItemsMatchingRegex(regExp, getZoomedItem());
+    const message = `Found ${matchingItems.length} matches for ${regExp}`;
     logElapsedTime(startTime, message);
 
-    if (matchingNodes.length === 0) {
-      alert(`No nodes under current location match '${regExpString}'.`);
+    if (matchingItems.length === 0) {
+      alert(`No items under current location match '${regExpString}'.`);
     } else {
-      const chosenNode = promptToChooseNode(matchingNodes);
-      if (chosenNode) {
-        openNodeHere(chosenNode, null);
+      const chosenItem = promptToChooseItem(matchingItems);
+      if (chosenItem) {
+        openItemHere(chosenItem, null);
       }
     }
   }
 
   /**
    * @param {string} tagToMatch The tag to match.
-   * @param {Item} node The node to extract the args text from.
+   * @param {Item} item The item to extract the args text from.
    * @returns {string} The trimmed arguments string, or null if no call found.
    * @see {@link stringToTagArgsText} For semantics.
    */
-  function nodeToTagArgsText(tagToMatch, node) {
+  function itemToTagArgsText(tagToMatch, item) {
     const resultForName = stringToTagArgsText(
       tagToMatch,
-      nodeToPlainTextName(node)
+      itemToPlainTextName(item)
     );
     if (resultForName !== null) {
       return resultForName;
     }
-    return stringToTagArgsText(tagToMatch, nodeToPlainTextNote(node));
+    return stringToTagArgsText(tagToMatch, itemToPlainTextNote(item));
   }
 
   /**
-   * @param {Item} node The node to query
-   * @returns {boolean} Whether the given node is the root node
+   * @param {Item} item The item to query
+   * @returns {boolean} Whether the given item is the root item
    */
-  function isRootNode(node) {
-    return node.getProjectId() === "None";
+  function isRootItem(item) {
+    return item.getProjectId() === "None";
   }
 
   /**
    * @returns {string} The long (non-truncated) project ID of the
-   *                   node which is currently zoomed into.
+   *                   item which is currently zoomed into.
    */
-  function getZoomedNodeAsLongId() {
+  function getZoomedItemAsLongId() {
     return WF.currentItem().getId();
   }
 
   /**
-   * @returns {Item} The node which is currently zoomed into.
+   * @returns {Item} The item which is currently zoomed into.
    */
-  function getZoomedNode() {
-    const zoomedNodeId = getZoomedNodeAsLongId();
-    return WF.getItemById(zoomedNodeId);
+  function getZoomedItem() {
+    const zoomedItemId = getZoomedItemAsLongId();
+    return WF.getItemById(zoomedItemId);
   }
 
   /**
-   * @param {Item} node The node whose path to get
+   * @param {Item} item The item whose path to get
    * @returns {Array<Item>} An array starting with the root and ending
-   *                              with the node.
+   *                              with the item.
    */
-  function nodeToPathAsNodes(node) {
-    return node
+  function itemToPathAsItems(item) {
+    return item
       .getAncestors() // parent ... root
       .slice()
       .reverse() // root ... parent
-      .concat(node); // root ... parent, node
+      .concat(item); // root ... parent, item
   }
 
   /**
-   * @param {Item} nodeA Some node
-   * @param {Item} nodeB Another node
-   * @returns {Item} The closest common ancestor of both nodes, inclusive.
+   * @param {Item} itemA Some item
+   * @param {Item} itemB Another item
+   * @returns {Item} The closest common ancestor of both items, inclusive.
    */
-  function findClosestCommonAncestor(nodeA, nodeB) {
-    const pathA = nodeToPathAsNodes(nodeA);
-    const pathB = nodeToPathAsNodes(nodeB);
+  function findClosestCommonAncestor(itemA, itemB) {
+    const pathA = itemToPathAsItems(itemA);
+    const pathB = itemToPathAsItems(itemB);
     const minLength = Math.min(pathA.length, pathB.length);
 
     let i;
@@ -487,7 +487,7 @@ global WF:false
       }
     }
     if (i === 0) {
-      throw "Nodes shared no common root";
+      throw "Items shared no common root";
     }
     return pathA[i - 1];
   }
@@ -502,7 +502,7 @@ global WF:false
 
   /**
    * @returns {boolean} True if and only if the given string is a WorkFlowy URL
-   *                    which represents the root node, with no search query.
+   *                    which represents the root item, with no search query.
    * @param {string} s The string to test.
    */
   function isWorkFlowyHomeUrl(s) {
@@ -518,36 +518,36 @@ global WF:false
   }
 
   /**
-   * @param {Array<Item>} nodes The nodes to build the search query for.
+   * @param {Array<Item>} items The items to build the search query for.
    * @returns {string | null} The search query to use for finding the
-   *                          nodes, or an unmatchable query if nodes is empty.
+   *                          items, or an unmatchable query if items is empty.
    */
-  function nodesToVolatileSearchQuery(nodes) {
-    if (nodes.length === 0) {
-      // Return a search query which matches no nodes
+  function itemsToVolatileSearchQuery(items) {
+    if (items.length === 0) {
+      // Return a search query which matches no items
       return searchQueryToMatchNoItems;
     }
-    const searches = nodes.map(n => nodeToVolatileSearchQuery(n));
+    const searches = items.map(n => itemToVolatileSearchQuery(n));
     return searches.join(" OR ");
   }
 
   /**
-   * @param {Item} node The node to build the search query for.
-   * @returns {string | null} The search query to use for finding the node, or
-   *                          an unmatchable query for the root node.
+   * @param {Item} item The item to build the search query for.
+   * @returns {string | null} The search query to use for finding the item, or
+   *                          an unmatchable query for the root item.
    */
-  function nodeToVolatileSearchQuery(node) {
-    if (isRootNode(node)) {
-      // Return a search query which matches no nodes
+  function itemToVolatileSearchQuery(item) {
+    if (isRootItem(item)) {
+      // Return a search query which matches no items
       return searchQueryToMatchNoItems;
     }
     const currentTimeSec = getCurrentTimeSec();
-    const nodeLastModifiedSec = nodeToLastModifiedSec(node);
-    const modifiedHowLongAgoSec = currentTimeSec - nodeLastModifiedSec;
+    const itemLastModifiedSec = itemToLastModifiedSec(item);
+    const modifiedHowLongAgoSec = currentTimeSec - itemLastModifiedSec;
     const modifiedHowLongAgoMinutes = Math.ceil(modifiedHowLongAgoSec / 60);
     const timeClause = `last-changed:${modifiedHowLongAgoMinutes +
       1} -last-changed:${modifiedHowLongAgoMinutes - 1} `;
-    const nameClause = splitStringToSearchTerms(nodeToPlainTextName(node));
+    const nameClause = splitStringToSearchTerms(itemToPlainTextName(item));
     return timeClause + nameClause;
   }
 
@@ -571,11 +571,11 @@ global WF:false
 
   /**
    * @param {string} tag The tag to find, e.g. "#foo".
-   * @param {Item} searchRoot The root node of the search.
-   * @returns {Array<Item>} The matching nodes, in order of appearance.
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Array<Item>} The matching items, in order of appearance.
    */
-  function findNodesWithTag(tag, searchRoot) {
-    return findMatchingNodes(n => doesNodeHaveTag(tag, n), searchRoot);
+  function findItemsWithTag(tag, searchRoot) {
+    return findMatchingItems(n => doesItemHaveTag(tag, n), searchRoot);
   }
 
   /**
@@ -610,28 +610,28 @@ global WF:false
   }
 
   /**
-   * @returns {Array<Item>} The top nodes under the given
-   *    search root (inclusive), with higher scoring nodes first.
-   * @param {function} nodeToScoreFn A function from node (Item)
+   * @returns {Array<Item>} The top items under the given
+   *    search root (inclusive), with higher scoring items first.
+   * @param {function} itemToScoreFn A function from item (Item)
    *    to a score (number), where higher scores are better.
-   * @param {number} minScore Nodes must have this score or higher to
+   * @param {number} minScore Items must have this score or higher to
    *    be included in the results.
    * @param {number} maxSize The results array will be at most this size.
-   * @param {Item} searchRoot The root node of the search.
+   * @param {Item} searchRoot The root item of the search.
    */
-  function findTopNodesByScore(nodeToScoreFn, minScore, maxSize, searchRoot) {
+  function findTopItemsByScore(itemToScoreFn, minScore, maxSize, searchRoot) {
     const results = Array(maxSize).fill(null);
-    function isABetterThanB(nodeAndScoreA, nodeAndScoreB) {
-      return nodeAndScoreA[1] > nodeAndScoreB[1];
+    function isABetterThanB(itemAndScoreA, itemAndScoreB) {
+      return itemAndScoreA[1] > itemAndScoreB[1];
     }
-    function forEachNode(node) {
-      const score = nodeToScoreFn(node);
-      const nodeAndScore = [node, score];
+    function forEachItem(item) {
+      const score = itemToScoreFn(item);
+      const itemAndScore = [item, score];
       if (score >= minScore) {
-        insertIntoSortedResults(isABetterThanB, results, nodeAndScore);
+        insertIntoSortedResults(isABetterThanB, results, itemAndScore);
       }
     }
-    applyToEachNode(forEachNode, searchRoot);
+    applyToEachItem(forEachItem, searchRoot);
     return results
       .filter(x => x !== null)
       .map(x => x[0])
@@ -656,14 +656,14 @@ global WF:false
   }
 
   /**
-   * @returns {Array<Item>} Recently edited nodes, most recent first.
-   * @param {number} earliestModifiedSec Nodes edited before this are excluded.
+   * @returns {Array<Item>} Recently edited items, most recent first.
+   * @param {number} earliestModifiedSec Items edited before this are excluded.
    * @param {number} maxSize The results array will be at most this size.
-   * @param {Item} searchRoot The root node of the search.
+   * @param {Item} searchRoot The root item of the search.
    */
-  function findRecentlyEditedNodes(earliestModifiedSec, maxSize, searchRoot) {
-    const scoreFn = nodeToLastModifiedSec; // Higher timestamp is a higher score
-    return findTopNodesByScore(
+  function findRecentlyEditedItems(earliestModifiedSec, maxSize, searchRoot) {
+    const scoreFn = itemToLastModifiedSec; // Higher timestamp is a higher score
+    return findTopItemsByScore(
       scoreFn,
       earliestModifiedSec,
       maxSize,
@@ -786,27 +786,27 @@ global WF:false
   }
 
   /**
-   * Prompts the user to choose a node from among the given array of nodes,
+   * Prompts the user to choose an item from among the given array of items,
    * using a mix of choosing by index, or choosing by bookmark, or by text.
    * Note: the behaviour of this method is expected to change.
-   * @param {Array<Item>} nodes The array of nodes to choose from.
-   * @returns {Item} Returns the chosen node, or null if cancelled.
+   * @param {Array<Item>} items The array of items to choose from.
+   * @returns {Item} Returns the chosen item, or null if cancelled.
    */
-  function promptToChooseNode(nodes) {
+  function promptToChooseItem(items) {
     // Build aliases
-    const nodeAliases = Array();
-    for (let node of nodes) {
-      const tagArgsText = nodeToTagArgsText(bookmarkTag, node);
+    const itemAliases = Array();
+    for (let item of items) {
+      const tagArgsText = itemToTagArgsText(bookmarkTag, item);
       if (tagArgsText && tagArgsText.trim()) {
-        nodeAliases.push(tagArgsText);
+        itemAliases.push(tagArgsText);
       } else {
-        nodeAliases.push(null);
+        itemAliases.push(null);
       }
     }
 
     let text = "Choose from one of the following:\n";
-    for (let i = 0; i < nodes.length; i++) {
-      text += i + ": " + (nodeToPlainTextName(nodes[i]) || "<No name>") + "\n";
+    for (let i = 0; i < items.length; i++) {
+      text += i + ": " + (itemToPlainTextName(items[i]) || "<No name>") + "\n";
     }
     let answer = prompt(text);
     if (answer === null) {
@@ -817,74 +817,74 @@ global WF:false
       return;
     }
     const answerAsInt = parseInt(answer);
-    const resultNodes = Array();
+    const resultItems = Array();
     const answerLC = answer.toLowerCase();
     if (!isNaN(answerAsInt) && `${answerAsInt}` === answer) {
       // It's a number
-      if (answerAsInt < 0 || answerAsInt >= nodes.length) {
+      if (answerAsInt < 0 || answerAsInt >= items.length) {
         alert("Invalid choice: " + answer);
         return;
       } else {
-        resultNodes.push(nodes[answerAsInt]);
+        resultItems.push(items[answerAsInt]);
       }
     }
-    if (resultNodes.length === 0) {
+    if (resultItems.length === 0) {
       // Match the full alias (ignoring case)
-      for (let i = 0; i < nodes.length; i++) {
-        const alias = nodeAliases[i];
+      for (let i = 0; i < items.length; i++) {
+        const alias = itemAliases[i];
         if (alias && alias.toLowerCase() === answerLC) {
-          resultNodes.push(nodes[i]);
+          resultItems.push(items[i]);
         }
       }
     }
-    if (resultNodes.length === 0) {
+    if (resultItems.length === 0) {
       // Match aliases which start with the string (ignoring case)
-      for (let i = 0; i < nodes.length; i++) {
-        const alias = nodeAliases[i];
+      for (let i = 0; i < items.length; i++) {
+        const alias = itemAliases[i];
         if (alias && alias.toLowerCase().startsWith(answerLC)) {
-          resultNodes.push(nodes[i]);
+          resultItems.push(items[i]);
         }
       }
     }
-    if (resultNodes.length === 0) {
-      // Match nodes which contains the full string in the name (ignoring case)
-      for (let node of nodes) {
-        const plainTextNameLC = nodeToPlainTextName(node).toLowerCase();
+    if (resultItems.length === 0) {
+      // Match items which contains the full string in the name (ignoring case)
+      for (let item of items) {
+        const plainTextNameLC = itemToPlainTextName(item).toLowerCase();
         if (plainTextNameLC.includes(answerLC)) {
-          resultNodes.push(node);
+          resultItems.push(item);
         }
       }
     }
-    if (resultNodes.length > 1) {
+    if (resultItems.length > 1) {
       // Choose again amongst only the matches
-      return promptToChooseNode(resultNodes);
-    } else if (resultNodes.length === 1) {
-      return resultNodes[0];
+      return promptToChooseItem(resultItems);
+    } else if (resultItems.length === 1) {
+      return resultItems[0];
     } else {
       if (confirm(`No matches for "${answer}". Try again or cancel.`)) {
-        return promptToChooseNode(nodes);
+        return promptToChooseItem(items);
       }
     }
   }
 
   /**
-   * @param {Item} node The node to follow.
+   * @param {Item} item The item to follow.
    * @returns {void}
-   * @see nodeToFollowAction
+   * @see itemToFollowAction
    */
-  function followNode(node) {
-    const action = nodeToFollowAction(node);
+  function followItem(item) {
+    const action = itemToFollowAction(item);
     action();
   }
 
   /**
-   * Calls followNode on the currently zoomed node.
-   * @see followNode
+   * Calls followItem on the currently zoomed item.
+   * @see followItem
    * @returns {void}
    */
-  function followZoomedNode() {
-    const zoomedNode = getZoomedNode();
-    followNode(zoomedNode);
+  function followZoomedItem() {
+    const zoomedItem = getZoomedItem();
+    followItem(zoomedItem);
   }
 
   /**
@@ -893,12 +893,12 @@ global WF:false
    */
   function openFirstLinkInFocusedItem() {
     const focusedItem = WF.focusedItem();
-    if (focusedItem === null || isRootNode(focusedItem)) {
+    if (focusedItem === null || isRootItem(focusedItem)) {
       return;
     }
     for (let nameOrNote of [
-      nodeToPlainTextName(focusedItem),
-      nodeToPlainTextNote(focusedItem)
+      itemToPlainTextName(focusedItem),
+      itemToPlainTextNote(focusedItem)
     ]) {
       const matchResult = nameOrNote.match(/https?:\/\/[^\s]+/);
       if (matchResult) {
@@ -913,25 +913,25 @@ global WF:false
   }
 
   /**
-   * Returns a no-arg function which will 'follow' the given node,
-   * performing some action depending on the content of the node.
+   * Returns a no-arg function which will 'follow' the given item,
+   * performing some action depending on the content of the item.
    * Note: the behaviour of this method is expected to change.
-   * @param {Item} node The node to follow.
-   * @returns {function} A no-arg function which 'follows' the node.
+   * @param {Item} item The item to follow.
+   * @returns {function} A no-arg function which 'follows' the item.
    */
-  function nodeToFollowAction(node) {
-    if (!node) {
+  function itemToFollowAction(item) {
+    if (!item) {
       return () => {}; // Return a no-op
     }
     for (let nameOrNote of [
-      nodeToPlainTextName(node),
-      nodeToPlainTextNote(node)
+      itemToPlainTextName(item),
+      itemToPlainTextNote(item)
     ]) {
       const trimmed = (nameOrNote || "").trim();
-      if (isWorkFlowyUrl(trimmed) && node.getChildren().length === 0) {
-        // For leaf nodes whose trimmed name or note is a WorkFlowy URL, open it
+      if (isWorkFlowyUrl(trimmed) && item.getChildren().length === 0) {
+        // For leaf items whose trimmed name or note is a WorkFlowy URL, open it
         if (isWorkFlowyHomeUrl(trimmed)) {
-          return () => openNodeHere(WF.rootItem(), null);
+          return () => openItemHere(WF.rootItem(), null);
         } else {
           return () => openHere(trimmed);
         }
@@ -941,23 +941,23 @@ global WF:false
       }
     }
 
-    // Otherwise, go directly to the node itself
-    return () => openNodeHere(node, null);
+    // Otherwise, go directly to the item itself
+    return () => openItemHere(item, null);
   }
 
   /**
-   * Prompts the user to choose from the bookmark nodes, then follows
-   * the chosen node.
+   * Prompts the user to choose from the bookmark items, then follows
+   * the chosen item.
    * Note: the behaviour of this method is expected to change.
    * @returns {void}
-   * @see followNode
+   * @see followItem
    */
   function promptToFindGlobalBookmarkThenFollow() {
     const startTime = new Date();
-    const nodes = findNodesWithTag(bookmarkTag, WF.rootItem());
-    logElapsedTime(startTime, `Found nodes with ${bookmarkTag} tag`);
-    const chosenNode = promptToChooseNode(nodes);
-    followNode(chosenNode);
+    const items = findItemsWithTag(bookmarkTag, WF.rootItem());
+    logElapsedTime(startTime, `Found items with ${bookmarkTag} tag`);
+    const chosenItem = promptToChooseItem(items);
+    followItem(chosenItem);
   }
 
   /**
@@ -1004,10 +1004,10 @@ global WF:false
       pass("Starred locations found: " + starredLocationsCount);
     }
 
-    currentTest = "Count total nodes";
-    let totalNodes = 0;
-    applyToEachNode(() => totalNodes++, rootProject);
-    pass(totalNodes + ".");
+    currentTest = "Count total items";
+    let totalItems = 0;
+    applyToEachItem(() => totalItems++, rootProject);
+    pass(totalItems + ".");
 
     console.log(text);
     if (hasFailed) {
@@ -1016,23 +1016,23 @@ global WF:false
   }
 
   function showZoomedAndMostRecentlyEdited() {
-    const recentNode = findRecentlyEditedNodes(0, 1, WF.rootItem())[0];
-    const zoomedNode = getZoomedNode();
-    const newZoom = findClosestCommonAncestor(recentNode, zoomedNode);
-    const searchQuery = nodesToVolatileSearchQuery([recentNode, zoomedNode]);
-    openNodeHere(newZoom, searchQuery);
+    const recentItem = findRecentlyEditedItems(0, 1, WF.rootItem())[0];
+    const zoomedItem = getZoomedItem();
+    const newZoom = findClosestCommonAncestor(recentItem, zoomedItem);
+    const searchQuery = itemsToVolatileSearchQuery([recentItem, zoomedItem]);
+    openItemHere(newZoom, searchQuery);
   }
 
   function editCurrentItem() {
     const currentItem = WF.currentItem();
-    if (!isRootNode(currentItem)) {
+    if (!isRootItem(currentItem)) {
       WF.editItemName(currentItem);
     }
   }
 
   function editParentOfFocusedItem() {
     const focusedItem = WF.focusedItem();
-    if (focusedItem === null || isRootNode(focusedItem)) {
+    if (focusedItem === null || isRootItem(focusedItem)) {
       return;
     }
     const parentItem = focusedItem.getParent();
@@ -1040,7 +1040,7 @@ global WF:false
       // Zoom out one level
       WF.zoomTo(parentItem);
     }
-    if (!isRootNode(parentItem)) {
+    if (!isRootItem(parentItem)) {
       WF.editItemName(parentItem);
     }
   }
@@ -1053,11 +1053,11 @@ global WF:false
       if (sel.getRangeAt && sel.rangeCount) {
         range = sel.getRangeAt(0);
         range.deleteContents();
-        const textNode = document.createTextNode(text);
-        range.insertNode(textNode);
+        const textItem = document.createTextItem(text);
+        range.insertItem(textItem);
         sel.removeAllRanges();
         range = range.cloneRange();
-        range.selectNode(textNode);
+        range.selectItem(textItem);
         range.collapse(false);
         sel.addRange(range);
       }
@@ -1125,8 +1125,8 @@ global WF:false
    */
   function _buildCustomAbbreviationsMap() {
     const abbreviationsMap = new Map();
-    for (let node of findNodesWithTag(abbrevTag, WF.rootItem())) {
-      const argsText = nodeToTagArgsText(abbrevTag, node);
+    for (let item of findItemsWithTag(abbrevTag, WF.rootItem())) {
+      const argsText = itemToTagArgsText(abbrevTag, item);
       if (!argsText) {
         continue;
       }
@@ -1175,13 +1175,13 @@ global WF:false
   }
 
   function _registerKeyboardShortcuts() {
-    for (let node of findNodesWithTag(shortcutTag, WF.rootItem())) {
-      const keyCode = nodeToTagArgsText(shortcutTag, node);
+    for (let item of findItemsWithTag(shortcutTag, WF.rootItem())) {
+      const keyCode = itemToTagArgsText(shortcutTag, item);
       if (!keyCode) {
         continue;
       }
       if (isValidCanonicalCode(keyCode)) {
-        registerFunctionForKeyDownEvent(keyCode, nodeToFollowAction(node));
+        registerFunctionForKeyDownEvent(keyCode, itemToFollowAction(item));
       } else {
         console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
       }
@@ -1283,30 +1283,30 @@ global WF:false
     editParentOfFocusedItem: editParentOfFocusedItem,
     expandAbbreviation: expandAbbreviation,
     findClosestCommonAncestor: findClosestCommonAncestor,
-    findNodesMatchingRegex: findNodesMatchingRegex,
-    findNodesWithTag: findNodesWithTag,
-    findRecentlyEditedNodes: findRecentlyEditedNodes,
+    findItemsMatchingRegex: findItemsMatchingRegex,
+    findItemsWithTag: findItemsWithTag,
+    findRecentlyEditedItems: findRecentlyEditedItems,
     findTopItemsByComparator: findTopItemsByComparator,
-    findTopNodesByScore: findTopNodesByScore,
-    followNode: followNode,
-    followZoomedNode: followZoomedNode,
-    getZoomedNode: getZoomedNode,
-    getZoomedNodeAsLongId: getZoomedNodeAsLongId,
+    findTopItemsByScore: findTopItemsByScore,
+    followItem: followItem,
+    followZoomedItem: followZoomedItem,
+    getZoomedItem: getZoomedItem,
+    getZoomedItemAsLongId: getZoomedItemAsLongId,
     insertTextAtCursor: insertTextAtCursor,
-    isRootNode: isRootNode,
+    isRootItem: isRootItem,
     isValidCanonicalCode: isValidCanonicalCode,
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
     logElapsedTime: logElapsedTime,
     logShortReport: logShortReport,
-    nodeToPathAsNodes: nodeToPathAsNodes,
-    nodeToTagArgsText: nodeToTagArgsText,
-    nodeToVolatileSearchQuery: nodeToVolatileSearchQuery,
-    nodesToVolatileSearchQuery: nodesToVolatileSearchQuery,
+    itemToPathAsItems: itemToPathAsItems,
+    itemToTagArgsText: itemToTagArgsText,
+    itemToVolatileSearchQuery: itemToVolatileSearchQuery,
+    itemsToVolatileSearchQuery: itemsToVolatileSearchQuery,
     openFirstLinkInFocusedItem: openFirstLinkInFocusedItem,
     openHere: openHere,
     openInNewTab: openInNewTab,
-    openNodeHere: openNodeHere,
-    promptToChooseNode: promptToChooseNode,
+    openItemHere: openItemHere,
+    promptToChooseItem: promptToChooseItem,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
@@ -1325,16 +1325,16 @@ global WF:false
   // Return jumpflowy object
   return {
     // Functions by alphabetical order
-    applyToEachNode: applyToEachNode,
-    doesNodeHaveTag: doesNodeHaveTag,
-    doesNodeNameOrNoteMatch: doesNodeNameOrNoteMatch,
+    applyToEachItem: applyToEachItem,
+    doesItemHaveTag: doesItemHaveTag,
+    doesItemNameOrNoteMatch: doesItemNameOrNoteMatch,
     doesStringHaveTag: doesStringHaveTag,
-    findMatchingNodes: findMatchingNodes,
+    findMatchingItems: findMatchingItems,
     getCurrentTimeSec: getCurrentTimeSec,
     itemToTags: itemToTags,
-    nodeToLastModifiedSec: nodeToLastModifiedSec,
-    nodeToPlainTextName: nodeToPlainTextName,
-    nodeToPlainTextNote: nodeToPlainTextNote,
+    itemToLastModifiedSec: itemToLastModifiedSec,
+    itemToPlainTextName: itemToPlainTextName,
+    itemToPlainTextNote: itemToPlainTextNote,
 
     // The Nursery namespace
     nursery: nursery

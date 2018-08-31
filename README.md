@@ -56,22 +56,22 @@ The documentation and examples consist of:
 
 ### Configuration of triggers and actions
 
-Configuring JumpFlowy is mostly about binding triggers (e.g. keyboard shortcuts) to actions. You do this by adding a node to your WorkFlowy document, where a tag describes the trigger, and the note describes an (optional) _follow action_.
+Configuring JumpFlowy is mostly about binding triggers (e.g. keyboard shortcuts) to actions. You do this by adding an item to your WorkFlowy document, where a tag describes the trigger, and the note describes an (optional) _follow action_.
 
 There are 2 types of trigger:
 - keyboard shortcuts, e.g. `#shortcut(ctrl+shift+KeyF)`
 - bookmarks, e.g. `#bm(home)`
 
-The trigger takes us to the node which defined that trigger, and then JumpFlowy _follows_ that node, i.e. it performs some _follow action_ based on the contents of the node.
+The trigger takes us to the item which defined that trigger, and then JumpFlowy _follows_ that item, i.e. it performs some _follow action_ based on the contents of the item.
 
 There are 3 types of _follow action_:
-- Perform some named function (where the node's text is the name of that function, e.g. `promptToNormalLocalSearch`)
-- Go to some other WorkFlowy node (where the node's text is the URL of that WorkFlowy node to go to, e.g. `https://workflowy.com`)
-- Go to the node itself (where neither a named function nor WorkFlowy URL are found as defined above)
+- Perform some named function (where the item's text is the name of that function, e.g. `promptToNormalLocalSearch`)
+- Go to some other WorkFlowy item (where the item's text is the URL of that WorkFlowy item to go to, e.g. `https://workflowy.com`)
+- Go to the item itself (where neither a named function nor WorkFlowy URL are found as defined above)
 
 #### Keyboard shortcut triggers
 
-To add a keyboard trigger, add e.g. `#shortcut(ctrl+shift+KeyF)` to the node you want to follow.
+To add a keyboard trigger, add e.g. `#shortcut(ctrl+shift+KeyF)` to the item you want to follow.
 
 For the available key codes, see this Mozilla's [keyCode reference](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode).
 
@@ -79,7 +79,7 @@ Note: Currently, you'll need to log out and log in again to WorkFlowy (after sav
 
 #### Bookmark triggers
 
-To add a keyboard trigger, add e.g. `#bm(home)` to the node you want to follow to define a bookmark called `home`.
+To add a keyboard trigger, add e.g. `#bm(home)` to the item you want to follow to define a bookmark called `home`.
 
 #### Configuration Examples
 
@@ -105,17 +105,17 @@ This example binds the bookmark `hm` to the root/home of the document.
 
 With the above configuration enabled, you could press `ctrl+KeyJ` to trigger the bookmark search, then type `hm`, `ENTER` to find and follow the `hm` bookmark, which would take you to the root/home of the document.
 
-A good convention to follow is to put the trigger in the node's text, and the action as the node's note. However, the trigger (`#bm`/`#shortcut`) can be specified anywhere in the node's main text or note. The action must be either the only content in the node's main text, or the only content in the node's note.
+A good convention to follow is to put the trigger in the item's text, and the action as the item's note. However, the trigger (`#bm`/`#shortcut`) can be specified anywhere in the item's main text or note. The action must be either the only content in the item's main text, or the only content in the item's note.
 
 #### Follow actions
 
-When following a node, the follow action will be one of:
-- Go to the node itself, i.e. zoom into it
-- Go to some other node (specify the URL or this other node as this node's note)
-- Perform some named function (specify the name of the function as this node's note)
+When following an item, the follow action will be one of:
+- Go to the item itself, i.e. zoom into it
+- Go to some other item (specify the URL or this other item as this item's note)
+- Perform some named function (specify the name of the function as this item's note)
 
-The normal convention for specifying a named function to execute or a URL to follow is to put it as the only content in the node's text.
-To be recognised by JumpFlowy, it must be the full text of either the node's main text or the node's note.
+The normal convention for specifying a named function to execute or a URL to follow is to put it as the only content in the item's text.
+To be recognised by JumpFlowy, it must be the full text of either the item's main text or the item's note.
 
 For a description of what each of these named functions do, find its comments in [`jumpflowy.user.js`](https://github.com/mbhutton/jumpflowy/blob/master/jumpflowy.user.js).
 
