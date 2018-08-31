@@ -4,6 +4,8 @@
 
 declare namespace WF {
 
+  function createItem(parent: Item, priority: number): ?Item
+
   function clearSearch(): void
 
   function currentItem(): Item

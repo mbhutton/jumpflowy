@@ -271,8 +271,11 @@ global WF:false
     WF.hideMessage();
   }
 
-  function clickAddButton() {
-    $(".addButton").click();
+  function createItemAtTopOfCurrent() {
+    const item = WF.createItem(WF.currentItem(), 0);
+    if (item) {
+      WF.editItemName(item);
+    }
   }
 
   /**
@@ -1224,7 +1227,7 @@ global WF:false
         // *******************************************************
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        clickAddButton,
+        createItemAtTopOfCurrent,
         dismissNotification,
         editCurrentItem,
         editParentOfFocusedItem,
@@ -1257,7 +1260,7 @@ global WF:false
     // Alphabetical order
     callAfterProjectLoaded: callAfterProjectLoaded,
     cleanUp: cleanUp,
-    clickAddButton: clickAddButton,
+    createItemAtTopOfCurrent: createItemAtTopOfCurrent,
     dateToYMDString: dateToYMDString,
     dismissNotification: dismissNotification,
     editCurrentItem: editCurrentItem,
