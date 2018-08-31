@@ -10,6 +10,8 @@ declare namespace WF {
 
   function currentItem(): Item
 
+  function currentSearchQuery(): string
+
   function editItemName(item: Item): void
 
   function editItemNote(item: Item): void

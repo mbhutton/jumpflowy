@@ -113,19 +113,6 @@ declare namespace webkit.MessageHandlers.Toast {
   function postMessage(m: string): void;
 }
 
-interface KeyCode {
-  ENTER: number;
-}
-
-interface JQueryUi {
-  keyCode: KeyCode;
-}
-
-// Extend JQuery definition
-interface JQueryStatic {
-  ui: JQueryUi;
-}
-
 declare namespace expect {
   function fail(s: string): void;
 }

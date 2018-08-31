@@ -248,19 +248,11 @@ global WF:false
    * @returns {void}
    */
   function promptToNormalLocalSearch() {
-    // Prompt for a new search query, using the previous value as the default
-    const previousVal = $("#searchBox")
-      .val()
-      .toString();
-    const newVal = prompt("WorkFlowy search: ", previousVal);
-    // Set search query then simulate <ENTER> key press, to trigger search
-    $("#searchBox").val(newVal);
-    $("#searchBox").focus();
-    $("#searchBox").trigger(
-      $.Event("keydown", {
-        which: $.ui.keyCode.ENTER
-      })
-    );
+    const previousQuery = WF.currentSearchQuery();
+    const newQuery = prompt("WorkFlowy search: ", previousQuery || "");
+    if (newQuery !== null) {
+      WF.search(newQuery);
+    }
   }
 
   /**
