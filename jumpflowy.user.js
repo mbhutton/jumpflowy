@@ -1045,25 +1045,6 @@ global WF:false
     }
   }
 
-  // Note: this function is based on https://jsfiddle.net/timdown/cCAWC/3/
-  function insertTextAtCursor(text) {
-    let sel, range;
-    if (getSelection) {
-      sel = getSelection();
-      if (sel.getRangeAt && sel.rangeCount) {
-        range = sel.getRangeAt(0);
-        range.deleteContents();
-        const textItem = document.createTextItem(text);
-        range.insertItem(textItem);
-        sel.removeAllRanges();
-        range = range.cloneRange();
-        range.selectItem(textItem);
-        range.collapse(false);
-        sel.addRange(range);
-      }
-    }
-  }
-
   /**
    * @returns {string} The expanded form of the given abbreviation, or null if
    *                   no such expansion is found. Gives preference to user
@@ -1112,7 +1093,7 @@ global WF:false
     if (!expansion) {
       alert(`No expansion found for ${abbreviation}`);
     } else if (typeof expansion === "string") {
-      insertTextAtCursor(expansion);
+      WF.insertText(expansion);
     } else {
       alert(`Invalid type of expansion: ${typeof expansion}.`);
     }
@@ -1292,7 +1273,6 @@ global WF:false
     followZoomedItem: followZoomedItem,
     getZoomedItem: getZoomedItem,
     getZoomedItemAsLongId: getZoomedItemAsLongId,
-    insertTextAtCursor: insertTextAtCursor,
     isRootItem: isRootItem,
     isValidCanonicalCode: isValidCanonicalCode,
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,

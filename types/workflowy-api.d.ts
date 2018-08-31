@@ -20,6 +20,8 @@ declare namespace WF {
 
   function getItemNoteTags(item: Item): Array<{index: number, tag: string}>
 
+  function insertText(content: string)
+
   function hideMessage(): void
 
   function rootItem(): Item

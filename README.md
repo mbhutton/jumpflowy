@@ -174,4 +174,3 @@ This project is licensed under the MIT license. See the [LICENSE](LICENSE) file 
 - The WorkFlowy team for creating such a great product
 - [rawbytz](https://rawbytz.wordpress.com/) for proving what's possible on top of WorkFlowy
 - Michinari Yamamoto for creating HandyFlowy, which makes it possible to extend WorkFlowy on mobile
-- [Timdown](https://jsfiddle.net/user/timdown/fiddles/) for the JavaScript example of replacing selected text
