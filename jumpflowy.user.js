@@ -164,24 +164,13 @@ global WF:false
       : dateToSecondsSinceEpoch(item.getLastModifiedDate());
   }
 
-  ////////////////////////////////////
-  // Nursery section starts.
-  //
-  // The code in this section should be considered under development rather
-  // than stable: the functionality is expected to change, and the functions
-  // do not form a stable API.
-  // Functions defined here are exposed via the 'jumpflowy.nursery' namespace.
-  // As code here stabilises, it will be moved above this section, with
-  // functions moved into the main 'jumpflowy' namespace.
-  ////////////////////////////////////
-
   // Clean up any previous instance of JumpFlowy
   if (
     typeof window.jumpflowy !== "undefined" &&
-    typeof window.jumpflowy.nursery !== "undefined" &&
-    typeof window.jumpflowy.nursery.cleanUp !== "undefined"
+    typeof window.jumpflowy !== "undefined" &&
+    typeof window.jumpflowy.cleanUp !== "undefined"
   ) {
-    window.jumpflowy.nursery.cleanUp();
+    window.jumpflowy.cleanUp();
   }
 
   // Global state
@@ -1253,7 +1242,8 @@ global WF:false
 
   setUp();
 
-  const nursery = {
+  // Return jumpflowy object
+  return {
     // Alphabetical order
     callAfterProjectLoaded: callAfterProjectLoaded,
     cleanUp: cleanUp,
@@ -1296,14 +1286,7 @@ global WF:false
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
-  };
 
-  ////////////////////////////////////
-  // Nursery section ends.
-  ////////////////////////////////////
-
-  // Return jumpflowy object
-  return {
     // Functions by alphabetical order
     applyToEachItem: applyToEachItem,
     doesItemHaveTag: doesItemHaveTag,
@@ -1315,8 +1298,5 @@ global WF:false
     itemToLastModifiedSec: itemToLastModifiedSec,
     itemToPlainTextName: itemToPlainTextName,
     itemToPlainTextNote: itemToPlainTextNote,
-
-    // The Nursery namespace
-    nursery: nursery
   };
 });

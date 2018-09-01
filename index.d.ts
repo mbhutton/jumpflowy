@@ -44,10 +44,6 @@ interface JumpFlowy {
 
   itemToPlainTextNote(item: Item): string;
 
-  nursery: Nursery;
-}
-
-interface Nursery {
   cleanUp(): void;
 
   itemToTagArgsText(tagToMatch: string, item: Item): string;

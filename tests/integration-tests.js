@@ -312,21 +312,21 @@ loading the expect.js and jumpflowy modules.
   }
 
   function whenUsingItemToTagArgsText() {
-    expect(jumpflowy.nursery.itemToTagArgsText).to.be.a("function");
+    expect(jumpflowy.itemToTagArgsText).to.be.a("function");
 
     const parentItem = getUniqueItemByNoteOrFail(
       "test/JumpFlowy/whenUsingItemToTagArgsText"
     );
     const item = getOnlyChildOf(parentItem);
-    expect(jumpflowy.nursery.itemToTagArgsText("#foo", item)).to.be(
+    expect(jumpflowy.itemToTagArgsText("#foo", item)).to.be(
       "a, b, c"
     );
   }
 
   function whenUsingStringToTagArgsText() {
-    expect(jumpflowy.nursery.stringToTagArgsText).to.be.a("function");
+    expect(jumpflowy.stringToTagArgsText).to.be.a("function");
 
-    const fnToTest = jumpflowy.nursery.stringToTagArgsText;
+    const fnToTest = jumpflowy.stringToTagArgsText;
 
     expect(fnToTest("#foo", null)).to.be(null);
     expect(fnToTest("#foo", "#foo")).to.be(null);
