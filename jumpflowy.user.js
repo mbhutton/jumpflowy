@@ -2,7 +2,7 @@
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
 // @version      0.1.5.6
-// @description  WorkFlowy library and user script for search and navigation
+// @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
 // @match        https://dev.workflowy.com/*
