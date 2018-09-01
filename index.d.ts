@@ -26,6 +26,8 @@ interface JumpFlowy {
   applyToEachItem(functionToApply: ItemHandler,
                   searchRoot: Item): void;
 
+  cleanUp(): void;
+
   doesItemHaveTag(tagToMatch: string, item: Item): boolean;
 
   doesItemNameOrNoteMatch(textPredicate: TextPredicate,
@@ -43,8 +45,6 @@ interface JumpFlowy {
   itemToPlainTextName(item: Item): string;
 
   itemToPlainTextNote(item: Item): string;
-
-  cleanUp(): void;
 
   itemToTagArgsText(tagToMatch: string, item: Item): string;
 
