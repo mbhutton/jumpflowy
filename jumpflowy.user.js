@@ -106,6 +106,15 @@ global WF:false
   }
 
   /**
+   * @param {Item} item The item to query
+   * @returns {boolean} True if and only if the given item is in the
+   *                    same tree as the root item.
+   */
+  function isItemLocal(item) {
+    return item.childrenAreInSameTree(WF.rootItem());
+  }
+
+  /**
    * @param {Item} item The item
    * @returns {string} The plain text version of the item's name,
    *                   or the empty string if it is the root item.
@@ -988,10 +997,18 @@ global WF:false
       pass("Starred locations found: " + starredLocationsCount);
     }
 
-    currentTest = "Count total items";
+    currentTest = "Count items";
     let totalItems = 0;
-    applyToEachItem(() => totalItems++, rootProject);
-    pass(totalItems + ".");
+    let localItems = 0;
+    applyToEachItem(
+      (item) => {
+        totalItems++;
+        if (isItemLocal(item)) {
+          localItems++;
+        }
+      }
+      , rootProject);
+    pass(`Total items: ${totalItems}. Local items: ${localItems}`);
 
     console.log(text);
     if (hasFailed) {

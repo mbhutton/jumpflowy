@@ -32,6 +32,7 @@ declare namespace WF {
 
   function search(query: string): void
 
+  // Note: return type may change
   function starredItems(): Array<Item>
 
   function zoomTo(item: Item): void

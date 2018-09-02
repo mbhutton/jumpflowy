@@ -56,6 +56,8 @@ interface JumpFlowy {
 //****************************
 
 interface Item {
+  childrenAreInSameTree(item: Item);
+
   getAncestors(): Array<Item>;
 
   getChildren(): Array<Item>;
