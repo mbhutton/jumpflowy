@@ -133,6 +133,26 @@ global WF:false
   }
 
   /**
+   * Marks the focused item and all its descendants as not complete.
+   * @returns {void}
+   */
+  function markFocusedAndDescendantsNotComplete() {
+    const focusedItem = WF.focusedItem();
+    if (focusedItem === null) {
+      return;
+    }
+    WF.editGroup(() => {
+      applyToEachItem(
+        (item) => {
+          if (item.isCompleted()) {
+            WF.completeItem(item);
+          }
+        },
+        focusedItem);
+    });
+  }
+
+  /**
    * @param {function} textPredicate The predicate to apply to each string.
    *                                 The predicate should handle null values,
    *                                 as the root item has a null name and note.
@@ -1235,6 +1255,7 @@ global WF:false
         editCurrentItem,
         editParentOfFocusedItem,
         logShortReport,
+        markFocusedAndDescendantsNotComplete,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
         promptToFindGlobalBookmarkThenFollow,
@@ -1299,6 +1320,7 @@ global WF:false
     keyDownEventToCanonicalCode: keyDownEventToCanonicalCode,
     logElapsedTime: logElapsedTime,
     logShortReport: logShortReport,
+    markFocusedAndDescendantsNotComplete: markFocusedAndDescendantsNotComplete,
     openFirstLinkInFocusedItem: openFirstLinkInFocusedItem,
     openHere: openHere,
     openInNewTab: openInNewTab,

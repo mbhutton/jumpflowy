@@ -8,9 +8,17 @@ declare namespace WF {
 
   function clearSearch(): void
 
+  /**
+   * Note: this *toggles* completeness.
+   * @param item Item to toggle
+   */
+  function completeItem(item: Item)
+
   function currentItem(): Item
 
   function currentSearchQuery(): string
+
+  function editGroup(callback: () => void)
 
   function editItemName(item: Item): void
 

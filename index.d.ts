@@ -77,6 +77,8 @@ interface Item {
   getNumDescendants(): number;
 
   getParent(): Item;
+
+  isCompleted(): boolean;
 }
 
 //****************************
