@@ -21,21 +21,8 @@ global WF:false
 /// <reference path="index.d.ts" />
 /// <reference path="types/workflowy-api.d.ts" />
 
-// UMD (Universal Module Definition) boilerplate
-(function(root, umdFactory) {
+(function() {
   "use strict";
-  // eslint-disable-next-line no-undef
-  if (typeof define === "function" && define.amd) {
-    // AMD. Register as an anonymous module.
-    // eslint-disable-next-line no-undef
-    define([], umdFactory);
-  } else {
-    // Browser globals
-    root.jumpflowy = umdFactory();
-  }
-})(typeof self !== "undefined" ? self : this, function() {
-  "use strict";
-  // JumpFlowy implementation starts
 
   /**
    * Applies the given function to the given item
@@ -1280,8 +1267,8 @@ global WF:false
 
   setUp();
 
-  // Return jumpflowy object
-  return {
+  // Create jumpflowy object and make it available at 'jumpflowy' in the window
+  self.jumpflowy = {
     // Functions by alphabetical order
     applyToEachItem: applyToEachItem,
     callAfterProjectLoaded: callAfterProjectLoaded,
@@ -1336,4 +1323,4 @@ global WF:false
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
   };
-});
+})();

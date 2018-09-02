@@ -96,16 +96,6 @@ interface Window {
 }
 
 //****************************
-// UMD pattern
-//****************************
-
-declare function define(dependencies: Array<any>, moduleFactory: any): void;
-
-declare namespace define {
-  const amd: boolean;
-}
-
-//****************************
 // Types from other packages
 //****************************
 
