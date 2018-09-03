@@ -16,6 +16,8 @@
 
 declare const jumpflowy: JumpFlowy;
 
+type NoArgsVoidFunction = () => void;
+
 type TextPredicate = (s: string) => boolean;
 
 type ItemPredicate = (item: Item) => boolean;
@@ -25,6 +27,8 @@ type ItemHandler = (item: Item) => void;
 interface JumpFlowy {
   applyToEachItem(functionToApply: ItemHandler,
                   searchRoot: Item): void;
+
+  callAfterProjectLoaded(callbackFn: NoArgsVoidFunction);
 
   cleanUp(): void;
 

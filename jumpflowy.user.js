@@ -672,8 +672,8 @@ global WF:false
   }
 
   /**
-   * @param {function} callbackFn The function to apply when project is loaded,
-   *                              of type (rootProject:Item) -> void.
+   * @param {function} callbackFn The function to call when project is loaded,
+   *                              of type () -> void.
    * @returns {void}
    * Notes:
    * - The function will be prevented from running if cleanUp() has been called.
@@ -704,7 +704,7 @@ global WF:false
     }
     if (isLoaded) {
       console.log("Project now loaded. Calling function.");
-      callbackFn(rootProject);
+      callbackFn();
     } else {
       console.log(`Project not yet loaded. Waiting for ${timeoutMs}ms.`);
       const repeat = () => callAfterProjectLoaded(callbackFn);
