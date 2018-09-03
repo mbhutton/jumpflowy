@@ -442,7 +442,7 @@ global WF:false
   }
 
   /**
-   * @returns {string} The long (non-truncated) project ID of the
+   * @returns {string} The long (non-truncated) ID of the
    *                   item which is currently zoomed into.
    */
   function getZoomedItemAsLongId() {
@@ -672,7 +672,7 @@ global WF:false
   }
 
   /**
-   * @param {function} callbackFn The function to call when project is loaded,
+   * @param {function} callbackFn Function to call when the document is loaded,
    *                              of type () -> void.
    * @returns {void}
    * Notes:
@@ -681,33 +681,33 @@ global WF:false
    * - If multiple functions are passed to this method, the callbacks
    *   will be run in an undefined order.
    */
-  function callAfterProjectLoaded(callbackFn) {
+  function callAfterDocumentLoaded(callbackFn) {
     if (isCleanedUp) {
       console.debug("Not calling function, because cleanUp() already called.");
       return;
     }
     let isLoaded = false;
-    let rootProject = null;
+    let rootItem = null;
     const timeoutMs = 350;
 
     if (typeof WF !== "undefined" && WF !== null) {
       if (WF.rootItem !== undefined && WF.rootItem !== null) {
         try {
-          rootProject = WF.rootItem();
+          rootItem = WF.rootItem();
         } catch (er) {
-          // This is expected while waiting for the project to load
+          // This is expected while waiting for the document to load
         }
-        if (rootProject !== null) {
+        if (rootItem !== null) {
           isLoaded = true;
         }
       }
     }
     if (isLoaded) {
-      console.log("Project now loaded. Calling function.");
+      console.log("Document now loaded. Calling function.");
       callbackFn();
     } else {
-      console.log(`Project not yet loaded. Waiting for ${timeoutMs}ms.`);
-      const repeat = () => callAfterProjectLoaded(callbackFn);
+      console.log(`Document not yet loaded. Waiting for ${timeoutMs}ms.`);
+      const repeat = () => callAfterDocumentLoaded(callbackFn);
       setTimeout(repeat, timeoutMs);
     }
   }
@@ -966,7 +966,7 @@ global WF:false
    * @returns {void}
    */
   function logShortReport() {
-    const rootProject = WF.rootItem();
+    const rootItem = WF.rootItem();
 
     let text = "WorkFlowy report:\n";
     let hasFailed = false;
@@ -1014,7 +1014,7 @@ global WF:false
           localItems++;
         }
       }
-      , rootProject);
+      , rootItem);
     pass(`Total items: ${totalItems}. Local items: ${localItems}`);
 
     console.log(text);
@@ -1225,7 +1225,7 @@ global WF:false
   }
 
   function setUp() {
-    callAfterProjectLoaded(() => {
+    callAfterDocumentLoaded(() => {
       if (isCleanedUp) {
         return;
       }
@@ -1271,7 +1271,7 @@ global WF:false
   self.jumpflowy = {
     // Functions by alphabetical order
     applyToEachItem: applyToEachItem,
-    callAfterProjectLoaded: callAfterProjectLoaded,
+    callAfterDocumentLoaded: callAfterDocumentLoaded,
     cleanUp: cleanUp,
     createItemAtTopOfCurrent: createItemAtTopOfCurrent,
     dateToYMDString: dateToYMDString,

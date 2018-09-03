@@ -28,7 +28,7 @@ interface JumpFlowy {
   applyToEachItem(functionToApply: ItemHandler,
                   searchRoot: Item): void;
 
-  callAfterProjectLoaded(callbackFn: NoArgsVoidFunction);
+  callAfterDocumentLoaded(callbackFn: NoArgsVoidFunction);
 
   cleanUp(): void;
 
