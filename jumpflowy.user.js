@@ -519,8 +519,8 @@ global WF:false
 
   /**
    * @param {Array<Item>} items The items to build the search query for.
-   * @returns {string | null} The search query to use for finding the
-   *                          items, or an unmatchable query if items is empty.
+   * @returns {string} The search query to use for finding the
+   *                   items, or an unmatchable query if items is empty.
    */
   function itemsToVolatileSearchQuery(items) {
     if (items.length === 0) {
@@ -533,8 +533,8 @@ global WF:false
 
   /**
    * @param {Item} item The item to build the search query for.
-   * @returns {string | null} The search query to use for finding the item, or
-   *                          an unmatchable query for the root item.
+   * @returns {string} The search query to use for finding the item, or
+   *                   an unmatchable query for the root item.
    */
   function itemToVolatileSearchQuery(item) {
     if (isRootItem(item)) {
@@ -724,6 +724,9 @@ global WF:false
     return `${yyyy}-${mm}-${dd}`;
   }
 
+  /**
+   * @returns {string} Today's date as a string in YYYY-MM-DD format.
+   */
   function todayAsYMDString() {
     return dateToYMDString(new Date());
   }
@@ -740,6 +743,10 @@ global WF:false
     console.log(`${message} (${deltaMs}ms)`);
   }
 
+  /**
+   * @param {KeyboardEvent} keyEvent The key event
+   * @returns {string} The canonical code
+   */
   function keyDownEventToCanonicalCode(keyEvent) {
     let canonicalCode = "";
     for (let flagAndCode of [
@@ -775,7 +782,7 @@ global WF:false
     canonicalKeyCodesToActions.set(canonicalCode, functionToApply);
   }
 
-  function keyDownListener(keyEvent) {
+  function _keyDownListener(keyEvent) {
     const canonicalCode = keyDownEventToCanonicalCode(keyEvent);
     const registeredFn = canonicalKeyCodesToActions.get(canonicalCode);
     if (registeredFn) {
@@ -1023,6 +1030,10 @@ global WF:false
     }
   }
 
+  /**
+   * Shows both the current item and the most recently edited item.
+   * @returns {void}
+   */
   function showZoomedAndMostRecentlyEdited() {
     const recentItem = findRecentlyEditedItems(0, 1, WF.rootItem())[0];
     const zoomedItem = getZoomedItem();
@@ -1031,6 +1042,10 @@ global WF:false
     openItemHere(newZoom, searchQuery);
   }
 
+  /**
+   * Moves the cursor to the name of the current item.
+   * @returns {void}
+   */
   function editCurrentItem() {
     const currentItem = WF.currentItem();
     if (!isRootItem(currentItem)) {
@@ -1211,7 +1226,7 @@ global WF:false
     }
 
     // Keyboard shortcuts
-    document.removeEventListener("keydown", keyDownListener);
+    document.removeEventListener("keydown", _keyDownListener);
     canonicalKeyCodesToActions.clear();
     bindableActionsByName.clear();
 
@@ -1224,6 +1239,10 @@ global WF:false
     isCleanedUp = true;
   }
 
+  /**
+   * Sets up global state maintained by this script.
+   * @returns {void}
+   */
   function setUp() {
     callAfterDocumentLoaded(() => {
       if (isCleanedUp) {
@@ -1253,7 +1272,7 @@ global WF:false
         // *******************************************************
       ]);
       _registerKeyboardShortcuts();
-      document.addEventListener("keydown", keyDownListener);
+      document.addEventListener("keydown", _keyDownListener);
 
       // Built-in expansions
       _registerBuiltInExpansion("ymd", todayAsYMDString);

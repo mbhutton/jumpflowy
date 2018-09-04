@@ -16,8 +16,6 @@
 
 declare const jumpflowy: JumpFlowy;
 
-type NoArgsVoidFunction = () => void;
-
 type TextPredicate = (s: string) => boolean;
 
 type ItemPredicate = (item: Item) => boolean;
@@ -28,9 +26,15 @@ interface JumpFlowy {
   applyToEachItem(functionToApply: ItemHandler,
                   searchRoot: Item): void;
 
-  callAfterDocumentLoaded(callbackFn: NoArgsVoidFunction);
+  callAfterDocumentLoaded(callbackFn: () => void);
+
+  createItemAtTopOfCurrent(): void;
 
   cleanUp(): void;
+
+  dateToYMDString(Date): string
+
+  dismissNotification(): void
 
   doesItemHaveTag(tagToMatch: string, item: Item): boolean;
 
@@ -39,12 +43,51 @@ interface JumpFlowy {
 
   doesStringHaveTag(tagToMatch: string, s: string): boolean
 
+  editCurrentItem(): void
+
+  editParentOfFocusedItem(): void
+
+  expandAbbreviation(abbreviation: string): string
+
+  findClosestCommonAncestor(itemA: Item, itemB: Item): Item
+
+  findItemsMatchingRegex(regExp: RegExp, searchRoot: Item): Array<Item>
+
+  findItemsWithTag(tag: string, searchRoot: Item): Array<Item>
+
   findMatchingItems(itemPredicate: ItemPredicate,
                     searchRoot: Item): Array<Item>;
 
+  findRecentlyEditedItems(earliestModifiedSec: number, maxSize: number,
+                          searchRoot: Item): Array<Item>
+
+  findTopItemsByComparator<T>(isABetterThanB: (a: T, b: T) => boolean,
+                              maxSize: number,
+                              items: Iterable<T>): Array<T>
+
+  findTopItemsByScore(itemToScoreFn: (Item) => number,
+                      minScore: number, maxSize: number,
+                      searchRoot: Item): Array<Item>
+
+  followItem(item: Item): void
+
+  followZoomedItem(): void
+
   getCurrentTimeSec(): number;
 
+  getZoomedItem(): Item
+
+  getZoomedItemAsLongId(): string
+
+  isRootItem(item: Item): boolean
+
+  isValidCanonicalCode(canonicalCode: string): void
+
+  itemsToVolatileSearchQuery(items: Array<Item>): string
+
   itemToLastModifiedSec(item: Item): number;
+
+  itemToPathAsItems(item: Item): Array<Item>
 
   itemToPlainTextName(item: Item): string;
 
@@ -52,7 +95,45 @@ interface JumpFlowy {
 
   itemToTagArgsText(tagToMatch: string, item: Item): string;
 
+  itemToTags(item: Item): Array<string>
+
+  itemToVolatileSearchQuery(item: Item): string
+
+  keyDownEventToCanonicalCode(keyEvent: KeyboardEvent): string
+
+  logElapsedTime(startDate: Date, message: string): void
+
+  logShortReport(): void
+
+  markFocusedAndDescendantsNotComplete(): void
+
+  openFirstLinkInFocusedItem(): void
+
+  openHere(url: string): void
+
+  openInNewTab(url: string): void
+
+  openItemHere(item: Item, searchQuery: string | null): void
+
+  promptToChooseItem(items: Array<Item>): Item
+
+  promptToExpandAndInsertAtCursor(): void
+
+  promptToFindGlobalBookmarkThenFollow(): void
+
+  promptToFindLocalRegexMatchThenZoom(): void
+
+  promptToNormalLocalSearch(): void
+
+  registerFunctionForKeyDownEvent(canonicalCode: string, functionToApply: () => void): void
+
+  showZoomedAndMostRecentlyEdited(): void
+
+  splitStringToSearchTerms(s: string): string
+
   stringToTagArgsText(tagToMatch: string, s: string): string;
+
+  todayAsYMDString(): string;
 }
 
 //****************************
