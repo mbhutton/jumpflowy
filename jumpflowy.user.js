@@ -992,6 +992,9 @@ global WF:false
       hasFailed = true;
     }
 
+    /* Temporarily disable this unnecessary block,
+      as the IS_* variables are being removed.
+
     currentTest = "Check platform";
     if (window.IS_IOS) {
       pass("iOS.");
@@ -1010,6 +1013,7 @@ global WF:false
       const starredLocationsCount = WF.starredItems().length;
       pass("Starred locations found: " + starredLocationsCount);
     }
+    */
 
     currentTest = "Count items";
     let totalItems = 0;
