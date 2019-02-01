@@ -88,8 +88,10 @@ global WF:false
       return false;
     }
 
-    return doesStringHaveTag(tagToMatch, item.getNameInPlainText())
-      || doesStringHaveTag(tagToMatch, item.getNoteInPlainText());
+    return (
+      doesStringHaveTag(tagToMatch, item.getNameInPlainText()) ||
+      doesStringHaveTag(tagToMatch, item.getNoteInPlainText())
+    );
   }
 
   /**
@@ -129,13 +131,11 @@ global WF:false
       return;
     }
     WF.editGroup(() => {
-      applyToEachItem(
-        (item) => {
-          if (item.isCompleted()) {
-            WF.completeItem(item);
-          }
-        },
-        focusedItem);
+      applyToEachItem(item => {
+        if (item.isCompleted()) {
+          WF.completeItem(item);
+        }
+      }, focusedItem);
     });
   }
 
@@ -196,7 +196,8 @@ global WF:false
   const bookmarkTag = "#bm";
   const abbrevTag = "#abbrev";
   const shortcutTag = "#shortcut";
-  const searchQueryToMatchNoItems = "META:NO_MATCHING_ITEMS_" + new Date().getTime();
+  const searchQueryToMatchNoItems =
+    "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
   let isCleanedUp = false;
 
@@ -512,7 +513,7 @@ global WF:false
       "https://workflowy.com/#",
       "https://dev.workflowy.com",
       "https://dev.workflowy.com/",
-      "https://dev.workflowy.com/#",
+      "https://dev.workflowy.com/#"
     ];
     return validRootUrls.includes(s);
   }
@@ -995,14 +996,12 @@ global WF:false
     currentTest = "Count items";
     let totalItems = 0;
     let localItems = 0;
-    applyToEachItem(
-      (item) => {
-        totalItems++;
-        if (isItemLocal(item)) {
-          localItems++;
-        }
+    applyToEachItem(item => {
+      totalItems++;
+      if (isItemLocal(item)) {
+        localItems++;
       }
-      , rootItem);
+    }, rootItem);
     pass(`Total items: ${totalItems}. Local items: ${localItems}`);
 
     console.log(text);
@@ -1248,7 +1247,7 @@ global WF:false
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
-        showZoomedAndMostRecentlyEdited,
+        showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
       ]);
@@ -1321,6 +1320,6 @@ global WF:false
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
-    todayAsYMDString: todayAsYMDString,
+    todayAsYMDString: todayAsYMDString
   };
 })();

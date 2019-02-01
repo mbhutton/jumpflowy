@@ -318,9 +318,7 @@ loading the expect.js and jumpflowy modules.
       "test/JumpFlowy/whenUsingItemToTagArgsText"
     );
     const item = getOnlyChildOf(parentItem);
-    expect(jumpflowy.itemToTagArgsText("#foo", item)).to.be(
-      "a, b, c"
-    );
+    expect(jumpflowy.itemToTagArgsText("#foo", item)).to.be("a, b, c");
   }
 
   function whenUsingStringToTagArgsText() {

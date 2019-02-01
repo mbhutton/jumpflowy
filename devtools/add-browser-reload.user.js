@@ -155,7 +155,8 @@
   }
 
   const USER_AGENT = navigator.userAgent;
-  const IS_MOBILE = USER_AGENT.includes("iPhone") || USER_AGENT.includes("Android");
+  const IS_MOBILE =
+    USER_AGENT.includes("iPhone") || USER_AGENT.includes("Android");
   if (!IS_MOBILE) {
     hostPort = "http://127.0.0.1:17362";
 
