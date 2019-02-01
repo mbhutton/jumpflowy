@@ -41,8 +41,8 @@ loading the expect.js and jumpflowy modules.
     expect(rootItem).to.be.an("object");
 
     expectItemFunctions(rootItem);
-    expect(rootItem.getName()).to.be(null);
-    expect(rootItem.getNote()).to.be(null);
+    expect(rootItem.getName()).to.be("Home");
+    expect(rootItem.getNote()).to.be("");
     expect(rootItem.getId()).to.be("None");
     expect(rootItem.getAncestors()).to.be.empty();
     expect(rootItem.getChildren()).to.not.be.empty();
@@ -257,7 +257,7 @@ loading the expect.js and jumpflowy modules.
     );
     expect(jumpflowy.itemToPlainTextName(item)).to.be("applePie");
     const rootItem = WF.rootItem();
-    expect(jumpflowy.itemToPlainTextName(rootItem)).to.be("");
+    expect(jumpflowy.itemToPlainTextName(rootItem)).to.be("Home");
   }
 
   function whenUsingItemToPlainTextNote() {
