@@ -12,7 +12,6 @@
 // ==/UserScript==
 
 // ESLint globals:
-/* global IS_MOBILE:false IS_MAC_OS:false IS_CHROME:false IS_FIREFOX:false */ // From WorkFlowy
 /* global toastr:false */ // Others
 
 /*
@@ -153,7 +152,9 @@
     toastrIfAvailable(message, "info");
   }
 
-  if (IS_CHROME || IS_FIREFOX) {
+  const USER_AGENT = navigator.userAgent;
+  const IS_MOBILE = USER_AGENT.includes("iPhone") || USER_AGENT.includes("Android");
+  if (!IS_MOBILE) {
     hostPort = "http://127.0.0.1:17362";
 
     addReloadButton();
@@ -162,13 +163,13 @@
     // Wait a while before adding the reload shortcut,
     // as IS_MAC_OS isn't set immediately.
     setTimeout(() => {
-      if (IS_MAC_OS) {
+      if (USER_AGENT.includes("Mac OS X")) {
         addShortcut();
       } else {
         console.log("Not macOS, so not adding ctrl-r reloading shortcut.");
       }
     }, 4000);
-  } else if (IS_MOBILE) {
+  } else {
     // HandyFlowy
     const rawAnswer = prompt("Reload from which ngrok URL?");
     if (rawAnswer !== null && rawAnswer !== "") {

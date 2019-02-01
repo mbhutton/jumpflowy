@@ -992,29 +992,6 @@ global WF:false
       hasFailed = true;
     }
 
-    /* Temporarily disable this unnecessary block,
-      as the IS_* variables are being removed.
-
-    currentTest = "Check platform";
-    if (window.IS_IOS) {
-      pass("iOS.");
-    } else if (window.IS_CHROME) {
-      pass("Chrome.");
-    } else if (window.IS_FIREFOX) {
-      pass("Firefox.");
-    } else {
-      fail("Running in unknown platform.");
-    }
-
-    currentTest = "Count starred pages";
-    if (window.IS_IOS) {
-      pass("Skipping starred pages check: not available on this platform.");
-    } else if (window.IS_CHROME || window.IS_FIREFOX) {
-      const starredLocationsCount = WF.starredItems().length;
-      pass("Starred locations found: " + starredLocationsCount);
-    }
-    */
-
     currentTest = "Count items";
     let totalItems = 0;
     let localItems = 0;

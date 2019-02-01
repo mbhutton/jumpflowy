@@ -171,12 +171,6 @@ interface Item {
 //****************************
 
 interface Window {
-  IS_CHROME: boolean;
-
-  IS_FIREFOX: boolean;
-
-  IS_IOS: boolean;
-
   jumpflowy: JumpFlowy;
 }
 
