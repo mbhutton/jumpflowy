@@ -988,10 +988,12 @@ global WF:false
       add("[PASS] (" + currentTest + "): " + message);
     }
 
+    /*
     function fail(message) {
       add("[FAIL] (" + currentTest + "): " + message);
       hasFailed = true;
     }
+    */
 
     currentTest = "Count items";
     let totalItems = 0;
