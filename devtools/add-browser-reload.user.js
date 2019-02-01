@@ -83,6 +83,8 @@
 
   async function reloadScripts() {
     // Load toastr first to show a progress notification
+    loadScript(hostPort + "/node_modules/jquery/dist/jquery.min.js");
+    await pause(200);
     loadCss(hostPort + "/node_modules/toastr/build/toastr.css");
     await pause(100);
     loadScript(hostPort + "/node_modules/toastr/toastr.js");
