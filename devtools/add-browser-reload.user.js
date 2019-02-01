@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Add JumpFlowy reload button
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.0.7
+// @version      0.1.0.8
 // @description  Add button to reload JumpFlowy scripts from localhost server
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
