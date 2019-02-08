@@ -657,6 +657,178 @@ global WF:false
   }
 
   /**
+   * @param {Item} item The item whose children to filter.
+   * @returns {Array<Item>} The filtered children.
+   */
+  function getUncompletedChildren(item) {
+    return item.getChildren().filter((i) => !i.isCompleted());
+  }
+
+  class ConversionFailure {
+    /**
+     * @param {string} description A description of the failure.
+     * @param {Item} item The item at which the failure occurred.
+     * @param {Array<ConversionFailure>} causes The underlying causes.
+     */
+    constructor(description, item, causes) {
+      this.description = description;
+      this.item = item;
+      this.causes = causes;
+    }
+  }
+
+  class ConversionResult {
+    /**
+     * @param {any} value The result value.
+     * @param {boolean} isUsable Whether or not the result is usable.
+     * @param {Array<ConversionFailure>} conversionFailures Array of failures.
+     */
+    constructor(value, isUsable, conversionFailures) {
+      this.value = value;
+      this.isUsable = isUsable;
+      this.conversionFailures = conversionFailures;
+    }
+  }
+
+  /**
+   * Returns a ConversionResult with a Map of values based on the given item.
+   * Ignores completed items, and trims keys strings.
+   * @param {Item} item The WorkFlowy item which contains the values.
+   * @param {function} keyToConverter (key) -> (Item) -> ConversionResult.
+   * @returns {ConversionResult} Result, with a Map of converted values.
+   */
+  function convertToMap(item, keyToConverter) {
+    /** @type Map<string, any> */
+    const rMap = new Map();
+    /** @type Array<ConversionFailure> */
+    const failures = new Array();
+    for (let child of getUncompletedChildren(item)) {
+      let key = child.getNameInPlainText().trim();
+      if (rMap.has(key)) {
+        failures.push(new ConversionFailure(
+          `Ignoring value for ${key}, which is already set above.`,
+          child, null));
+      } else {
+        let childConverter = keyToConverter(key);
+        if (childConverter) {
+          /** @type ConversionResult */
+          let conversionResult = childConverter(child);
+          if (conversionResult.isUsable) {
+            rMap.set(key, conversionResult.value);
+          }
+          if (conversionResult.conversionFailures) {
+            failures.push(...conversionResult.conversionFailures);
+          }
+        } else {
+          failures.push(new ConversionFailure(
+            `Unknown key "${key}"`, child, null));
+        }
+      }
+    }
+    return new ConversionResult(rMap, true, failures);
+  }
+
+  /**
+   * Returns a ConversionResult with a Map of strings based on the given item.
+   * Ignores completed items, and trims keys strings.
+   * @param {Item} item The WorkFlowy item which contains the values.
+   * @returns {ConversionResult} Result, with a Map of converted strings.
+   */
+  function convertToMapOfStrings(item) {
+    return convertToMap(item, () => convertToNotePlainText);
+  }
+
+  /**
+   * Returns a ConversionResult with an Array of values based on the given item.
+   * Ignores completed items.
+   * @param {Item} item The WorkFlowy item which contains the values.
+   * @param {function} childConverter Converts the child values.
+   *                                  (Item) -> ConversionResult.
+   * @returns {ConversionResult} Result, with an Array of converted values.
+   */
+  function convertToArray(item, childConverter) {
+    const rArray = new Array();
+    /** @type Array<ConversionFailure> */
+    const failures = new Array();
+    for (let child of getUncompletedChildren(item)) {
+      /** @type ConversionResult */
+      let conversionResult = childConverter(child);
+      if (conversionResult.isUsable) {
+        rArray.push(conversionResult.value);
+      }
+      if (conversionResult.conversionFailures) {
+        failures.push(...conversionResult.conversionFailures);
+      }
+    }
+    return new ConversionResult(rArray, true, failures);
+  }
+
+  /**
+   * Returns a ConversionResult with an Array of strings based on the item.
+   * Ignores completed items.
+   * @param {Item} item The WorkFlowy item which contains the values.
+   * @returns {ConversionResult} Result, with an Array of converted strings.
+   */
+  function convertToArrayOfStrings(item) {
+    return convertToArray(item, convertToNameOrNotePlainText);
+  }
+
+  /**
+   * @param {Item} item The item whose note to use.
+   * @returns {ConversionResult} A result, with a string value.
+   */
+  function convertToNotePlainText(item) {
+    return new ConversionResult(item.getNoteInPlainText(), true, null);
+  }
+
+  /**
+   * @param {Item} item The item whose name or note to use.
+   * @returns {ConversionResult} A result, with a string value.
+   */
+  function convertToNameOrNotePlainText(item) {
+    const name = item.getNameInPlainText();
+    const note = item.getNoteInPlainText();
+    const nameTrimmed = name.trim();
+    const noteTrimmed = note.trim();
+    let isUsable = true;
+    let failures = new Array();
+    let value = null;
+    if (nameTrimmed && noteTrimmed) {
+      failures.push(new ConversionFailure(
+        "Can't specify both a name and a note. Delete the name or the note.",
+        item, null));
+      isUsable = false;
+    } else if (nameTrimmed) {
+      value = name;
+    } else if (noteTrimmed) {
+      value = note;
+    } else {
+      value = name;
+    }
+    return new ConversionResult(value, isUsable, failures);
+  }
+
+  /**
+   * @param {Item} item The configuration item.
+   * @returns {ConversionResult} The configuration result.
+   */
+  // eslint-disable-next-line no-unused-vars
+  function convertJumpFlowyConfiguration(item) {
+    function keyToConverter(key) {
+      switch(key) {
+        case "shortcuts": // Falls through
+        case "bookmarks":
+          return convertToMapOfStrings;
+        case "invalidTags":
+          return convertToArrayOfStrings;
+        case "timeZone":
+          return convertToNotePlainText;
+      }
+    }
+    return convertToMap(item, keyToConverter);
+  }
+
+  /**
    * @returns {Array<Item>} Recently edited items, most recent first.
    * @param {number} earliestModifiedSec Items edited before this are excluded.
    * @param {number} maxSize The results array will be at most this size.
