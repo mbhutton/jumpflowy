@@ -28,10 +28,9 @@
   (2) Run ngrok http 17362, and note the generated ngrok URL.
       (Only when testing HandyFlowy)
 
-  (3) Disable cache in Chrome dev tools under the Network tab,
-      or the equivalent in Firefox.
+  (3) Disable cache in Chrome dev tools under the Network tab.
 
-  (4) Run this script once in the Chrome/Firefox developer console to add the
+  (4) Run this script once in the Chrome developer console to add the
       reload button, if not already installed as a user script in Tampermonkey.
 
   (5) Run this script in HandyFlowy to add the reload button,
@@ -47,8 +46,8 @@
 
   (1) Stop the ngrok tunnel
   (2) Stop the HTTP server
-  (3) Re-enable Chrome's/Firefox's cache
-  (4) Close and reload WorkFlowy tab in Chrome/Firefox
+  (3) Re-enable Chrome's cache
+  (4) Close and reload WorkFlowy tab in Chrome
   (5) Close and reload HandyFlowy
 
 */

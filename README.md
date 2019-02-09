@@ -1,6 +1,6 @@
 # JumpFlowy
 
-A Chrome/Firefox user script which adds search, navigation, and keyboard shortcut features to WorkFlowy.
+A Chrome user script which adds search, navigation, and keyboard shortcut features to WorkFlowy.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -35,7 +35,6 @@ A Chrome/Firefox user script which adds search, navigation, and keyboard shortcu
 ## Target platforms
 
 - Chrome (macOS/Linux/Windows), via [Tampermonkey](https://tampermonkey.net/index.php)
-- Firefox (macOS/Linux/Windows), via [Tampermonkey](https://tampermonkey.net/index.php)
 - [HandyFlowy for iOS](https://itunes.apple.com/us/app/handyflowy/id1080279196?mt=8) (with a subset of features)
 - Note: Greasemonkey is not supported
 
@@ -49,7 +48,7 @@ The documentation and examples consist of:
 
 ### Install the JumpFlowy user script
 
-- Install [Tampermonkey](https://tampermonkey.net/index.php) in Chrome or Firefox.
+- Install [Tampermonkey](https://tampermonkey.net/index.php) in Chrome.
 - In your browser, open the [JumpFlowy user script](https://github.com/mbhutton/jumpflowy/raw/master/jumpflowy.user.js).
 - Install the user script in Tampermonkey.
 - Open/reload [WorkFlowy](https://workflowy.com/).
