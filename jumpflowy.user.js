@@ -200,6 +200,8 @@ global WF:false
     "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
   let isCleanedUp = false;
+  let configurationRootItem = null;
+  const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
 
   const prodOrigin = "https://workflowy.com";
   const devOrigin = "https://dev.workflowy.com";
@@ -806,6 +808,28 @@ global WF:false
       value = name;
     }
     return new ConversionResult(value, isUsable, failures);
+  }
+
+  function isConfigurationRoot(item) {
+    return item.getNameInPlainText().trim() === CONFIGURATION_ROOT_NAME;
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  function findConfigurationRootItem() {
+    if (configurationRootItem === null ||
+       !isConfigurationRoot(configurationRootItem)) {
+      configurationRootItem = null;
+      const matchingNodes = findMatchingItems(isConfigurationRoot, WF.rootItem());
+      if (matchingNodes.length > 0) {
+        configurationRootItem = matchingNodes[0];
+      }
+      if (matchingNodes.length > 1) {
+        WF.showMessage(
+          `Multiple ${CONFIGURATION_ROOT_NAME} items found. Using the first one.`,
+          false);
+      }
+      return configurationRootItem;
+    }
   }
 
   /**

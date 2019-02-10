@@ -40,6 +40,8 @@ declare namespace WF {
 
   function search(query: string): void
 
+  function showMessage(html: string, isError?: boolean)
+
   function zoomTo(item: Item): void
 
 }
