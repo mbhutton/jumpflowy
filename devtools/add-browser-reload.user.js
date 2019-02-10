@@ -25,16 +25,10 @@
       > (cd ~/git/jumpflowy && python3 -m http.server 17362)
       The port must match the port used elsewhere in this script.
 
-  (2) Run ngrok http 17362, and note the generated ngrok URL.
-      (Only when testing HandyFlowy)
+  (2) Disable cache in Chrome dev tools under the Network tab.
 
-  (3) Disable cache in Chrome dev tools under the Network tab.
-
-  (4) Run this script once in the Chrome developer console to add the
+  (3) Run this script once in the Chrome developer console to add the
       reload button, if not already installed as a user script in Tampermonkey.
-
-  (5) Run this script in HandyFlowy to add the reload button,
-      passing in the ngrok URL from above.
 
   To reload and run the integration tests each time, either:
 
@@ -44,11 +38,9 @@
 
   To clean up:
 
-  (1) Stop the ngrok tunnel
-  (2) Stop the HTTP server
-  (3) Re-enable Chrome's cache
-  (4) Close and reload WorkFlowy tab in Chrome
-  (5) Close and reload HandyFlowy
+  (1) Stop the HTTP server
+  (2) Re-enable Chrome's cache
+  (3) Close and reload WorkFlowy tab in Chrome
 
 */
 
@@ -156,7 +148,9 @@
   const USER_AGENT = navigator.userAgent;
   const IS_MOBILE =
     USER_AGENT.includes("iPhone") || USER_AGENT.includes("Android");
-  if (!IS_MOBILE) {
+  if (IS_MOBILE) {
+    alert("This script isn't supported on mobile");
+  } else {
     hostPort = "http://127.0.0.1:17362";
 
     addReloadButton();
@@ -171,17 +165,5 @@
         console.log("Not macOS, so not adding ctrl-r reloading shortcut.");
       }
     }, 4000);
-  } else {
-    // HandyFlowy
-    const rawAnswer = prompt("Reload from which ngrok URL?");
-    if (rawAnswer !== null && rawAnswer !== "") {
-      const answer = rawAnswer.trim();
-      if (answer.match("^https://[0-9a-f]+\\.ngrok\\.io$")) {
-        hostPort = answer;
-        addReloadButton();
-      } else {
-        alert("Invalid choice of URL: " + answer);
-      }
-    }
   }
 })();

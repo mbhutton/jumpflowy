@@ -35,7 +35,6 @@ A Chrome user script which adds search, navigation, and keyboard shortcut featur
 ## Target platforms
 
 - Chrome (macOS/Linux/Windows), via [Tampermonkey](https://tampermonkey.net/index.php)
-- [HandyFlowy for iOS](https://itunes.apple.com/us/app/handyflowy/id1080279196?mt=8) (with a subset of features)
 
 ## Documentation and examples
 
@@ -171,4 +170,3 @@ This project is licensed under the MIT license. See the [LICENSE](LICENSE) file 
 
 - The WorkFlowy team for creating such a great product
 - [rawbytz](https://rawbytz.wordpress.com/) for proving what's possible on top of WorkFlowy
-- Michinari Yamamoto for creating HandyFlowy, which makes it possible to extend WorkFlowy on mobile
