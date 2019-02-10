@@ -36,7 +36,6 @@ A Chrome user script which adds search, navigation, and keyboard shortcut featur
 
 - Chrome (macOS/Linux/Windows), via [Tampermonkey](https://tampermonkey.net/index.php)
 - [HandyFlowy for iOS](https://itunes.apple.com/us/app/handyflowy/id1080279196?mt=8) (with a subset of features)
-- Note: Greasemonkey is not supported
 
 ## Documentation and examples
 
