@@ -812,10 +812,17 @@ global WF:false
     return new ConversionResult(value, isUsable, failures);
   }
 
+  /**
+   * @param {Item} item The item to test.
+   * @returns {boolean} True if and only if the item is a configuration root.
+   */
   function isConfigurationRoot(item) {
     return item.getNameInPlainText().trim() === CONFIGURATION_ROOT_NAME;
   }
 
+  /**
+   * @returns {Item | null} item The configuration item if found, or null.
+   */
   // eslint-disable-next-line no-unused-vars
   function findConfigurationRootItem() {
     if (configurationRootItem === null ||
@@ -830,8 +837,8 @@ global WF:false
           `Multiple ${CONFIGURATION_ROOT_NAME} items found. Using the first one.`,
           false);
       }
-      return configurationRootItem;
     }
+    return configurationRootItem;
   }
 
   /**
