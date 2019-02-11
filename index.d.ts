@@ -172,6 +172,8 @@ interface Item {
 
 interface Window {
   jumpflowy: JumpFlowy;
+
+  WFEventListener: (eventName: string) => void;
 }
 
 //****************************

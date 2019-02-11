@@ -192,6 +192,7 @@ global WF:false
   // Global state
   const canonicalKeyCodesToActions = new Map();
   const builtInAbbreviationsMap = new Map();
+  let customAbbrevs = new Map();
   const bindableActionsByName = new Map();
   const bookmarkTag = "#bm";
   const abbrevTag = "#abbrev";
@@ -200,6 +201,7 @@ global WF:false
     "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
   let isCleanedUp = false;
+
   let configurationRootItem = null;
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
 
@@ -853,6 +855,27 @@ global WF:false
   }
 
   /**
+   * Global event listener.
+   * @param {string} eventName The name of the event.
+   * @returns {void}
+   */
+  function wfEventListener(eventName) {
+    if (eventName === "operation--edit" || eventName === "locationChanged") {
+      updateConfiguration();
+    }
+  }
+
+  /**
+   * Finds and updates the global configuration.
+   * @returns {boolean} True of the config was found, false otherwise.
+   */
+  function updateConfiguration() {
+    const config = findConfigurationRootItem();
+    customAbbrevs = _buildCustomAbbreviationsMap();
+    return config !== null;
+  }
+
+  /**
    * @returns {Array<Item>} Recently edited items, most recent first.
    * @param {number} earliestModifiedSec Items edited before this are excluded.
    * @param {number} maxSize The results array will be at most this size.
@@ -1266,7 +1289,6 @@ global WF:false
       expandAbbreviation(abbreviation.trim());
     }
 
-    const customAbbrevs = _buildCustomAbbreviationsMap();
     const allAbbrevs = new Map([...builtInAbbreviationsMap, ...customAbbrevs]);
 
     const fnOrValue = allAbbrevs.get(abbreviation);
@@ -1410,9 +1432,15 @@ global WF:false
 
     // Built-in expansions
     builtInAbbreviationsMap.clear();
+    customAbbrevs.clear();
+
+    // Configuration
+    configurationRootItem = null;
 
     // Other global state
     lastRegexString = null;
+
+    window.WFEventListener = null;
 
     isCleanedUp = true;
   }
@@ -1459,6 +1487,9 @@ global WF:false
         window.open = _openWithoutChangingWfDomain;
         console.log("Overrode window.open function, because on dev domain");
       }
+
+      window.WFEventListener = wfEventListener;
+      updateConfiguration();
     });
   }
 
