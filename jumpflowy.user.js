@@ -672,7 +672,7 @@ global WF:false
    * @returns {Array<Item>} The filtered children.
    */
   function getUncompletedChildren(item) {
-    return item.getChildren().filter((i) => !i.isCompleted());
+    return item.getChildren().filter(i => !i.isCompleted());
   }
 
   class ConversionFailure {
@@ -716,9 +716,13 @@ global WF:false
     for (let child of getUncompletedChildren(item)) {
       let key = child.getNameInPlainText().trim();
       if (rMap.has(key)) {
-        failures.push(new ConversionFailure(
-          `Ignoring value for ${key}, which is already set above.`,
-          child, null));
+        failures.push(
+          new ConversionFailure(
+            `Ignoring value for ${key}, which is already set above.`,
+            child,
+            null
+          )
+        );
       } else {
         let childConverter = keyToConverter(key);
         if (childConverter) {
@@ -731,8 +735,9 @@ global WF:false
             failures.push(...conversionResult.conversionFailures);
           }
         } else {
-          failures.push(new ConversionFailure(
-            `Unknown key "${key}"`, child, null));
+          failures.push(
+            new ConversionFailure(`Unknown key "${key}"`, child, null)
+          );
         }
       }
     }
@@ -806,9 +811,13 @@ global WF:false
     let failures = new Array();
     let value = null;
     if (nameTrimmed && noteTrimmed) {
-      failures.push(new ConversionFailure(
-        "Can't specify both a name and a note. Delete the name or the note.",
-        item, null));
+      failures.push(
+        new ConversionFailure(
+          "Can't specify both a name and a note. Delete the name or the note.",
+          item,
+          null
+        )
+      );
       isUsable = false;
     } else if (nameTrimmed) {
       value = name;
@@ -832,17 +841,23 @@ global WF:false
    * @returns {Item | null} item The configuration item if found, or null.
    */
   function findConfigurationRootItem() {
-    if (configurationRootItem === null ||
-       !isConfigurationRoot(configurationRootItem)) {
+    if (
+      configurationRootItem === null ||
+      !isConfigurationRoot(configurationRootItem)
+    ) {
       configurationRootItem = null;
-      const matchingNodes = findMatchingItems(isConfigurationRoot, WF.rootItem());
+      const matchingNodes = findMatchingItems(
+        isConfigurationRoot,
+        WF.rootItem()
+      );
       if (matchingNodes.length > 0) {
         configurationRootItem = matchingNodes[0];
       }
       if (matchingNodes.length > 1) {
         WF.showMessage(
           `Multiple ${CONFIGURATION_ROOT_NAME} items found. Using the first one.`,
-          false);
+          false
+        );
       }
     }
     return configurationRootItem;
@@ -854,7 +869,7 @@ global WF:false
    */
   function convertJumpFlowyConfiguration(item) {
     function keyToConverter(key) {
-      switch(key) {
+      switch (key) {
         case CONFIG_SECTION_ABBREVS: // Falls through
         case CONFIG_SECTION_BOOKMARKS: // Falls through
         case CONFIG_SECTION_SHORTCUTS:
@@ -1543,8 +1558,8 @@ global WF:false
       if (deprecatedAbbrevItems.length > 0) {
         deprecationMessages.push(
           `Found ${deprecatedAbbrevItems.length} ${abbrevTag} items. ` +
-          `The ${abbrevTag} tag is deprecated. Instead, define abbreviations ` +
-          `in ${CONFIGURATION_ROOT_NAME} -> ${CONFIG_SECTION_ABBREVS}.`
+            `The ${abbrevTag} tag is deprecated. Instead, define abbreviations ` +
+            `in ${CONFIGURATION_ROOT_NAME} -> ${CONFIG_SECTION_ABBREVS}.`
         );
       }
       if (deprecationMessages.length > 0) {
