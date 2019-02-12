@@ -194,9 +194,13 @@ global WF:false
   const builtInAbbreviationsMap = new Map();
   let customAbbrevs = new Map();
   const bindableActionsByName = new Map();
+
+  // DEPRECATED TAGS START
   const bookmarkTag = "#bm";
   const abbrevTag = "#abbrev";
   const shortcutTag = "#shortcut";
+  // DEPRECATED TAGS END
+
   const searchQueryToMatchNoItems =
     "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
@@ -205,6 +209,8 @@ global WF:false
   let configurationRootItem = null;
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
   const CONFIG_SECTION_ABBREVS = "abbreviations";
+  const CONFIG_SECTION_BOOKMARKS = "bookmarks";
+  const CONFIG_SECTION_SHORTCUTS = "shortcuts";
 
   const prodOrigin = "https://workflowy.com";
   const devOrigin = "https://dev.workflowy.com";
@@ -774,6 +780,7 @@ global WF:false
    * @param {Item} item The WorkFlowy item which contains the values.
    * @returns {ConversionResult} Result, with an Array of converted strings.
    */
+  // eslint-disable-next-line no-unused-vars
   function convertToArrayOfStrings(item) {
     return convertToArray(item, convertToNameOrNotePlainText);
   }
@@ -824,7 +831,6 @@ global WF:false
   /**
    * @returns {Item | null} item The configuration item if found, or null.
    */
-  // eslint-disable-next-line no-unused-vars
   function findConfigurationRootItem() {
     if (configurationRootItem === null ||
        !isConfigurationRoot(configurationRootItem)) {
@@ -846,18 +852,13 @@ global WF:false
    * @param {Item} item The configuration item.
    * @returns {ConversionResult} The configuration result.
    */
-  // eslint-disable-next-line no-unused-vars
   function convertJumpFlowyConfiguration(item) {
     function keyToConverter(key) {
       switch(key) {
         case CONFIG_SECTION_ABBREVS: // Falls through
-        case "shortcuts": // Falls through
-        case "bookmarks":
+        case CONFIG_SECTION_BOOKMARKS: // Falls through
+        case CONFIG_SECTION_SHORTCUTS:
           return convertToMapOfStrings;
-        case "invalidTags":
-          return convertToArrayOfStrings;
-        case "timeZone":
-          return convertToNotePlainText;
       }
     }
     return convertToMap(item, keyToConverter);
