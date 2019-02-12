@@ -871,19 +871,26 @@ global WF:false
    */
   function wfEventListener(eventName) {
     if (eventName === "operation--edit" || eventName === "locationChanged") {
+      cleanConfiguration();
       updateConfiguration();
     }
   }
 
   /**
-   * Finds and updates the global configuration.
-   * @returns {boolean} True of the config was found, false otherwise.
+   * Wipes state which is set in response to user configuration.
+   * @returns {void}
+   */
+  function cleanConfiguration() {
+    customAbbrevs = new Map();
+  }
+
+  /**
+   * Finds and applies user configuration.
+   * @returns {boolean} True if the config was found, was usable,
+   *                    and was applied. False if not found or not usable.
    */
   function updateConfiguration() {
-    // Wipe existing configuration
-    customAbbrevs = new Map();
-
-    // Load new configuration
+    // Find and validate configuration
     const configItem = findConfigurationRootItem();
     if (configItem === null) return false;
 
@@ -891,17 +898,26 @@ global WF:false
     if (result.conversionFailures && result.conversionFailures.length > 0) {
       WF.showMessage(result.conversionFailures.toString(), !result.isUsable);
     }
-    if (!result.isUsable) return false;
+    if (result.isUsable && result.value) {
+      // Apply configuration
+      applyConfiguration(result.value);
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-    /** @type Map<string, any> */
-    const configObject = result.value;
-
+  /**
+   * Applies the given user configuration object.
+   * @param {Map<string, any>} configObject The configuration object.
+   * @returns {void}
+   */
+  function applyConfiguration(configObject) {
     // Extract configuration sections
     /** @type Map<string, string> */
     const abbrevsConfig = configObject.get(CONFIG_SECTION_ABBREVS);
     const abbrevsFromTags = _buildCustomAbbreviationsMap();
     customAbbrevs = new Map([...abbrevsFromTags, ...abbrevsConfig]);
-    return true;
   }
 
   /**
@@ -1464,6 +1480,7 @@ global WF:false
     customAbbrevs.clear();
 
     // Configuration
+    cleanConfiguration();
     configurationRootItem = null;
 
     // Other global state
