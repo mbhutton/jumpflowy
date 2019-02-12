@@ -204,6 +204,7 @@ global WF:false
 
   let configurationRootItem = null;
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
+  const CONFIG_SECTION_ABBREVS = "abbreviations";
 
   const prodOrigin = "https://workflowy.com";
   const devOrigin = "https://dev.workflowy.com";
@@ -849,6 +850,7 @@ global WF:false
   function convertJumpFlowyConfiguration(item) {
     function keyToConverter(key) {
       switch(key) {
+        case CONFIG_SECTION_ABBREVS: // Falls through
         case "shortcuts": // Falls through
         case "bookmarks":
           return convertToMapOfStrings;
@@ -877,9 +879,28 @@ global WF:false
    * @returns {boolean} True of the config was found, false otherwise.
    */
   function updateConfiguration() {
-    const config = findConfigurationRootItem();
-    customAbbrevs = _buildCustomAbbreviationsMap();
-    return config !== null;
+    // Wipe existing configuration
+    customAbbrevs = new Map();
+
+    // Load new configuration
+    const configItem = findConfigurationRootItem();
+    if (configItem === null) return false;
+
+    const result = convertJumpFlowyConfiguration(configItem);
+    if (result.conversionFailures && result.conversionFailures.length > 0) {
+      WF.showMessage(result.conversionFailures.toString(), !result.isUsable);
+    }
+    if (!result.isUsable) return false;
+
+    /** @type Map<string, any> */
+    const configObject = result.value;
+
+    // Extract configuration sections
+    /** @type Map<string, string> */
+    const abbrevsConfig = configObject.get(CONFIG_SECTION_ABBREVS);
+    const abbrevsFromTags = _buildCustomAbbreviationsMap();
+    customAbbrevs = new Map([...abbrevsFromTags, ...abbrevsConfig]);
+    return true;
   }
 
   /**
@@ -1497,6 +1518,20 @@ global WF:false
 
       window.WFEventListener = wfEventListener;
       updateConfiguration();
+
+      // Warn for any deprecated configuration
+      const deprecationMessages = [];
+      const deprecatedAbbrevItems = findItemsWithTag(abbrevTag, WF.rootItem());
+      if (deprecatedAbbrevItems.length > 0) {
+        deprecationMessages.push(
+          `Found ${deprecatedAbbrevItems.length} ${abbrevTag} items. ` +
+          `The ${abbrevTag} tag is deprecated. Instead, define abbreviations ` +
+          `in ${CONFIGURATION_ROOT_NAME} -> ${CONFIG_SECTION_ABBREVS}.`
+        );
+      }
+      if (deprecationMessages.length > 0) {
+        WF.showMessage(deprecationMessages.join("<br>"));
+      }
     });
   }
 
