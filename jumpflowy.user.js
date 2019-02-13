@@ -926,7 +926,7 @@ global WF:false
       eventName === "locationChanged"
     ) {
       cleanConfiguration();
-      updateConfiguration();
+      reloadConfiguration();
     }
   }
 
@@ -944,7 +944,7 @@ global WF:false
    * @returns {boolean} True if the config was found, was usable,
    *                    and was applied. False if not found or not usable.
    */
-  function updateConfiguration() {
+  function reloadConfiguration() {
     // Find and validate configuration
     const configItem = findConfigurationRootItem();
     if (configItem === null) return false;
@@ -1638,7 +1638,7 @@ global WF:false
       }
 
       window.WFEventListener = wfEventListener;
-      updateConfiguration();
+      reloadConfiguration();
 
       // Warn for any deprecated configuration
       const deprecationMessages = [];
