@@ -505,6 +505,14 @@ global WF:false
   }
 
   /**
+   * @param {Item} item The item to create a WorkFlowy URL for.
+   * @returns {string} The WorkFlowy URL pointing to the item.
+   */
+  function toWorkFlowyUrlOnCurrentDomain(item) {
+    return `${location.origin}/${item.getUrl()}`;
+  }
+
+  /**
    * @returns {boolean} True if and only if the given string is a WorkFlowy URL.
    * @param {string} s The string to test.
    */
@@ -686,6 +694,20 @@ global WF:false
       this.item = item;
       this.causes = causes;
     }
+
+    toString() {
+      let parts = [];
+      if (this.description) {
+        parts.push(this.description);
+      }
+      if (this.item) {
+        parts.push(`See ${toWorkFlowyUrlOnCurrentDomain(this.item)} .`);
+      }
+      if (this.causes) {
+        parts.push(`Caused by: ${this.causes}.`);
+      }
+      return parts.join(" ") || "Conversion failure";
+    }
   }
 
   class ConversionResult {
@@ -698,6 +720,20 @@ global WF:false
       this.value = value;
       this.isUsable = isUsable;
       this.conversionFailures = conversionFailures;
+    }
+
+    toString() {
+      let parts = [];
+      if (this.value) {
+        parts.push(this.value.toString());
+      }
+      if (!this.isUsable) {
+        parts.push("(Not usable.)");
+      }
+      if (this.conversionFailures) {
+        parts.push(`Failures: ${this.conversionFailures}.`);
+      }
+      return parts.join(" ") || "Conversion result";
     }
   }
 
@@ -736,7 +772,7 @@ global WF:false
           }
         } else {
           failures.push(
-            new ConversionFailure(`Unknown key "${key}"`, child, null)
+            new ConversionFailure(`Unknown key "${key}".`, child, null)
           );
         }
       }
@@ -930,7 +966,8 @@ global WF:false
   function applyConfiguration(configObject) {
     // Extract configuration sections
     /** @type Map<string, string> */
-    const expansionsConfig = configObject.get(CONFIG_SECTION_EXPANSIONS);
+    const expansionsConfig =
+      configObject.get(CONFIG_SECTION_EXPANSIONS) || new Map();
     const abbrevsFromTags = _buildCustomAbbreviationsMap();
     customExpansions = new Map([...abbrevsFromTags, ...expansionsConfig]);
   }
