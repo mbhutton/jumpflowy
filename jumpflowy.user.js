@@ -936,6 +936,7 @@ global WF:false
    */
   function cleanConfiguration() {
     customExpansions = new Map();
+    canonicalKeyCodesToActions.clear();
   }
 
   /**
@@ -967,12 +968,18 @@ global WF:false
    * @returns {void}
    */
   function applyConfiguration(configObject) {
-    // Extract configuration sections
+    // Text expansions
     /** @type Map<string, string> */
     const expansionsConfig =
       configObject.get(CONFIG_SECTION_EXPANSIONS) || new Map();
     const abbrevsFromTags = _buildCustomAbbreviationsMap();
     customExpansions = new Map([...abbrevsFromTags, ...expansionsConfig]);
+
+    // Keyboard shortcuts
+    /** @type Map<string, string> */
+    const shortcutsConfig =
+      configObject.get(CONFIG_SECTION_KB_SHORTCUTS) || new Map();
+    _registerKeyboardShortcuts(shortcutsConfig);
   }
 
   /**
@@ -1254,22 +1261,37 @@ global WF:false
       itemToPlainTextName(item),
       itemToPlainTextNote(item)
     ]) {
-      const trimmed = (nameOrNote || "").trim();
-      if (isWorkFlowyUrl(trimmed) && item.getChildren().length === 0) {
-        // For leaf items whose trimmed name or note is a WorkFlowy URL, open it
-        if (isWorkFlowyHomeUrl(trimmed)) {
-          return () => openItemHere(WF.rootItem(), null);
-        } else {
-          return () => openHere(trimmed);
-        }
-      } else if (bindableActionsByName.has(trimmed)) {
-        // If the trimmed name or note is the name of a bindable action, call it
-        return bindableActionsByName.get(trimmed);
+      let followAction = textToAction(nameOrNote);
+      if (followAction) {
+        return followAction;
       }
     }
 
     // Otherwise, go directly to the item itself
     return () => openItemHere(item, null);
+  }
+
+  /**
+   * Returns a no-arg function which will perform the given action, or null.
+   * The action can be a WorkFlowy URL, or the name of a bindable action.
+   * @param {string} actionText The URL or bindable action name.
+   * @returns {function} A no-arg function which performs the given action.
+   */
+  function textToAction(actionText) {
+    const trimmed = (actionText || "").trim();
+    if (isWorkFlowyUrl(trimmed)) {
+      // If it's a WorkFlowy URL, open it
+      if (isWorkFlowyHomeUrl(trimmed)) {
+        return () => openItemHere(WF.rootItem(), null);
+      } else {
+        return () => openHere(trimmed);
+      }
+    } else if (bindableActionsByName.has(trimmed)) {
+      // If the trimmed name or note is the name of a bindable action, call it
+      return bindableActionsByName.get(trimmed);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -1487,7 +1509,14 @@ global WF:false
     builtInExpansionsMap.set(abbreviation, functionOrValue);
   }
 
-  function _registerKeyboardShortcuts() {
+  /**
+   * Registers shortcuts from both the given configuration,
+   * and (deprecated) shortcut tags.
+   * @param {Map<string,string>} shortcutsMap Shortcuts from configuration.
+   * @returns {void}
+   */
+  function _registerKeyboardShortcuts(shortcutsMap) {
+    // From tags
     for (let item of findItemsWithTag(shortcutTag, WF.rootItem())) {
       const keyCode = itemToTagArgsText(shortcutTag, item);
       if (!keyCode) {
@@ -1497,6 +1526,23 @@ global WF:false
         registerFunctionForKeyDownEvent(keyCode, itemToFollowAction(item));
       } else {
         console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
+      }
+    }
+    // From given config
+    for (let keyCode of shortcutsMap.keys()) {
+      const actionText = shortcutsMap.get(keyCode);
+      if (isValidCanonicalCode(keyCode)) {
+        const action = textToAction(actionText);
+        if (action) {
+          registerFunctionForKeyDownEvent(keyCode, action);
+        } else {
+          WF.showMessage(`Not a valid workflowy URL or action: ${actionText}.`);
+        }
+      } else {
+        WF.showMessage(
+          `WARN: Invalid keyboard shortcut code: '${keyCode}'.`,
+          false
+        );
       }
     }
   }
@@ -1531,7 +1577,6 @@ global WF:false
 
     // Keyboard shortcuts
     document.removeEventListener("keydown", _keyDownListener);
-    canonicalKeyCodesToActions.clear();
     bindableActionsByName.clear();
 
     // Built-in expansions
@@ -1582,7 +1627,6 @@ global WF:false
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
       ]);
-      _registerKeyboardShortcuts();
       document.addEventListener("keydown", _keyDownListener);
 
       // Built-in expansions
