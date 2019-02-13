@@ -23,8 +23,7 @@ type ItemPredicate = (item: Item) => boolean;
 type ItemHandler = (item: Item) => void;
 
 interface JumpFlowy {
-  applyToEachItem(functionToApply: ItemHandler,
-                  searchRoot: Item): void;
+  applyToEachItem(functionToApply: ItemHandler, searchRoot: Item): void;
 
   callAfterDocumentLoaded(callbackFn: () => void);
 
@@ -32,62 +31,71 @@ interface JumpFlowy {
 
   cleanUp(): void;
 
-  dateToYMDString(Date): string
+  dateToYMDString(Date): string;
 
-  dismissNotification(): void
+  dismissNotification(): void;
 
   doesItemHaveTag(tagToMatch: string, item: Item): boolean;
 
-  doesItemNameOrNoteMatch(textPredicate: TextPredicate,
-                          item: Item): boolean;
+  doesItemNameOrNoteMatch(textPredicate: TextPredicate, item: Item): boolean;
 
-  doesStringHaveTag(tagToMatch: string, s: string): boolean
+  doesStringHaveTag(tagToMatch: string, s: string): boolean;
 
-  editCurrentItem(): void
+  editCurrentItem(): void;
 
-  editParentOfFocusedItem(): void
+  editParentOfFocusedItem(): void;
 
-  expandAbbreviation(abbreviation: string): string
+  expandAbbreviation(abbreviation: string): string;
 
-  findClosestCommonAncestor(itemA: Item, itemB: Item): Item
+  findClosestCommonAncestor(itemA: Item, itemB: Item): Item;
 
-  findItemsMatchingRegex(regExp: RegExp, searchRoot: Item): Array<Item>
+  findItemsMatchingRegex(regExp: RegExp, searchRoot: Item): Array<Item>;
 
-  findItemsWithTag(tag: string, searchRoot: Item): Array<Item>
+  findItemsWithTag(tag: string, searchRoot: Item): Array<Item>;
 
-  findMatchingItems(itemPredicate: ItemPredicate,
-                    searchRoot: Item): Array<Item>;
+  findMatchingItems(
+    itemPredicate: ItemPredicate,
+    searchRoot: Item
+  ): Array<Item>;
 
-  findRecentlyEditedItems(earliestModifiedSec: number, maxSize: number,
-                          searchRoot: Item): Array<Item>
+  findRecentlyEditedItems(
+    earliestModifiedSec: number,
+    maxSize: number,
+    searchRoot: Item
+  ): Array<Item>;
 
-  findTopItemsByComparator<T>(isABetterThanB: (a: T, b: T) => boolean,
-                              maxSize: number,
-                              items: Iterable<T>): Array<T>
+  findTopItemsByComparator<T>(
+    isABetterThanB: (a: T, b: T) => boolean,
+    maxSize: number,
+    items: Iterable<T>
+  ): Array<T>;
 
-  findTopItemsByScore(itemToScoreFn: (Item) => number,
-                      minScore: number, maxSize: number,
-                      searchRoot: Item): Array<Item>
+  findTopItemsByScore(
+    itemToScoreFn: (Item) => number,
+    minScore: number,
+    maxSize: number,
+    searchRoot: Item
+  ): Array<Item>;
 
-  followItem(item: Item): void
+  followItem(item: Item): void;
 
-  followZoomedItem(): void
+  followZoomedItem(): void;
 
   getCurrentTimeSec(): number;
 
-  getZoomedItem(): Item
+  getZoomedItem(): Item;
 
-  getZoomedItemAsLongId(): string
+  getZoomedItemAsLongId(): string;
 
-  isRootItem(item: Item): boolean
+  isRootItem(item: Item): boolean;
 
-  isValidCanonicalCode(canonicalCode: string): void
+  isValidCanonicalCode(canonicalCode: string): void;
 
-  itemsToVolatileSearchQuery(items: Array<Item>): string
+  itemsToVolatileSearchQuery(items: Array<Item>): string;
 
   itemToLastModifiedSec(item: Item): number;
 
-  itemToPathAsItems(item: Item): Array<Item>
+  itemToPathAsItems(item: Item): Array<Item>;
 
   itemToPlainTextName(item: Item): string;
 
@@ -95,41 +103,44 @@ interface JumpFlowy {
 
   itemToTagArgsText(tagToMatch: string, item: Item): string;
 
-  itemToTags(item: Item): Array<string>
+  itemToTags(item: Item): Array<string>;
 
-  itemToVolatileSearchQuery(item: Item): string
+  itemToVolatileSearchQuery(item: Item): string;
 
-  keyDownEventToCanonicalCode(keyEvent: KeyboardEvent): string
+  keyDownEventToCanonicalCode(keyEvent: KeyboardEvent): string;
 
-  logElapsedTime(startDate: Date, message: string): void
+  logElapsedTime(startDate: Date, message: string): void;
 
-  logShortReport(): void
+  logShortReport(): void;
 
-  markFocusedAndDescendantsNotComplete(): void
+  markFocusedAndDescendantsNotComplete(): void;
 
-  openFirstLinkInFocusedItem(): void
+  openFirstLinkInFocusedItem(): void;
 
-  openHere(url: string): void
+  openHere(url: string): void;
 
-  openInNewTab(url: string): void
+  openInNewTab(url: string): void;
 
-  openItemHere(item: Item, searchQuery: string | null): void
+  openItemHere(item: Item, searchQuery: string | null): void;
 
-  promptToChooseItem(items: Array<Item>): Item
+  promptToChooseItem(items: Array<Item>): Item;
 
-  promptToExpandAndInsertAtCursor(): void
+  promptToExpandAndInsertAtCursor(): void;
 
-  promptToFindGlobalBookmarkThenFollow(): void
+  promptToFindGlobalBookmarkThenFollow(): void;
 
-  promptToFindLocalRegexMatchThenZoom(): void
+  promptToFindLocalRegexMatchThenZoom(): void;
 
-  promptToNormalLocalSearch(): void
+  promptToNormalLocalSearch(): void;
 
-  registerFunctionForKeyDownEvent(canonicalCode: string, functionToApply: () => void): void
+  registerFunctionForKeyDownEvent(
+    canonicalCode: string,
+    functionToApply: () => void
+  ): void;
 
-  showZoomedAndMostRecentlyEdited(): void
+  showZoomedAndMostRecentlyEdited(): void;
 
-  splitStringToSearchTerms(s: string): string
+  splitStringToSearchTerms(s: string): string;
 
   stringToTagArgsText(tagToMatch: string, s: string): string;
 
