@@ -163,6 +163,8 @@ interface Item {
 
   getParent(): Item;
 
+  getUrl(): string;
+
   isCompleted(): boolean;
 }
 

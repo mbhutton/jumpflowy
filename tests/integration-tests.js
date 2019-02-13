@@ -31,6 +31,8 @@ loading the expect.js and jumpflowy modules.
     expect(item.getChildren()).to.be.an("array");
     expect(item.getNumDescendants).to.be.a("function");
     expect(item.getNumDescendants()).to.be.a("number");
+    expect(item.getUrl).to.be.a("function");
+    expect(item.getUrl()).to.be.a("string");
   }
 
   /** Tests the Item type. */
