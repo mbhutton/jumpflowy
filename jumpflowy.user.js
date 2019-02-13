@@ -209,7 +209,7 @@ global WF:false
   let configurationRootItem = null;
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
   const CONFIG_SECTION_EXPANSIONS = "textExpansions";
-  const CONFIG_SECTION_BOOKMARKS = "bookmarks";
+  const CONFIG_SECTION_SHORT_CODES = "shortCodes";
   const CONFIG_SECTION_KB_SHORTCUTS = "keyboardShortcuts";
 
   const prodOrigin = "https://workflowy.com";
@@ -871,7 +871,7 @@ global WF:false
     function keyToConverter(key) {
       switch (key) {
         case CONFIG_SECTION_EXPANSIONS: // Falls through
-        case CONFIG_SECTION_BOOKMARKS: // Falls through
+        case CONFIG_SECTION_SHORT_CODES: // Falls through
         case CONFIG_SECTION_KB_SHORTCUTS:
           return convertToMapOfStrings;
       }
@@ -1074,7 +1074,7 @@ global WF:false
 
   /**
    * Prompts the user to choose an item from among the given array of items,
-   * using a mix of choosing by index, or choosing by bookmark, or by text.
+   * using a mix of choosing by index, or choosing by short code, or by text.
    * Note: the behaviour of this method is expected to change.
    * @param {Array<Item>} items The array of items to choose from.
    * @returns {Item} Returns the chosen item, or null if cancelled.
@@ -1233,7 +1233,7 @@ global WF:false
   }
 
   /**
-   * Prompts the user to choose from the bookmark items, then follows
+   * Prompts the user to choose from the short code items, then follows
    * the chosen item.
    * Note: the behaviour of this method is expected to change.
    * @returns {void}
