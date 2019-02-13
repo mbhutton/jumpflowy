@@ -921,7 +921,10 @@ global WF:false
    * @returns {void}
    */
   function wfEventListener(eventName) {
-    if (eventName === "operation--edit" || eventName === "locationChanged") {
+    if (
+      (eventName && eventName.startsWith("operation--")) ||
+      eventName === "locationChanged"
+    ) {
       cleanConfiguration();
       updateConfiguration();
     }
