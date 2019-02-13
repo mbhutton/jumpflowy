@@ -210,7 +210,7 @@ global WF:false
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
   const CONFIG_SECTION_EXPANSIONS = "textExpansions";
   const CONFIG_SECTION_BOOKMARKS = "bookmarks";
-  const CONFIG_SECTION_SHORTCUTS = "shortcuts";
+  const CONFIG_SECTION_KB_SHORTCUTS = "keyboardShortcuts";
 
   const prodOrigin = "https://workflowy.com";
   const devOrigin = "https://dev.workflowy.com";
@@ -872,7 +872,7 @@ global WF:false
       switch (key) {
         case CONFIG_SECTION_EXPANSIONS: // Falls through
         case CONFIG_SECTION_BOOKMARKS: // Falls through
-        case CONFIG_SECTION_SHORTCUTS:
+        case CONFIG_SECTION_KB_SHORTCUTS:
           return convertToMapOfStrings;
       }
     }
