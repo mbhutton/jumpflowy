@@ -191,8 +191,8 @@ global WF:false
 
   // Global state
   const canonicalKeyCodesToActions = new Map();
-  const builtInAbbreviationsMap = new Map();
-  let customAbbrevs = new Map();
+  const builtInExpansionsMap = new Map();
+  let customExpansions = new Map();
   const bindableActionsByName = new Map();
 
   // DEPRECATED TAGS START
@@ -208,7 +208,7 @@ global WF:false
 
   let configurationRootItem = null;
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
-  const CONFIG_SECTION_ABBREVS = "abbreviations";
+  const CONFIG_SECTION_EXPANSIONS = "textExpansions";
   const CONFIG_SECTION_BOOKMARKS = "bookmarks";
   const CONFIG_SECTION_SHORTCUTS = "shortcuts";
 
@@ -870,7 +870,7 @@ global WF:false
   function convertJumpFlowyConfiguration(item) {
     function keyToConverter(key) {
       switch (key) {
-        case CONFIG_SECTION_ABBREVS: // Falls through
+        case CONFIG_SECTION_EXPANSIONS: // Falls through
         case CONFIG_SECTION_BOOKMARKS: // Falls through
         case CONFIG_SECTION_SHORTCUTS:
           return convertToMapOfStrings;
@@ -896,7 +896,7 @@ global WF:false
    * @returns {void}
    */
   function cleanConfiguration() {
-    customAbbrevs = new Map();
+    customExpansions = new Map();
   }
 
   /**
@@ -930,9 +930,9 @@ global WF:false
   function applyConfiguration(configObject) {
     // Extract configuration sections
     /** @type Map<string, string> */
-    const abbrevsConfig = configObject.get(CONFIG_SECTION_ABBREVS);
+    const expansionsConfig = configObject.get(CONFIG_SECTION_EXPANSIONS);
     const abbrevsFromTags = _buildCustomAbbreviationsMap();
-    customAbbrevs = new Map([...abbrevsFromTags, ...abbrevsConfig]);
+    customExpansions = new Map([...abbrevsFromTags, ...expansionsConfig]);
   }
 
   /**
@@ -1349,9 +1349,12 @@ global WF:false
       expandAbbreviation(abbreviation.trim());
     }
 
-    const allAbbrevs = new Map([...builtInAbbreviationsMap, ...customAbbrevs]);
+    const allExpansions = new Map([
+      ...builtInExpansionsMap,
+      ...customExpansions
+    ]);
 
-    const fnOrValue = allAbbrevs.get(abbreviation);
+    const fnOrValue = allExpansions.get(abbreviation);
     if (!fnOrValue) {
       return null;
     }
@@ -1388,6 +1391,7 @@ global WF:false
   }
 
   /**
+   * DEPRECATED.
    * @returns {Map} The user defined #abbrev(theAbbrev theExpansion)
    *                style expansions as a Map, by abbreviation.
    *                The Map type is string -> (function | string)
@@ -1415,7 +1419,7 @@ global WF:false
   }
 
   /**
-   * Validates then adds the given expansion into builtInAbbreviationsMap.
+   * Validates then adds the given expansion into builtInExpansionsMap.
    * @param {string} abbreviation The abbreviation.
    * @param {function|string} functionOrValue The expansion. Either a string, or
    *   a function of type () -> string.
@@ -1440,7 +1444,7 @@ global WF:false
       const type = typeof functionOrValue;
       throw `Unsupported type of expansion for ${abbreviation}: ${type}`;
     }
-    builtInAbbreviationsMap.set(abbreviation, functionOrValue);
+    builtInExpansionsMap.set(abbreviation, functionOrValue);
   }
 
   function _registerKeyboardShortcuts() {
@@ -1491,8 +1495,8 @@ global WF:false
     bindableActionsByName.clear();
 
     // Built-in expansions
-    builtInAbbreviationsMap.clear();
-    customAbbrevs.clear();
+    builtInExpansionsMap.clear();
+    customExpansions.clear();
 
     // Configuration
     cleanConfiguration();
@@ -1558,8 +1562,8 @@ global WF:false
       if (deprecatedAbbrevItems.length > 0) {
         deprecationMessages.push(
           `Found ${deprecatedAbbrevItems.length} ${abbrevTag} items. ` +
-            `The ${abbrevTag} tag is deprecated. Instead, define abbreviations ` +
-            `in ${CONFIGURATION_ROOT_NAME} -> ${CONFIG_SECTION_ABBREVS}.`
+            `The ${abbrevTag} tag is deprecated. Instead, define expansions ` +
+            `in ${CONFIGURATION_ROOT_NAME} -> ${CONFIG_SECTION_EXPANSIONS}.`
         );
       }
       if (deprecationMessages.length > 0) {
