@@ -193,6 +193,7 @@ global WF:false
   const canonicalKeyCodesToActions = new Map();
   const builtInExpansionsMap = new Map();
   let customExpansions = new Map();
+  let abbrevsFromTags = new Map();
   const bindableActionsByName = new Map();
 
   // DEPRECATED TAGS START
@@ -997,7 +998,6 @@ global WF:false
     /** @type Map<string, string> */
     const expansionsConfig =
       configObject.get(CONFIG_SECTION_EXPANSIONS) || new Map();
-    const abbrevsFromTags = _buildCustomAbbreviationsMap();
     customExpansions = new Map([...abbrevsFromTags, ...expansionsConfig]);
 
     // Keyboard shortcuts
@@ -1606,6 +1606,7 @@ global WF:false
 
     // Built-in expansions
     builtInExpansionsMap.clear();
+    abbrevsFromTags.clear();
 
     // Configuration
     cleanConfiguration();
@@ -1655,6 +1656,7 @@ global WF:false
 
       // Built-in expansions
       _registerBuiltInExpansion("ymd", todayAsYMDString);
+      abbrevsFromTags = _buildCustomAbbreviationsMap();
 
       if (isDevDomain) {
         window.open = _openWithoutChangingWfDomain;
