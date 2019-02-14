@@ -218,6 +218,7 @@ global WF:false
   const GEL_CALLBACKS_RECEIVED = 1;
   const GEL_CALLBACKS_TOTAL_MS = 2;
   const GEL_CALLBACKS_MAX_MS = 3;
+  const IS_DEBUG_GEL_TIMING = false;
 
   const prodOrigin = "https://workflowy.com";
   const devOrigin = "https://dev.workflowy.com";
@@ -949,7 +950,7 @@ global WF:false
           gelData[GEL_CALLBACKS_MAX_MS],
           elapsedMs
         );
-        // console.log(`${gelData}`);
+        if (IS_DEBUG_GEL_TIMING) console.log(`${gelData}`);
       }, 0);
     }
   }
