@@ -212,6 +212,13 @@ global WF:false
   const CONFIG_SECTION_SHORT_CODES = "shortCodes";
   const CONFIG_SECTION_KB_SHORTCUTS = "keyboardShortcuts";
 
+  // Global event listener data
+  const gelData = [0, 0, 0, 0];
+  const GEL_CALLBACKS_FIRED = 0;
+  const GEL_CALLBACKS_RECEIVED = 1;
+  const GEL_CALLBACKS_TOTAL_MS = 2;
+  const GEL_CALLBACKS_MAX_MS = 3;
+
   const prodOrigin = "https://workflowy.com";
   const devOrigin = "https://dev.workflowy.com";
   const isDevDomain = location.origin === devOrigin;
@@ -925,10 +932,24 @@ global WF:false
       (eventName && eventName.startsWith("operation--")) ||
       eventName === "locationChanged"
     ) {
+      gelData[GEL_CALLBACKS_FIRED]++;
       // Do the actual work after letting the UI update
       setTimeout(() => {
-        cleanConfiguration();
-        reloadConfiguration();
+        const start = new Date();
+        gelData[GEL_CALLBACKS_RECEIVED]++;
+        // When multiple events are fired together, only process the last one
+        if (gelData[GEL_CALLBACKS_FIRED] === gelData[GEL_CALLBACKS_RECEIVED]) {
+          cleanConfiguration();
+          reloadConfiguration();
+        }
+        const end = new Date();
+        const elapsedMs = end.getTime() - start.getTime();
+        gelData[GEL_CALLBACKS_TOTAL_MS] += elapsedMs;
+        gelData[GEL_CALLBACKS_MAX_MS] = Math.max(
+          gelData[GEL_CALLBACKS_MAX_MS],
+          elapsedMs
+        );
+        // console.log(`${gelData}`);
       }, 0);
     }
   }
