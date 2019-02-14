@@ -194,6 +194,7 @@ global WF:false
   const builtInExpansionsMap = new Map();
   let customExpansions = new Map();
   let abbrevsFromTags = new Map();
+  let kbShortcutsFromTags = new Map();
   const bindableActionsByName = new Map();
 
   // DEPRECATED TAGS START
@@ -1004,7 +1005,13 @@ global WF:false
     /** @type Map<string, string> */
     const shortcutsConfig =
       configObject.get(CONFIG_SECTION_KB_SHORTCUTS) || new Map();
-    _registerKeyboardShortcuts(shortcutsConfig);
+    const allKeyCodesToFunctions = new Map([
+      ...kbShortcutsFromTags,
+      ..._convertKbShortcutsConfigToFunctionMap(shortcutsConfig)
+    ]);
+    allKeyCodesToFunctions.forEach((action, code) => {
+      canonicalKeyCodesToActions.set(code, action);
+    });
   }
 
   /**
@@ -1121,7 +1128,7 @@ global WF:false
     return result !== null;
   }
 
-  function registerFunctionForKeyDownEvent(canonicalCode, functionToApply) {
+  function validateFunctionForKeyDownEvent(canonicalCode, functionToApply) {
     if (!isValidCanonicalCode(canonicalCode)) {
       throw `${canonicalCode} is not a valid canonical key code`;
     }
@@ -1131,7 +1138,6 @@ global WF:false
     if (functionToApply.length !== 0) {
       throw "Cannot register a callback function which takes arguments";
     }
-    canonicalKeyCodesToActions.set(canonicalCode, functionToApply);
   }
 
   function _keyDownListener(keyEvent) {
@@ -1535,12 +1541,10 @@ global WF:false
   }
 
   /**
-   * Registers shortcuts from both the given configuration,
-   * and (deprecated) shortcut tags.
-   * @param {Map<string,string>} shortcutsMap Shortcuts from configuration.
-   * @returns {void}
+   * @returns {Map<string,function>} A map of key codes to no-arg functions.
    */
-  function _registerKeyboardShortcuts(shortcutsMap) {
+  function _loadKbShortcutsFromTagsToFunctionMap() {
+    const rMap = new Map();
     // From tags
     for (let item of findItemsWithTag(shortcutTag, WF.rootItem())) {
       const keyCode = itemToTagArgsText(shortcutTag, item);
@@ -1548,18 +1552,31 @@ global WF:false
         continue;
       }
       if (isValidCanonicalCode(keyCode)) {
-        registerFunctionForKeyDownEvent(keyCode, itemToFollowAction(item));
+        const action = itemToFollowAction(item);
+        validateFunctionForKeyDownEvent(keyCode, action);
+        rMap.set(keyCode, action);
       } else {
         console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
       }
     }
-    // From given config
+    return rMap;
+  }
+
+  /**
+   * Reads shortcuts from the given configuration, converting them to
+   * a map of key codes to no-arg functions.
+   * @param {Map<string,string>} shortcutsMap Shortcuts from configuration.
+   * @returns {Map<string,function>} A map of key codes to no-arg functions.
+   */
+  function _convertKbShortcutsConfigToFunctionMap(shortcutsMap) {
+    const rMap = new Map();
     for (let keyCode of shortcutsMap.keys()) {
       const actionText = shortcutsMap.get(keyCode);
       if (isValidCanonicalCode(keyCode)) {
         const action = textToAction(actionText);
         if (action) {
-          registerFunctionForKeyDownEvent(keyCode, action);
+          validateFunctionForKeyDownEvent(keyCode, action);
+          rMap.set(keyCode, action);
         } else {
           WF.showMessage(`Not a valid workflowy URL or action: ${actionText}.`);
         }
@@ -1570,6 +1587,7 @@ global WF:false
         );
       }
     }
+    return rMap;
   }
 
   function _populateMapWithNoArgFunctions(map, functionsArray) {
@@ -1602,6 +1620,7 @@ global WF:false
 
     // Keyboard shortcuts
     document.removeEventListener("keydown", _keyDownListener);
+    kbShortcutsFromTags.clear();
     bindableActionsByName.clear();
 
     // Built-in expansions
@@ -1652,6 +1671,7 @@ global WF:false
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
       ]);
+      kbShortcutsFromTags = _loadKbShortcutsFromTagsToFunctionMap();
       document.addEventListener("keydown", _keyDownListener);
 
       // Built-in expansions
@@ -1734,7 +1754,6 @@ global WF:false
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,
-    registerFunctionForKeyDownEvent: registerFunctionForKeyDownEvent,
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,

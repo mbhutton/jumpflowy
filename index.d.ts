@@ -133,11 +133,6 @@ interface JumpFlowy {
 
   promptToNormalLocalSearch(): void;
 
-  registerFunctionForKeyDownEvent(
-    canonicalCode: string,
-    functionToApply: () => void
-  ): void;
-
   showZoomedAndMostRecentlyEdited(): void;
 
   splitStringToSearchTerms(s: string): string;
