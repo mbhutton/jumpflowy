@@ -925,8 +925,11 @@ global WF:false
       (eventName && eventName.startsWith("operation--")) ||
       eventName === "locationChanged"
     ) {
-      cleanConfiguration();
-      reloadConfiguration();
+      // Do the actual work after letting the UI update
+      setTimeout(() => {
+        cleanConfiguration();
+        reloadConfiguration();
+      }, 0);
     }
   }
 
