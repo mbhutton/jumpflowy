@@ -1606,7 +1606,6 @@ global WF:false
 
     // Built-in expansions
     builtInExpansionsMap.clear();
-    customExpansions.clear();
 
     // Configuration
     cleanConfiguration();
