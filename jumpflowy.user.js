@@ -202,6 +202,10 @@ global WF:false
   let kbShortcutsFromTags = new Map();
   /** @type {Map<string, function>} */
   const bindableActionsByName = new Map();
+  /** @type {Map<string, string>} */
+  const hashSegmentsToIds = new Map();
+  /** @type {Set<string>} */
+  const unknownHashSegments = new Set();
 
   // DEPRECATED TAGS START
   const bookmarkTag = "#bm";
@@ -534,6 +538,77 @@ global WF:false
    */
   function isWorkFlowyUrl(s) {
     return s && s.match("^https://(dev\\.)?workflowy\\.com(/.*)?$") !== null;
+  }
+
+  /**
+   * @param {string} fullUrl The full WorkFlowy URL.
+   * @returns {string} The hash segment, of the form returned by Item.getUrl().
+   */
+  function workflowyUrlToHashSegment(fullUrl) {
+    const urlObject = new URL(fullUrl);
+    const hash = urlObject.hash;
+    if (hash.length > 2) {
+      return hash;
+    } else {
+      // '#/' or '#' or ''
+      return "#";
+    }
+  }
+
+  /**
+   * Just an alias to Item.getUrl(), to help make it clear that calling code
+   * is dealing with the hash part of the URL rather than a full URL.
+   * @param {Item} item The item.
+   * @returns {string} The hash segment, of the form returned by Item.getUrl().
+   */
+  function itemToHashSegment(item) {
+    return item.getUrl();
+  }
+
+  /**
+   * Walks the entire tree, (re-)populating the hashSegmentsToIds map.
+   * @returns {void}
+   */
+  function populateHashSegmentsForFullTree() {
+    function populateHash(item) {
+      const hashSegment = itemToHashSegment(item);
+      if (!hashSegmentsToIds.has(hashSegment)) {
+        hashSegmentsToIds.set(hashSegment, item.getId());
+      }
+    }
+    applyToEachItem(populateHash, WF.rootItem());
+  }
+
+  /**
+   * @param {string} hashSegment The hash segment part of a WorkFlowy URL.
+   * @returns {string | null} The ID of the item if found, otherwise null.
+   */
+  function findItemIdForHashSegment(hashSegment) {
+    const existingEntry = hashSegmentsToIds.get(hashSegment);
+    if (existingEntry) {
+      return existingEntry;
+    }
+    if (unknownHashSegments.has(hashSegment)) {
+      return null;
+    }
+    // First request for this hash segment. Re-index the entire tree.
+    populateHashSegmentsForFullTree();
+    // Re-check the map, blacklisting the hash segment if not found
+    if (hashSegmentsToIds.has(hashSegment)) {
+      return hashSegmentsToIds.get(hashSegment);
+    } else {
+      unknownHashSegments.add(hashSegment);
+      return null;
+    }
+  }
+
+  /**
+   * @param {string} fullUrl The WorkFlowy URL.
+   * @returns {string | null} The ID of the item in the given URL.
+   */
+  function workflowyUrlToId(fullUrl) {
+    const hashSegment = workflowyUrlToHashSegment(fullUrl);
+    return findItemIdForHashSegment(hashSegment);
   }
 
   /**
