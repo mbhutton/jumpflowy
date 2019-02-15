@@ -202,6 +202,10 @@ global WF:false
   let kbShortcutsFromTags = new Map();
   /** @type {Map<string, function>} */
   const bindableActionsByName = new Map();
+  /** @type {Map<string, Item>} */
+  let bookmarksToItems = new Map();
+  /** @type {Map<string, string>} */
+  let itemIdsToFirstBookmarks = new Map();
   /** @type {Map<string, string>} */
   const hashSegmentsToIds = new Map();
   /** @type {Set<string>} */
@@ -1044,6 +1048,8 @@ global WF:false
    */
   function cleanConfiguration() {
     customExpansions = new Map();
+    bookmarksToItems = new Map();
+    itemIdsToFirstBookmarks = new Map();
     canonicalKeyCodesToActions.clear();
   }
 
@@ -1092,6 +1098,40 @@ global WF:false
     ]);
     allKeyCodesToFunctions.forEach((action, code) => {
       canonicalKeyCodesToActions.set(code, action);
+    });
+
+    // Bookmarks
+    applyBookmarksConfiguration(configObject);
+  }
+
+  /**
+   * Applies the bookmarks configuration for given user configuration object.
+   * @param {Map<string, any>} configObject The configuration object.
+   * @returns {void}
+   */
+  function applyBookmarksConfiguration(configObject) {
+    /** @type Map<string, string> */
+    const bookmarksConfig =
+      configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
+    bookmarksConfig.forEach((wfUrl, bookmarkName) => {
+      if (isWorkFlowyUrl(wfUrl)) {
+        const itemId = workflowyUrlToId(wfUrl);
+        if (itemId) {
+          const item = WF.getItemById(itemId);
+          if (item) {
+            bookmarksToItems.set(bookmarkName, item);
+            if (!itemIdsToFirstBookmarks.has(itemId)) {
+              itemIdsToFirstBookmarks.set(itemId, bookmarkName);
+            }
+          } else {
+            console.log(`Item not found for ID ${itemId}.`);
+          }
+        } else {
+          WF.showMessage(`No item found for URL ${wfUrl}.`);
+        }
+      } else {
+        WF.showMessage(`"${wfUrl} is a not a valid WorkFlowy URL."`);
+      }
     });
   }
 
@@ -1243,16 +1283,23 @@ global WF:false
     const itemAliases = Array();
     for (let item of items) {
       const tagArgsText = itemToTagArgsText(bookmarkTag, item);
+      const firstBmInConfig = itemIdsToFirstBookmarks.get(item.getId());
+      let aliasToUse;
       if (tagArgsText && tagArgsText.trim()) {
-        itemAliases.push(tagArgsText);
+        aliasToUse = tagArgsText;
+      } else if (firstBmInConfig) {
+        aliasToUse = firstBmInConfig;
       } else {
-        itemAliases.push(null);
+        aliasToUse = null;
       }
+      itemAliases.push(aliasToUse);
     }
 
     let text = "Choose from one of the following:\n";
     for (let i = 0; i < items.length; i++) {
-      text += i + ": " + (itemToPlainTextName(items[i]) || "<No name>") + "\n";
+      const aliasPart = (itemAliases[i] && `[${itemAliases[i]}] `) || "";
+      const namePart = itemToPlainTextName(items[i]) || "<No name>";
+      text += i + ": " + aliasPart + namePart + "\n";
     }
     let answer = prompt(text);
     if (answer === null) {
@@ -1415,7 +1462,9 @@ global WF:false
    */
   function promptToFindGlobalBookmarkThenFollow() {
     const startTime = new Date();
-    const items = findItemsWithTag(bookmarkTag, WF.rootItem());
+    const itemsWithBmTag = findItemsWithTag(bookmarkTag, WF.rootItem());
+    const itemsFromConfig = Array.from(bookmarksToItems.values());
+    const items = [...itemsFromConfig, ...itemsWithBmTag];
     logElapsedTime(startTime, `Found items with ${bookmarkTag} tag`);
     const chosenItem = promptToChooseItem(items);
     followItem(chosenItem);
