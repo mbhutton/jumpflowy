@@ -548,7 +548,7 @@ global WF:false
    * @param {string} fullUrl The full WorkFlowy URL.
    * @returns {string} The hash segment, of the form returned by Item.getUrl().
    */
-  function workflowyUrlToHashSegment(fullUrl) {
+  function workFlowyUrlToHashSegment(fullUrl) {
     const urlObject = new URL(fullUrl);
     const hash = urlObject.hash;
     if (hash.length > 2) {
@@ -610,8 +610,8 @@ global WF:false
    * @param {string} fullUrl The WorkFlowy URL.
    * @returns {string | null} The ID of the item in the given URL.
    */
-  function workflowyUrlToId(fullUrl) {
-    const hashSegment = workflowyUrlToHashSegment(fullUrl);
+  function findItemIdForWorkFlowyUrl(fullUrl) {
+    const hashSegment = workFlowyUrlToHashSegment(fullUrl);
     return findItemIdForHashSegment(hashSegment);
   }
 
@@ -1115,7 +1115,7 @@ global WF:false
       configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
     bookmarksConfig.forEach((wfUrl, bookmarkName) => {
       if (isWorkFlowyUrl(wfUrl)) {
-        const itemId = workflowyUrlToId(wfUrl);
+        const itemId = findItemIdForWorkFlowyUrl(wfUrl);
         if (itemId) {
           const item = WF.getItemById(itemId);
           if (item) {
@@ -1124,7 +1124,7 @@ global WF:false
               itemIdsToFirstBookmarks.set(itemId, bookmarkName);
             }
           } else {
-            console.log(`Item not found for ID ${itemId}.`);
+            WF.showMessage(`Item not found for ID ${itemId}.`);
           }
         } else {
           WF.showMessage(`No item found for URL ${wfUrl}.`);
@@ -1708,7 +1708,7 @@ global WF:false
           validateFunctionForKeyDownEvent(keyCode, action);
           rMap.set(keyCode, action);
         } else {
-          WF.showMessage(`Not a valid workflowy URL or action: ${actionText}.`);
+          WF.showMessage(`Not a valid WorkFlowy URL or action: ${actionText}.`);
         }
       } else {
         WF.showMessage(
