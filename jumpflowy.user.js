@@ -1130,7 +1130,7 @@ global WF:false
           WF.showMessage(`No item found for URL ${wfUrl}.`);
         }
       } else {
-        WF.showMessage(`"${wfUrl} is a not a valid WorkFlowy URL."`);
+        WF.showMessage(`"${wfUrl}" is a not a valid WorkFlowy URL.`);
       }
     });
   }
