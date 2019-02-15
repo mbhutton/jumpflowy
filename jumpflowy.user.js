@@ -190,11 +190,17 @@ global WF:false
   }
 
   // Global state
+  /** @type {Map<string, function>} */
   const canonicalKeyCodesToActions = new Map();
+  /** @type {Map<string, function | string>} */
   const builtInExpansionsMap = new Map();
+  /** @type {Map<string, function | string>} */
   let customExpansions = new Map();
+  /** @type {Map<string, function | string>} */
   let abbrevsFromTags = new Map();
+  /** @type {Map<string, function>} */
   let kbShortcutsFromTags = new Map();
+  /** @type {Map<string, function>} */
   const bindableActionsByName = new Map();
 
   // DEPRECATED TAGS START
