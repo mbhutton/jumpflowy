@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.11
+// @version      0.1.6.12
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -555,17 +555,21 @@ global WF:false
 
   /**
    * @param {string} fullUrl The full WorkFlowy URL.
-   * @returns {string} The hash segment, of the form returned by Item.getUrl().
+   * @returns {[string, string]} The hash segment, of the form returned by
+   *                             Item.getUrl(), and the search query or null.
    */
-  function workFlowyUrlToHashSegment(fullUrl) {
+  function workFlowyUrlToHashSegmentAndSearchQuery(fullUrl) {
     const urlObject = new URL(fullUrl);
-    const hash = urlObject.hash;
-    if (hash.length > 2) {
-      return hash;
-    } else {
+    let [hash, rawSearchQuery] = urlObject.hash.split("?q=");
+    if (hash.length <= 2) {
       // '#/' or '#' or ''
-      return "#";
+      hash = "#";
     }
+    let searchQuery = null;
+    if (rawSearchQuery) {
+      searchQuery = unescape(rawSearchQuery);
+    }
+    return [hash, searchQuery];
   }
 
   /**
@@ -617,11 +621,27 @@ global WF:false
 
   /**
    * @param {string} fullUrl The WorkFlowy URL.
-   * @returns {string | null} The ID of the item in the given URL.
+   * @returns {[string, string]} ID of the item in the URL, and search query.
    */
-  function findItemIdForWorkFlowyUrl(fullUrl) {
-    const hashSegment = workFlowyUrlToHashSegment(fullUrl);
-    return findItemIdForHashSegment(hashSegment);
+  function findItemIdAndSearchQueryForWorkFlowyUrl(fullUrl) {
+    const [hashSegment, searchQuery] = workFlowyUrlToHashSegmentAndSearchQuery(
+      fullUrl
+    );
+    const itemId = findItemIdForHashSegment(hashSegment);
+    return [itemId, searchQuery];
+  }
+
+  /**
+   * @param {string} fullUrl The WorkFlowy URL.
+   * @returns {[Item, string]} The ID of the item in the URL, and search query.
+   */
+  function findItemAndSearchQueryForWorkFlowyUrl(fullUrl) {
+    const [id, query] = findItemIdAndSearchQueryForWorkFlowyUrl(fullUrl);
+    let item = null;
+    if (id) {
+      item = WF.getItemById(id);
+    }
+    return [item, query];
   }
 
   /**
@@ -1139,16 +1159,11 @@ global WF:false
       configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
     bookmarksConfig.forEach((wfUrl, bookmarkName) => {
       if (isWorkFlowyUrl(wfUrl)) {
-        const itemId = findItemIdForWorkFlowyUrl(wfUrl);
-        if (itemId) {
-          const item = WF.getItemById(itemId);
-          if (item) {
-            bookmarksToItems.set(bookmarkName, item);
-            if (!itemIdsToFirstBookmarks.has(itemId)) {
-              itemIdsToFirstBookmarks.set(itemId, bookmarkName);
-            }
-          } else {
-            WF.showMessage(`Item not found for ID ${itemId}.`);
+        const [item] = findItemAndSearchQueryForWorkFlowyUrl(wfUrl);
+        if (item) {
+          bookmarksToItems.set(bookmarkName, item);
+          if (!itemIdsToFirstBookmarks.has(item.getId())) {
+            itemIdsToFirstBookmarks.set(item.getId(), bookmarkName);
           }
         } else {
           WF.showMessage(`No item found for URL ${wfUrl}.`);
@@ -1445,8 +1460,8 @@ global WF:false
       itemToPlainTextNote(item)
     ]) {
       let followAction = textToAction(nameOrNote);
-      if (followAction) {
-        return followAction;
+      if (followAction && followAction.actionFunction) {
+        return followAction.actionFunction;
       }
     }
 
@@ -1455,29 +1470,63 @@ global WF:false
   }
 
   /**
-   * Returns a no-arg function which will perform the given action, or null.
-   * The action can be a WorkFlowy URL, or the name of a bindable action.
+   * Returns an Action for the given action text, or null.
+   * The action can be a WorkFlowy URL, or the name of a bindable action,
+   * or a bookmarklet.
    * @param {string} actionText The URL or bindable action name.
-   * @returns {function} A no-arg function which performs the given action.
+   * @returns {Action} A no-arg function which performs the given action.
    */
   function textToAction(actionText) {
     const trimmed = (actionText || "").trim();
+    let action = null;
     if (isWorkFlowyUrl(trimmed)) {
       // If it's a WorkFlowy URL, open it
-      if (isWorkFlowyHomeUrl(trimmed)) {
-        return () => openItemHere(WF.rootItem(), null);
-      } else {
-        return () => openHere(trimmed);
+      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(
+        trimmed
+      );
+      let name = `Go to ${trimmed}`;
+      if (item) {
+        name = `Go to "${item.getNameInPlainText()}"`;
+        if (searchQuery) {
+          name += `. Search: "${searchQuery}"`;
+        }
       }
+      let actionFunction;
+      if (isWorkFlowyHomeUrl(trimmed)) {
+        actionFunction = () => openItemHere(WF.rootItem(), null);
+      } else {
+        actionFunction = () => openHere(trimmed);
+      }
+      action = new Action(name, "item", actionFunction);
     } else if (bindableActionsByName.has(trimmed)) {
       // If it's the name of a bindable action, call it
-      return bindableActionsByName.get(trimmed);
+      const fn = bindableActionsByName.get(trimmed);
+      action = new Action(`Call ${trimmed}`, "namedAction", fn);
     } else if (trimmed.startsWith("javascript:")) {
       // If it's a bookmarklet, execute it
       const bookmarkletBody = trimmed.substring("javascript:".length);
-      return () => eval(bookmarkletBody);
+      const fn = () => eval(bookmarkletBody);
+      action = new Action("Call bookmarklet", "bookmarklet", fn);
     } else {
-      return null;
+      action = null;
+    }
+    return action;
+  }
+
+  class Action {
+    /**
+     * @param {string} name The full name of the action.
+     * @param {'item' | 'namedAction' | 'bookmarklet'} type Action type.
+     * @param {function} actionFunction The function which performs the action.
+     */
+    constructor(name, type, actionFunction) {
+      this.name = name;
+      this.type = type;
+      this.actionFunction = actionFunction;
+    }
+
+    toString() {
+      return `${this.type}: ${this.name}`;
     }
   }
 
@@ -1806,9 +1855,9 @@ global WF:false
       const actionText = shortcutsMap.get(keyCode);
       if (isValidCanonicalCode(keyCode)) {
         const action = textToAction(actionText);
-        if (action) {
-          validateFunctionForKeyDownEvent(keyCode, action);
-          rMap.set(keyCode, action);
+        if (action && action.actionFunction) {
+          validateFunctionForKeyDownEvent(keyCode, action.actionFunction);
+          rMap.set(keyCode, action.actionFunction);
         } else {
           WF.showMessage(`Not a valid WorkFlowy URL or action: ${actionText}.`);
         }
