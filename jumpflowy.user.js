@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.9
+// @version      0.1.6.10
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1470,8 +1470,12 @@ global WF:false
         return () => openHere(trimmed);
       }
     } else if (bindableActionsByName.has(trimmed)) {
-      // If the trimmed name or note is the name of a bindable action, call it
+      // If it's the name of a bindable action, call it
       return bindableActionsByName.get(trimmed);
+    } else if (trimmed.startsWith("javascript:")) {
+      // If it's a bookmarklet, execute it
+      const bookmarkletBody = trimmed.substring("javascript:".length);
+      return () => eval(bookmarkletBody);
     } else {
       return null;
     }
