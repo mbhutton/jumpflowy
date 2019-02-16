@@ -1486,12 +1486,9 @@ global WF:false
    * @returns {void}
    */
   function deleteFocusedItemIfNoChildren() {
-    const focusedItem = WF.focusedItem();
-    if (focusedItem === null || isRootItem(focusedItem)) {
-      return;
-    }
-    if (focusedItem.getChildren().length === 0) {
-      WF.deleteItem(focusedItem);
+    const item = WF.focusedItem();
+    if (item && !isRootItem(item) && item.getChildren().length === 0) {
+      WF.deleteItem(item);
     }
   }
 
