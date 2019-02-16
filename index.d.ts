@@ -127,6 +127,8 @@ interface JumpFlowy {
 
   promptToExpandAndInsertAtCursor(): void;
 
+  promptToAddBookmarkForCurrentItem(): void;
+
   promptToFindGlobalBookmarkThenFollow(): void;
 
   promptToFindLocalRegexMatchThenZoom(): void;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.8
+// @version      0.1.6.9
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -222,6 +222,7 @@ global WF:false
   let lastRegexString = null;
   let isCleanedUp = false;
 
+  /** @type {Item} */
   let configurationRootItem = null;
   const CONFIGURATION_ROOT_NAME = "jumpflowyConfiguration";
   const CONFIG_SECTION_EXPANSIONS = "textExpansions";
@@ -534,6 +535,14 @@ global WF:false
    */
   function toWorkFlowyUrlOnCurrentDomain(item) {
     return `${location.origin}/${item.getUrl()}`;
+  }
+
+  /**
+   * @param {Item} item The item to create a WorkFlowy URL for.
+   * @returns {string} The WorkFlowy URL pointing to the item.
+   */
+  function toWorkFlowyUrlOnProductionDomain(item) {
+    return `https://workflowy.com/${item.getUrl()}`;
   }
 
   /**
@@ -1011,6 +1020,21 @@ global WF:false
   }
 
   /**
+   * @param {string} sectionName The name of the configuration section.
+   * @returns {Item | null} The section item, or null if not found.
+   */
+  function findConfigurationSection(sectionName) {
+    if (configurationRootItem) {
+      for (let child of configurationRootItem.getChildren()) {
+        if (child.getNameInPlainText().trim() === sectionName) {
+          return child;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * Global event listener.
    * @param {string} eventName The name of the event.
    * @returns {void}
@@ -1471,6 +1495,69 @@ global WF:false
   }
 
   /**
+   * Prompts user for bookmark name, using it to bookmark the current item.
+   * @returns {void}
+   */
+  function promptToAddBookmarkForCurrentItem() {
+    const currentItem = WF.currentItem();
+    if (currentItem === null) {
+      return;
+    }
+    let bookmarkName = prompt(
+      "Choose bookmark name for zoomed item " +
+        `"${currentItem.getNameInPlainText()}".`
+    );
+    if (bookmarkName === null || !bookmarkName.trim()) {
+      return;
+    }
+    bookmarkName = bookmarkName.trim();
+    if (bookmarksToItems.has(bookmarkName)) {
+      const existingItem = bookmarksToItems.get(bookmarkName);
+      if (existingItem.getId() === currentItem.getId()) {
+        // Nothing to do
+      } else {
+        WF.showMessage(
+          `Bookmark "${bookmarkName}" already used,
+            for ${toWorkFlowyUrlOnCurrentDomain(existingItem)}.`
+        );
+      }
+    } else {
+      if (configurationRootItem) {
+        const bookmarksSectionItem = findConfigurationSection(
+          CONFIG_SECTION_BOOKMARKS
+        );
+        if (bookmarksSectionItem) {
+          WF.zoomTo(bookmarksSectionItem);
+          WF.editGroup(() => {
+            const newBookmarkItem = WF.createItem(bookmarksSectionItem, 0);
+            if (newBookmarkItem) {
+              WF.setItemName(newBookmarkItem, bookmarkName);
+              const prodUrl = toWorkFlowyUrlOnProductionDomain(currentItem);
+              WF.setItemNote(newBookmarkItem, prodUrl);
+              // Success! Don't show an unnecessary success message, as config
+              // reload logic may need to display validation messages.
+            } else {
+              WF.showMessage(
+                "Failed to create new bookmark. Check the console log."
+              );
+            }
+          });
+        } else {
+          WF.showMessage(
+            `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found ` +
+              `under ${toWorkFlowyUrlOnCurrentDomain}.`
+          );
+        }
+      } else {
+        WF.showMessage(
+          "Configuration root item not found. " +
+            `Are you missing a "${CONFIGURATION_ROOT_NAME}" item?`
+        );
+      }
+    }
+  }
+
+  /**
    * Logs some very basic info about the current document to the console,
    * showing an alert if any tests fail.
    * @returns {void}
@@ -1794,6 +1881,7 @@ global WF:false
         markFocusedAndDescendantsNotComplete,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
+        promptToAddBookmarkForCurrentItem,
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
@@ -1881,6 +1969,7 @@ global WF:false
     openItemHere: openItemHere,
     promptToChooseItem: promptToChooseItem,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
+    promptToAddBookmarkForCurrentItem: promptToAddBookmarkForCurrentItem,
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,

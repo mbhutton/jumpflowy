@@ -39,6 +39,10 @@ declare namespace WF {
 
   function search(query: string): void;
 
+  function setItemName(item: Item, content: string);
+
+  function setItemNote(item: Item, content: string);
+
   function showMessage(html: string, isError?: boolean);
 
   function zoomTo(item: Item): void;
