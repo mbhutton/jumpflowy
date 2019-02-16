@@ -7,6 +7,8 @@ declare namespace WF {
 
   function clearSearch(): void;
 
+  function completedVisible(): boolean;
+
   /**
    * Note: this *toggles* completeness.
    * @param item Item to toggle
@@ -16,6 +18,8 @@ declare namespace WF {
   function currentItem(): Item;
 
   function currentSearchQuery(): string;
+
+  function deleteItem(item: Item): void;
 
   function editGroup(callback: () => void);
 
@@ -44,6 +48,8 @@ declare namespace WF {
   function setItemNote(item: Item, content: string);
 
   function showMessage(html: string, isError?: boolean);
+
+  function toggleCompletedVisible(): void;
 
   function zoomTo(item: Item): void;
 }

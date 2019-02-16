@@ -33,6 +33,8 @@ interface JumpFlowy {
 
   dateToYMDString(Date): string;
 
+  deleteFocusedItemIfNoChildren(): void;
+
   dismissNotification(): void;
 
   doesItemHaveTag(tagToMatch: string, item: Item): boolean;

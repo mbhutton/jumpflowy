@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.10
+// @version      0.1.6.11
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1482,6 +1482,20 @@ global WF:false
   }
 
   /**
+   * Deletes the focused item if and only if it has no children.
+   * @returns {void}
+   */
+  function deleteFocusedItemIfNoChildren() {
+    const focusedItem = WF.focusedItem();
+    if (focusedItem === null || isRootItem(focusedItem)) {
+      return;
+    }
+    if (focusedItem.getChildren().length === 0) {
+      WF.deleteItem(focusedItem);
+    }
+  }
+
+  /**
    * Prompts the user to choose from the bookmarked items, then follows
    * the chosen item.
    * Note: the behaviour of this method is expected to change.
@@ -1878,6 +1892,7 @@ global WF:false
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         createItemAtTopOfCurrent,
+        deleteFocusedItemIfNoChildren,
         dismissNotification,
         editCurrentItem,
         editParentOfFocusedItem,
@@ -1934,6 +1949,7 @@ global WF:false
     cleanUp: cleanUp,
     createItemAtTopOfCurrent: createItemAtTopOfCurrent,
     dateToYMDString: dateToYMDString,
+    deleteFocusedItemIfNoChildren: deleteFocusedItemIfNoChildren,
     dismissNotification: dismissNotification,
     doesItemHaveTag: doesItemHaveTag,
     doesItemNameOrNoteMatch: doesItemNameOrNoteMatch,
