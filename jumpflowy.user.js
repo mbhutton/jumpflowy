@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.12
+// @version      0.1.6.13
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -534,7 +534,7 @@ global WF:false
    * @returns {string} The WorkFlowy URL pointing to the item.
    */
   function toWorkFlowyUrlOnCurrentDomain(item) {
-    return `${location.origin}/${item.getUrl()}`;
+    return `${location.origin}/${itemToHashSegment(item)}`;
   }
 
   /**
@@ -542,7 +542,7 @@ global WF:false
    * @returns {string} The WorkFlowy URL pointing to the item.
    */
   function toWorkFlowyUrlOnProductionDomain(item) {
-    return `https://workflowy.com/${item.getUrl()}`;
+    return `https://workflowy.com/${itemToHashSegment(item)}`;
   }
 
   /**
@@ -556,7 +556,7 @@ global WF:false
   /**
    * @param {string} fullUrl The full WorkFlowy URL.
    * @returns {[string, string]} The hash segment, of the form returned by
-   *                             Item.getUrl(), and the search query or null.
+   *                             itemToHashSegment(), and search query or null.
    */
   function workFlowyUrlToHashSegmentAndSearchQuery(fullUrl) {
     const urlObject = new URL(fullUrl);
@@ -573,13 +573,16 @@ global WF:false
   }
 
   /**
-   * Just an alias to Item.getUrl(), to help make it clear that calling code
-   * is dealing with the hash part of the URL rather than a full URL.
+   * Wraps a call to Item.getUrl(), which returns the hash part of the URL
+   * rather than a full URL. Strips off a leading '/' which is added on
+   * some domains.
    * @param {Item} item The item.
-   * @returns {string} The hash segment, of the form returned by Item.getUrl().
+   * @returns {string} The hash segment, of the form returned by Item.getUrl(),
+   *                   with any leading '/' character removed.
    */
   function itemToHashSegment(item) {
-    return item.getUrl();
+    const hashSegment = item.getUrl();
+    return hashSegment.startsWith("/") ? hashSegment.substring(1) : hashSegment;
   }
 
   /**
