@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.13
+// @version      0.1.6.14
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -575,14 +575,15 @@ global WF:false
   /**
    * Wraps a call to Item.getUrl(), which returns the hash part of the URL
    * rather than a full URL. Strips off a leading '/' which is added on
-   * some domains.
+   * some domains. For the root item, the empty string is replaced by '#'.
    * @param {Item} item The item.
    * @returns {string} The hash segment, of the form returned by Item.getUrl(),
    *                   with any leading '/' character removed.
    */
   function itemToHashSegment(item) {
-    const hashSegment = item.getUrl();
-    return hashSegment.startsWith("/") ? hashSegment.substring(1) : hashSegment;
+    let hash = item.getUrl();
+    hash = hash.startsWith("/") ? hash.substring(1) : hash;
+    return hash === "" ? "#" : hash;
   }
 
   /**
