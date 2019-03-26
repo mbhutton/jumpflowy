@@ -658,9 +658,11 @@ global WF:false
       "https://workflowy.com",
       "https://workflowy.com/",
       "https://workflowy.com/#",
+      "https://workflowy.com/#/",
       "https://dev.workflowy.com",
       "https://dev.workflowy.com/",
-      "https://dev.workflowy.com/#"
+      "https://dev.workflowy.com/#",
+      "https://dev.workflowy.com/#/"
     ];
     return validRootUrls.includes(s);
   }
