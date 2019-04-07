@@ -260,17 +260,17 @@ global WF:false
    * necessary to avoid crossing between the various workflowy.com subdomains.
    * Intended primarily for use on the dev/beta domains but also usable in prod.
    * @param {string} url The URL to open.
-   * @param {string} target (See documentation for window.open)
+   * @param {string} targetWindow (See documentation for window.open)
    * @param {string} features (See documentation for window.open)
    * @param {boolean} replace (See documentation for window.open)
    * @returns {Window} (See documentation for window.open)
    */
-  function _openWithoutChangingWfDomain(url, target, features, replace) {
+  function _openWithoutChangingWfDomain(url, targetWindow, features, replace) {
     if (isWorkFlowyUrl(url)) {
       url = location.origin + url.substring(new URL(url).origin.length);
     }
-    target = target || (isWorkFlowyUrl(url) ? "_self" : "_blank");
-    return originalWindowOpenFn(url, target, features, replace);
+    targetWindow = targetWindow || (isWorkFlowyUrl(url) ? "_self" : "_blank");
+    return originalWindowOpenFn(url, targetWindow, features, replace);
   }
 
   function openItemHere(item, searchQuery) {
