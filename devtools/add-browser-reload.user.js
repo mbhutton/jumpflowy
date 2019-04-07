@@ -5,6 +5,7 @@
 // @description  Add button to reload JumpFlowy scripts from localhost server
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
+// @match        https://beta.workflowy.com/*
 // @match        https://dev.workflowy.com/*
 // @grant        none
 // @run-at       document-end

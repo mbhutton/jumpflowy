@@ -147,6 +147,8 @@ interface JumpFlowy {
 
   todayAsYMDString(): string;
 
+  validRootUrls: Array[string];
+
   workFlowyUrlToHashSegmentAndSearchQuery(url: string): [string, string]
 }
 

@@ -362,18 +362,8 @@ loading the expect.js and jumpflowy modules.
       expect(result[0]).to.be(expectedHash);
       expect(result[1]).to.be(expectedQuery);
     }
-    // Maintenance note: copied from isWorkFlowyHomeUrl method
-    const validRootUrls = [
-      "https://workflowy.com",
-      "https://workflowy.com/",
-      "https://workflowy.com/#",
-      "https://workflowy.com/#/",
-      "https://dev.workflowy.com",
-      "https://dev.workflowy.com/",
-      "https://dev.workflowy.com/#",
-      "https://dev.workflowy.com/#/"
-    ];
-    for (let rootUrl of validRootUrls) {
+    expect(jumpflowy.validRootUrls).to.be.an("array");
+    for (let rootUrl of jumpflowy.validRootUrls) {
       checkUrlToHashAndQuery(rootUrl, "#", null);
     }
     const baseUrl = "https://workflowy.com";

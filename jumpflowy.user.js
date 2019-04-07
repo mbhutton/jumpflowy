@@ -5,6 +5,7 @@
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
+// @match        https://beta.workflowy.com/*
 // @match        https://dev.workflowy.com/*
 // @grant        none
 // @run-at       document-end
@@ -237,9 +238,8 @@ global WF:false
   const GEL_CALLBACKS_MAX_MS = 3;
   const IS_DEBUG_GEL_TIMING = false;
 
-  const prodOrigin = "https://workflowy.com";
-  const devOrigin = "https://dev.workflowy.com";
-  const isDevDomain = location.origin === devOrigin;
+  const isBetaDomain = location.origin === "https://beta.workflowy.com";
+  const isDevDomain = location.origin === "https://dev.workflowy.com";
   const originalWindowOpenFn = window.open;
 
   function openHere(url) {
@@ -257,8 +257,8 @@ global WF:false
 
   /**
    * An alternative to window.open which rewrites the URL as
-   * necessary to avoid crossing between workflowy.com and dev.workflowy.com.
-   * Intended primarily for use on the dev domain, but also usable in prod.
+   * necessary to avoid crossing between the various workflowy.com subdomains.
+   * Intended primarily for use on the dev/beta domains but also usable in prod.
    * @param {string} url The URL to open.
    * @param {string} target (See documentation for window.open)
    * @param {string} features (See documentation for window.open)
@@ -266,11 +266,8 @@ global WF:false
    * @returns {Window} (See documentation for window.open)
    */
   function _openWithoutChangingWfDomain(url, target, features, replace) {
-    const isProdDomain = !isDevDomain;
-    if (isDevDomain && url.startsWith(prodOrigin)) {
-      url = devOrigin + url.substring(prodOrigin.length);
-    } else if (isProdDomain && url.startsWith(devOrigin)) {
-      url = prodOrigin + url.substring(devOrigin.length);
+    if (isWorkFlowyUrl(url)) {
+      url = location.origin + url.substring(new URL(url).origin.length);
     }
     target = target || (isWorkFlowyUrl(url) ? "_self" : "_blank");
     return originalWindowOpenFn(url, target, features, replace);
@@ -644,22 +641,19 @@ global WF:false
     return [item, query];
   }
 
+  const validRootUrls = [];
+  for (let subdomainPrefix of ["", "beta.", "dev."]) {
+    for (let suffix of ["", "/", "/#", "/#/"]) {
+      validRootUrls.push(`https://${subdomainPrefix}workflowy.com${suffix}`);
+    }
+  }
+
   /**
    * @returns {boolean} True if and only if the given string is a WorkFlowy URL
    *                    which represents the root item, with no search query.
    * @param {string} s The string to test.
    */
   function isWorkFlowyHomeUrl(s) {
-    const validRootUrls = [
-      "https://workflowy.com",
-      "https://workflowy.com/",
-      "https://workflowy.com/#",
-      "https://workflowy.com/#/",
-      "https://dev.workflowy.com",
-      "https://dev.workflowy.com/",
-      "https://dev.workflowy.com/#",
-      "https://dev.workflowy.com/#/"
-    ];
     return validRootUrls.includes(s);
   }
 
@@ -1896,7 +1890,7 @@ global WF:false
     }
     console.log("Cleaning up");
 
-    if (isDevDomain) {
+    if (isDevDomain || isBetaDomain) {
       window.open = originalWindowOpenFn;
       console.log("Restored original window.open function");
     }
@@ -1963,9 +1957,9 @@ global WF:false
       _registerBuiltInExpansion("ymd", todayAsYMDString);
       abbrevsFromTags = _buildCustomAbbreviationsMap();
 
-      if (isDevDomain) {
+      if (isDevDomain || isBetaDomain) {
         window.open = _openWithoutChangingWfDomain;
-        console.log("Overrode window.open function, because on dev domain");
+        console.log("Overrode window.open function because on dev/beta domain");
       }
 
       window.WFEventListener = wfEventListener;
@@ -2046,6 +2040,7 @@ global WF:false
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
+    validRootUrls: validRootUrls,
     workFlowyUrlToHashSegmentAndSearchQuery: workFlowyUrlToHashSegmentAndSearchQuery
   };
 })();
