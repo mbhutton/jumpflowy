@@ -344,6 +344,45 @@ loading the expect.js and jumpflowy modules.
     expect(fnToTest("#foo", "#foo()")).to.be("");
   }
 
+  function whenUsingHashSegmentFunctions() {
+    expect(jumpflowy.itemToHashSegment).to.be.a("function");
+    const itemToHashSegment = jumpflowy.itemToHashSegment;
+
+    expect(itemToHashSegment(WF.rootItem())).to.be.a("string");
+    expect(itemToHashSegment(WF.rootItem())).to.be("#");
+    expect(itemToHashSegment(WF.rootItem().getChildren()[0])).to.match(
+      RegExp("^#/[a-f0-9]+$"));
+
+    const urlToHashAndQuery = jumpflowy.workFlowyUrlToHashSegmentAndSearchQuery;
+    expect(urlToHashAndQuery).to.be.a("function");
+    function checkUrlToHashAndQuery(url, expectedHash, expectedQuery) {
+      let result = urlToHashAndQuery(url);
+      expect(result).to.be.an("array");
+      expect(result).to.have.length(2);
+      expect(result[0]).to.be(expectedHash);
+      expect(result[1]).to.be(expectedQuery);
+    }
+    // Maintenance note: copied from isWorkFlowyHomeUrl method
+    const validRootUrls = [
+      "https://workflowy.com",
+      "https://workflowy.com/",
+      "https://workflowy.com/#",
+      "https://workflowy.com/#/",
+      "https://dev.workflowy.com",
+      "https://dev.workflowy.com/",
+      "https://dev.workflowy.com/#",
+      "https://dev.workflowy.com/#/"
+    ];
+    for (let rootUrl of validRootUrls) {
+      checkUrlToHashAndQuery(rootUrl, "#", null);
+    }
+    const baseUrl = "https://workflowy.com";
+    const hash = "#/80cbd123abe1";
+    checkUrlToHashAndQuery(`${baseUrl}/#?q=foo`, "#", "foo");
+    checkUrlToHashAndQuery(`${baseUrl}/${hash}`, hash, null);
+    checkUrlToHashAndQuery(`${baseUrl}/${hash}?q=foo`, hash, "foo");
+  }
+
   function toastrIfAvailable(message, methodName) {
     if (typeof toastr !== "undefined" && toastr !== null) {
       if (typeof toastr[methodName] === "function") {
@@ -387,6 +426,7 @@ loading the expect.js and jumpflowy modules.
       whenUsingItemToPlainTextName();
       whenUsingItemToPlainTextNote();
       whenUsingStringToTagArgsText();
+      whenUsingHashSegmentFunctions();
       showSuccess("SUCCESS: Tests passed.");
     } catch (error) {
       showError("FAILURE: Tests failed: " + error.message);

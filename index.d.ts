@@ -95,6 +95,8 @@ interface JumpFlowy {
 
   itemsToVolatileSearchQuery(items: Array<Item>): string;
 
+  itemToHashSegment(item: Item): string;
+
   itemToLastModifiedSec(item: Item): number;
 
   itemToPathAsItems(item: Item): Array<Item>;
@@ -144,6 +146,8 @@ interface JumpFlowy {
   stringToTagArgsText(tagToMatch: string, s: string): string;
 
   todayAsYMDString(): string;
+
+  workFlowyUrlToHashSegmentAndSearchQuery(url: string): [string, string]
 }
 
 //****************************

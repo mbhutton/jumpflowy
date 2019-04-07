@@ -573,12 +573,8 @@ global WF:false
   }
 
   /**
-   * Wraps a call to Item.getUrl(), which returns the hash part of the URL
-   * rather than a full URL. Strips off a leading '/' which is added on
-   * some domains. For the root item, the empty string is replaced by '#'.
    * @param {Item} item The item.
-   * @returns {string} The hash segment, of the form returned by Item.getUrl(),
-   *                   with any leading '/' character removed.
+   * @returns {string} '#' for the root item, or e.g. '#/80cbd123abe1'.
    */
   function itemToHashSegment(item) {
     let hash = item.getUrl();
@@ -2024,6 +2020,7 @@ global WF:false
     isRootItem: isRootItem,
     isValidCanonicalCode: isValidCanonicalCode,
     itemsToVolatileSearchQuery: itemsToVolatileSearchQuery,
+    itemToHashSegment: itemToHashSegment,
     itemToLastModifiedSec: itemToLastModifiedSec,
     itemToPathAsItems: itemToPathAsItems,
     itemToPlainTextName: itemToPlainTextName,
@@ -2048,6 +2045,7 @@ global WF:false
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
-    todayAsYMDString: todayAsYMDString
+    todayAsYMDString: todayAsYMDString,
+    workFlowyUrlToHashSegmentAndSearchQuery: workFlowyUrlToHashSegmentAndSearchQuery
   };
 })();
