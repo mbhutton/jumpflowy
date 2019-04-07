@@ -1455,9 +1455,9 @@ global WF:false
       itemToPlainTextName(item),
       itemToPlainTextNote(item)
     ]) {
-      let followAction = textToAction(nameOrNote);
-      if (followAction && followAction.actionFunction) {
-        return followAction.actionFunction;
+      let target = textToTarget(nameOrNote);
+      if (target && target.actionFunction) {
+        return target.actionFunction;
       }
     }
 
@@ -1466,15 +1466,15 @@ global WF:false
   }
 
   /**
-   * Returns an Action for the given action text, or null.
-   * The action can be a WorkFlowy URL, or the name of a bindable action,
+   * Returns a Target for the given text, or null.
+   * The text can be a WorkFlowy URL, or the name of a built-in function,
    * or a bookmarklet.
-   * @param {string} actionText The URL or bindable action name.
-   * @returns {Action} A no-arg function which performs the given action.
+   * @param {string} text The URL, or function name.
+   * @returns {Target} The target, including a no-arg function.
    */
-  function textToAction(actionText) {
-    const trimmed = (actionText || "").trim();
-    let action = null;
+  function textToTarget(text) {
+    const trimmed = (text || "").trim();
+    let target = null;
     if (isWorkFlowyUrl(trimmed)) {
       // If it's a WorkFlowy URL, open it
       const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(
@@ -1493,27 +1493,27 @@ global WF:false
       } else {
         actionFunction = () => openHere(trimmed);
       }
-      action = new Action(name, "item", actionFunction);
+      target = new Target(name, "item", actionFunction);
     } else if (bindableActionsByName.has(trimmed)) {
-      // If it's the name of a bindable action, call it
+      // If it's the name of a built-in function, call it
       const fn = bindableActionsByName.get(trimmed);
-      action = new Action(`Call ${trimmed}`, "namedAction", fn);
+      target = new Target(`Call ${trimmed}`, "namedAction", fn);
     } else if (trimmed.startsWith("javascript:")) {
       // If it's a bookmarklet, execute it
       const bookmarkletBody = trimmed.substring("javascript:".length);
       const fn = () => eval(bookmarkletBody);
-      action = new Action("Call bookmarklet", "bookmarklet", fn);
+      target = new Target("Call bookmarklet", "bookmarklet", fn);
     } else {
-      action = null;
+      target = null;
     }
-    return action;
+    return target;
   }
 
-  class Action {
+  class Target {
     /**
-     * @param {string} name The full name of the action.
+     * @param {string} name The full name of the target.
      * @param {'item' | 'namedAction' | 'bookmarklet'} type Action type.
-     * @param {function} actionFunction The function which performs the action.
+     * @param {function} actionFunction The default function for the target.
      */
     constructor(name, type, actionFunction) {
       this.name = name;
@@ -1850,7 +1850,7 @@ global WF:false
     for (let keyCode of shortcutsMap.keys()) {
       const actionText = shortcutsMap.get(keyCode);
       if (isValidCanonicalCode(keyCode)) {
-        const action = textToAction(actionText);
+        const action = textToTarget(actionText);
         if (action && action.actionFunction) {
           validateFunctionForKeyDownEvent(keyCode, action.actionFunction);
           rMap.set(keyCode, action.actionFunction);
