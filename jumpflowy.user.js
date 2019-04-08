@@ -274,11 +274,11 @@ global WF:false
   }
 
   function openItemHere(item, searchQuery) {
-    WF.zoomTo(item);
     if (searchQuery) {
-      WF.search(searchQuery);
+      // This is much faster than zooming and searching in two steps.
+      openHere(toWorkFlowyUrlOnCurrentDomain(item, searchQuery));
     } else {
-      WF.clearSearch();
+      WF.zoomTo(item);
     }
   }
 
@@ -528,10 +528,12 @@ global WF:false
 
   /**
    * @param {Item} item The item to create a WorkFlowy URL for.
+   * @param {string} searchQuery (Optional) search query string.
    * @returns {string} The WorkFlowy URL pointing to the item.
    */
-  function toWorkFlowyUrlOnCurrentDomain(item) {
-    return `${location.origin}/${itemToHashSegment(item)}`;
+  function toWorkFlowyUrlOnCurrentDomain(item, searchQuery) {
+    const searchSuffix = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : "";
+    return `${location.origin}/${itemToHashSegment(item)}${searchSuffix}`;
   }
 
   /**
@@ -564,7 +566,7 @@ global WF:false
     }
     let searchQuery = null;
     if (rawSearchQuery) {
-      searchQuery = unescape(rawSearchQuery);
+      searchQuery = decodeURIComponent(rawSearchQuery);
     }
     return [hash, searchQuery];
   }
@@ -646,15 +648,6 @@ global WF:false
     for (let suffix of ["", "/", "/#", "/#/"]) {
       validRootUrls.push(`https://${subdomainPrefix}workflowy.com${suffix}`);
     }
-  }
-
-  /**
-   * @returns {boolean} True if and only if the given string is a WorkFlowy URL
-   *                    which represents the root item, with no search query.
-   * @param {string} s The string to test.
-   */
-  function isWorkFlowyHomeUrl(s) {
-    return validRootUrls.includes(s);
   }
 
   /**
@@ -821,7 +814,7 @@ global WF:false
         parts.push(this.description);
       }
       if (this.item) {
-        parts.push(`See ${toWorkFlowyUrlOnCurrentDomain(this.item)} .`);
+        parts.push(`See ${toWorkFlowyUrlOnCurrentDomain(this.item, null)} .`);
       }
       if (this.causes) {
         parts.push(`Caused by: ${this.causes}.`);
@@ -1288,12 +1281,8 @@ global WF:false
     if (!isValidCanonicalCode(canonicalCode)) {
       throw `${canonicalCode} is not a valid canonical key code`;
     }
-    if (typeof functionToApply !== "function") {
-      throw "Not a function";
-    }
-    if (functionToApply.length !== 0) {
-      throw "Cannot register a callback function which takes arguments";
-    }
+    const ctx = `Registering function for keyboard shortcut ${canonicalCode}`;
+    _validateNoArgsFunction(functionToApply, ctx, true, true);
   }
 
   function _keyDownListener(keyEvent) {
@@ -1470,40 +1459,28 @@ global WF:false
    * The text can be a WorkFlowy URL, or the name of a built-in function,
    * or a bookmarklet.
    * @param {string} text The URL, or function name.
-   * @returns {Target} The target, including a no-arg function.
+   * @returns {Target} The target, including a no-arg function, or null.
    */
   function textToTarget(text) {
     const trimmed = (text || "").trim();
-    let target = null;
+    let target;
     if (isWorkFlowyUrl(trimmed)) {
-      // If it's a WorkFlowy URL, open it
-      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(
-        trimmed
-      );
-      let name = `Go to ${trimmed}`;
+      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(trimmed);
       if (item) {
-        name = `Go to "${item.getNameInPlainText()}"`;
-        if (searchQuery) {
-          name += `. Search: "${searchQuery}"`;
-        }
-      }
-      let actionFunction;
-      if (isWorkFlowyHomeUrl(trimmed)) {
-        actionFunction = () => openItemHere(WF.rootItem(), null);
+        target = new ItemTarget(item, searchQuery);
       } else {
-        actionFunction = () => openHere(trimmed);
+        console.log(`Couldn't find WorkFlowy item for URL: ${trimmed}`);
+        target = null;
       }
-      target = new Target(name, "item", actionFunction);
     } else if (bindableActionsByName.has(trimmed)) {
       // If it's the name of a built-in function, call it
       const fn = bindableActionsByName.get(trimmed);
-      target = new Target(`Call ${trimmed}`, "namedAction", fn);
+      target = new FunctionTarget(trimmed, fn);
     } else if (trimmed.startsWith("javascript:")) {
-      // If it's a bookmarklet, execute it
       const bookmarkletBody = trimmed.substring("javascript:".length);
-      const fn = () => eval(bookmarkletBody);
-      target = new Target("Call bookmarklet", "bookmarklet", fn);
+      target = new JavaScriptTarget(bookmarkletBody, bookmarkletBody);
     } else {
+      console.log(`Not clear what type of target to build for "${text}".`);
       target = null;
     }
     return target;
@@ -1511,20 +1488,68 @@ global WF:false
 
   class Target {
     /**
-     * @param {string} name The full name of the target.
      * @param {'item' | 'namedAction' | 'bookmarklet'} type Action type.
+     * @param {string} id The full name of the target.
+     * @param {string} description A description of the target.
      * @param {function} actionFunction The default function for the target.
      */
-    constructor(name, type, actionFunction) {
-      this.name = name;
+    constructor(type, id, description, actionFunction) {
+      this.id = id;
       this.type = type;
+      this.description = description;
       this.actionFunction = actionFunction;
+      const context = `Building target ${description}`;
+      _validateNoArgsFunction(actionFunction, context, true, true);
     }
 
     toString() {
-      return `${this.type}: ${this.name}`;
+      return `${this.id} (${this.description})`;
     }
   }
+
+  class FunctionTarget extends Target {
+    /**
+     * @param {string} functionName The name of the function.
+     * @param {function} actionFunction The default function for the target.
+     */
+    constructor(functionName, actionFunction) {
+      super("namedAction", "function:" + functionName,
+        `Built-in function ${functionName}`, actionFunction);
+    }
+  }
+
+  class JavaScriptTarget extends Target {
+    /**
+     * @param {string} scriptName The name of the script.
+     * @param {string} javascriptCode The raw JavaScript code.
+     */
+    constructor(scriptName, javascriptCode) {
+      const fn = () => eval(javascriptCode);
+      super("bookmarklet", `script:${scriptName}`,
+        `Script ${scriptName}`, fn);
+    }
+  }
+
+  class ItemTarget extends Target {
+    /**
+     * @param {Item} item The WorkFlowy Item to zoom to.
+     * @param {string} searchQuery The (optional) search query string.
+     */
+    constructor(item, searchQuery) {
+      if (!item) {
+        throw "Item must be specified";
+      }
+      let id = `item:${item.getId()}`;
+      let description = `Zoom to "${item.getNameInPlainText()}"`;
+      if (searchQuery) {
+        id += `; Search: "${searchQuery}"`;
+        description += `. Search: "${searchQuery}"`;
+      }
+      let actionFunction = () => openItemHere(item, searchQuery);
+      super("item", id, description, actionFunction);
+    }
+  }
+
 
   /**
    * Deletes the focused item if and only if it has no children.
@@ -1578,7 +1603,7 @@ global WF:false
       } else {
         WF.showMessage(
           `Bookmark "${bookmarkName}" already used,
-            for ${toWorkFlowyUrlOnCurrentDomain(existingItem)}.`
+            for ${toWorkFlowyUrlOnCurrentDomain(existingItem, null)}.`
         );
       }
     } else {
@@ -1604,8 +1629,8 @@ global WF:false
           });
         } else {
           WF.showMessage(
-            `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found ` +
-              `under ${toWorkFlowyUrlOnCurrentDomain}.`
+            `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found under`
+              + `${toWorkFlowyUrlOnCurrentDomain(configurationRootItem, null)}.`
           );
         }
       } else {
@@ -1855,7 +1880,7 @@ global WF:false
           validateFunctionForKeyDownEvent(keyCode, action.actionFunction);
           rMap.set(keyCode, action.actionFunction);
         } else {
-          WF.showMessage(`Not a valid WorkFlowy URL or action: ${actionText}.`);
+          WF.showMessage(`"${actionText}" is not a valid target.`);
         }
       } else {
         WF.showMessage(
@@ -1867,13 +1892,39 @@ global WF:false
     return rMap;
   }
 
+  /**
+   * Checks whether the given argument is a no-args function.
+   * @param {function} fn The function to validate.
+   * @param {string} context Context description for use in error messages.
+   * @param {boolean} warnIfInvalid Whether to warn problems to the console.
+   * @param {boolean} failIfInvalid Whether to throw errors for problems.
+   * @returns {boolean} True if the given function is valid, false otherwise.
+   */
+  function _validateNoArgsFunction(fn, context, warnIfInvalid, failIfInvalid) {
+    let reasonWhyInvalid = "";
+    if (typeof fn !== "function") {
+      reasonWhyInvalid = "Not a function: " + fn;
+    } else if (fn.length !== 0) {
+      reasonWhyInvalid = "Function takes more that zero arguments: " + fn;
+    }
+    if (reasonWhyInvalid) {
+      reasonWhyInvalid += " Context: " + context;
+      if (warnIfInvalid) {
+        console.warn(reasonWhyInvalid);
+      }
+      if (failIfInvalid) {
+        throw reasonWhyInvalid;
+      }
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   function _populateMapWithNoArgFunctions(map, functionsArray) {
     for (let f of functionsArray) {
-      if (typeof f !== "function") {
-        console.warn("Not a function: " + f);
-      } else if (f.length !== 0) {
-        console.warn("Function takes more that zero arguments: " + f);
-      } else {
+      const context = "Populating map of no-args functions";
+      if (_validateNoArgsFunction(f, context, true, false)) {
         map.set(f.name, f);
       }
     }
