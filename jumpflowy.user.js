@@ -532,7 +532,9 @@ global WF:false
    * @returns {string} The WorkFlowy URL pointing to the item.
    */
   function toWorkFlowyUrlOnCurrentDomain(item, searchQuery) {
-    const searchSuffix = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : "";
+    const searchSuffix = searchQuery
+      ? `?q=${encodeURIComponent(searchQuery)}`
+      : "";
     return `${location.origin}/${itemToHashSegment(item)}${searchSuffix}`;
   }
 
@@ -1465,7 +1467,9 @@ global WF:false
     const trimmed = (text || "").trim();
     let target;
     if (isWorkFlowyUrl(trimmed)) {
-      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(trimmed);
+      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(
+        trimmed
+      );
       if (item) {
         target = new ItemTarget(item, searchQuery);
       } else {
@@ -1513,8 +1517,12 @@ global WF:false
      * @param {function} actionFunction The default function for the target.
      */
     constructor(functionName, actionFunction) {
-      super("namedAction", "function:" + functionName,
-        `Built-in function ${functionName}`, actionFunction);
+      super(
+        "namedAction",
+        "function:" + functionName,
+        `Built-in function ${functionName}`,
+        actionFunction
+      );
     }
   }
 
@@ -1525,8 +1533,7 @@ global WF:false
      */
     constructor(scriptName, javascriptCode) {
       const fn = () => eval(javascriptCode);
-      super("bookmarklet", `script:${scriptName}`,
-        `Script ${scriptName}`, fn);
+      super("bookmarklet", `script:${scriptName}`, `Script ${scriptName}`, fn);
     }
   }
 
@@ -1549,7 +1556,6 @@ global WF:false
       super("item", id, description, actionFunction);
     }
   }
-
 
   /**
    * Deletes the focused item if and only if it has no children.
@@ -1629,8 +1635,8 @@ global WF:false
           });
         } else {
           WF.showMessage(
-            `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found under`
-              + `${toWorkFlowyUrlOnCurrentDomain(configurationRootItem, null)}.`
+            `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found under` +
+              `${toWorkFlowyUrlOnCurrentDomain(configurationRootItem, null)}.`
           );
         }
       } else {

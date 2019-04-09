@@ -351,7 +351,8 @@ loading the expect.js and jumpflowy modules.
     expect(itemToHashSegment(WF.rootItem())).to.be.a("string");
     expect(itemToHashSegment(WF.rootItem())).to.be("#");
     expect(itemToHashSegment(WF.rootItem().getChildren()[0])).to.match(
-      RegExp("^#/[a-f0-9]+$"));
+      RegExp("^#/[a-f0-9]+$")
+    );
 
     const urlToHashAndQuery = jumpflowy.workFlowyUrlToHashSegmentAndSearchQuery;
     expect(urlToHashAndQuery).to.be.a("function");

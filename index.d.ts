@@ -149,7 +149,7 @@ interface JumpFlowy {
 
   validRootUrls: Array<string>;
 
-  workFlowyUrlToHashSegmentAndSearchQuery(url: string): [string, string]
+  workFlowyUrlToHashSegmentAndSearchQuery(url: string): [string, string];
 }
 
 //****************************
