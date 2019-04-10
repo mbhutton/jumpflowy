@@ -1391,7 +1391,7 @@ global WF:false
   /**
    * @param {Item} item The item to follow.
    * @returns {void}
-   * @see itemToFollowAction
+   * @see itemToTarget
    */
   function followItem(item) {
     const target = itemToTarget(item);
@@ -1494,7 +1494,7 @@ global WF:false
 
   class Target {
     /**
-     * @param {'item' | 'namedAction' | 'bookmarklet'} type Action type.
+     * @param {'item' | 'builtInFunction' | 'bookmarklet'} type Action type.
      * @param {string} id The full name of the target.
      * @param {string} description A description of the target.
      * @param {function} actionFunction The default function for the target.
@@ -1524,7 +1524,7 @@ global WF:false
      */
     constructor(functionName, actionFunction) {
       super(
-        "namedAction",
+        "builtInFunction",
         "function:" + functionName,
         `Built-in function ${functionName}`,
         actionFunction
