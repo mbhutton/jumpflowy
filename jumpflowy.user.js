@@ -1494,7 +1494,7 @@ global WF:false
 
   class Target {
     /**
-     * @param {'item' | 'builtInFunction' | 'bookmarklet'} type Action type.
+     * @param {'item' | 'builtInFunction' | 'bookmarklet'} type Target type.
      * @param {string} id The full name of the target.
      * @param {string} description A description of the target.
      * @param {function} actionFunction The default function for the target.
@@ -1885,14 +1885,14 @@ global WF:false
   function _convertKbShortcutsConfigToFunctionMap(shortcutsMap) {
     const rMap = new Map();
     for (let keyCode of shortcutsMap.keys()) {
-      const actionText = shortcutsMap.get(keyCode);
+      const targetText = shortcutsMap.get(keyCode);
       if (isValidCanonicalCode(keyCode)) {
-        const action = textToTarget(actionText);
-        if (action && action.actionFunction) {
-          validateFunctionForKeyDownEvent(keyCode, action.actionFunction);
-          rMap.set(keyCode, action.actionFunction);
+        const target = textToTarget(targetText);
+        if (target && target.actionFunction) {
+          validateFunctionForKeyDownEvent(keyCode, target.actionFunction);
+          rMap.set(keyCode, target.actionFunction);
         } else {
-          WF.showMessage(`"${actionText}" is not a valid target.`);
+          WF.showMessage(`"${targetText}" is not a valid target.`);
         }
       } else {
         WF.showMessage(
