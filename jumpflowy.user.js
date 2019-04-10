@@ -191,15 +191,15 @@ global WF:false
   }
 
   // Global state
-  /** @type {Map<string, function>} */
-  const canonicalKeyCodesToActions = new Map();
+  /** @type {Map<string, Target>} */
+  const canonicalKeyCodesToTargets = new Map();
   /** @type {Map<string, function | string>} */
   const builtInExpansionsMap = new Map();
   /** @type {Map<string, function | string>} */
   let customExpansions = new Map();
   /** @type {Map<string, function | string>} */
   let abbrevsFromTags = new Map();
-  /** @type {Map<string, function>} */
+  /** @type {Map<string, Target>} */
   let kbShortcutsFromTags = new Map();
   /** @type {Map<string, FunctionTarget>} */
   const builtInFunctionTargetsByName = new Map();
@@ -1087,7 +1087,7 @@ global WF:false
     customExpansions = new Map();
     bookmarksToItems = new Map();
     itemIdsToFirstBookmarks = new Map();
-    canonicalKeyCodesToActions.clear();
+    canonicalKeyCodesToTargets.clear();
   }
 
   /**
@@ -1131,10 +1131,10 @@ global WF:false
       configObject.get(CONFIG_SECTION_KB_SHORTCUTS) || new Map();
     const allKeyCodesToFunctions = new Map([
       ...kbShortcutsFromTags,
-      ..._convertKbShortcutsConfigToFunctionMap(shortcutsConfig)
+      ..._convertKbShortcutsConfigToTargetMap(shortcutsConfig)
     ]);
-    allKeyCodesToFunctions.forEach((action, code) => {
-      canonicalKeyCodesToActions.set(code, action);
+    allKeyCodesToFunctions.forEach((target, code) => {
+      canonicalKeyCodesToTargets.set(code, target);
     });
 
     // Bookmarks
@@ -1281,19 +1281,17 @@ global WF:false
     return result !== null;
   }
 
-  function validateFunctionForKeyDownEvent(canonicalCode, functionToApply) {
+  function validateKeyCode(canonicalCode) {
     if (!isValidCanonicalCode(canonicalCode)) {
       throw `${canonicalCode} is not a valid canonical key code`;
     }
-    const ctx = `Registering function for keyboard shortcut ${canonicalCode}`;
-    _validateNoArgsFunction(functionToApply, ctx, true, true);
   }
 
   function _keyDownListener(keyEvent) {
     const canonicalCode = keyDownEventToCanonicalCode(keyEvent);
-    const registeredFn = canonicalKeyCodesToActions.get(canonicalCode);
-    if (registeredFn) {
-      registeredFn();
+    const registeredTarget = canonicalKeyCodesToTargets.get(canonicalCode);
+    if (registeredTarget) {
+      registeredTarget.go();
       keyEvent.stopPropagation();
       keyEvent.preventDefault();
     }
@@ -1497,19 +1495,19 @@ global WF:false
      * @param {'item' | 'builtInFunction' | 'bookmarklet'} type Target type.
      * @param {string} id The full name of the target.
      * @param {string} description A description of the target.
-     * @param {function} actionFunction The default function for the target.
+     * @param {function} defaultFunction The default function for the target.
      */
-    constructor(type, id, description, actionFunction) {
+    constructor(type, id, description, defaultFunction) {
       this.id = id;
       this.type = type;
       this.description = description;
-      this.actionFunction = actionFunction;
+      this.defaultFunction = defaultFunction;
       const context = `Building target ${description}`;
-      _validateNoArgsFunction(actionFunction, context, true, true);
+      _validateNoArgsFunction(defaultFunction, context, true, true);
     }
 
     go() {
-      this.actionFunction();
+      this.defaultFunction();
     }
 
     toString() {
@@ -1520,14 +1518,14 @@ global WF:false
   class FunctionTarget extends Target {
     /**
      * @param {string} functionName The name of the function.
-     * @param {function} actionFunction The default function for the target.
+     * @param {function} defaultFunction The default function for the target.
      */
-    constructor(functionName, actionFunction) {
+    constructor(functionName, defaultFunction) {
       super(
         "builtInFunction",
         "function:" + functionName,
         `Built-in function ${functionName}`,
-        actionFunction
+        defaultFunction
       );
     }
   }
@@ -1558,8 +1556,8 @@ global WF:false
         id += `; Search: "${searchQuery}"`;
         description += `. Search: "${searchQuery}"`;
       }
-      let actionFunction = () => openItemHere(item, searchQuery);
-      super("item", id, description, actionFunction);
+      let zoomToItemFn = () => openItemHere(item, searchQuery);
+      super("item", id, description, zoomToItemFn);
     }
   }
 
@@ -1855,7 +1853,7 @@ global WF:false
   }
 
   /**
-   * @returns {Map<string,function>} A map of key codes to no-arg functions.
+   * @returns {Map<string,Target>} A map of key codes to targets.
    */
   function _loadKbShortcutsFromTagsToFunctionMap() {
     const rMap = new Map();
@@ -1867,8 +1865,8 @@ global WF:false
       }
       if (isValidCanonicalCode(keyCode)) {
         const target = itemToTarget(item);
-        validateFunctionForKeyDownEvent(keyCode, target.actionFunction);
-        rMap.set(keyCode, target.actionFunction);
+        validateKeyCode(keyCode);
+        rMap.set(keyCode, target);
       } else {
         console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
       }
@@ -1878,19 +1876,19 @@ global WF:false
 
   /**
    * Reads shortcuts from the given configuration, converting them to
-   * a map of key codes to no-arg functions.
+   * a map of key codes to targets.
    * @param {Map<string,string>} shortcutsMap Shortcuts from configuration.
-   * @returns {Map<string,function>} A map of key codes to no-arg functions.
+   * @returns {Map<string,Target>} A map of key codes to targets.
    */
-  function _convertKbShortcutsConfigToFunctionMap(shortcutsMap) {
+  function _convertKbShortcutsConfigToTargetMap(shortcutsMap) {
     const rMap = new Map();
     for (let keyCode of shortcutsMap.keys()) {
       const targetText = shortcutsMap.get(keyCode);
       if (isValidCanonicalCode(keyCode)) {
         const target = textToTarget(targetText);
-        if (target && target.actionFunction) {
-          validateFunctionForKeyDownEvent(keyCode, target.actionFunction);
-          rMap.set(keyCode, target.actionFunction);
+        if (target) {
+          validateKeyCode(keyCode);
+          rMap.set(keyCode, target);
         } else {
           WF.showMessage(`"${targetText}" is not a valid target.`);
         }
