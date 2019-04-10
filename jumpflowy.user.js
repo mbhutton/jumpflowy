@@ -273,7 +273,7 @@ global WF:false
     return originalWindowOpenFn(url, targetWindow, features, replace);
   }
 
-  function openItemHere(item, searchQuery) {
+  function zoomToAndSearch(item, searchQuery) {
     if (searchQuery) {
       // This is much faster than zooming and searching in two steps.
       openHere(toWorkFlowyUrlOnCurrentDomain(item, searchQuery));
@@ -445,7 +445,7 @@ global WF:false
     } else {
       const chosenItem = promptToChooseItem(matchingItems);
       if (chosenItem) {
-        openItemHere(chosenItem, null);
+        zoomToAndSearch(chosenItem, null);
       }
     }
   }
@@ -1556,7 +1556,7 @@ global WF:false
         id += `; Search: "${searchQuery}"`;
         description += `. Search: "${searchQuery}"`;
       }
-      let zoomToItemFn = () => openItemHere(item, searchQuery);
+      let zoomToItemFn = () => zoomToAndSearch(item, searchQuery);
       super("item", id, description, zoomToItemFn);
     }
   }
@@ -1705,7 +1705,7 @@ global WF:false
     const zoomedItem = getZoomedItem();
     const newZoom = findClosestCommonAncestor(recentItem, zoomedItem);
     const searchQuery = itemsToVolatileSearchQuery([recentItem, zoomedItem]);
-    openItemHere(newZoom, searchQuery);
+    zoomToAndSearch(newZoom, searchQuery);
   }
 
   /**
@@ -2109,7 +2109,6 @@ global WF:false
     openFirstLinkInFocusedItem: openFirstLinkInFocusedItem,
     openHere: openHere,
     openInNewTab: openInNewTab,
-    openItemHere: openItemHere,
     promptToChooseItem: promptToChooseItem,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
     promptToAddBookmarkForCurrentItem: promptToAddBookmarkForCurrentItem,
@@ -2121,6 +2120,7 @@ global WF:false
     stringToTagArgsText: stringToTagArgsText,
     todayAsYMDString: todayAsYMDString,
     validRootUrls: validRootUrls,
-    workFlowyUrlToHashSegmentAndSearchQuery: workFlowyUrlToHashSegmentAndSearchQuery
+    workFlowyUrlToHashSegmentAndSearchQuery: workFlowyUrlToHashSegmentAndSearchQuery,
+    zoomToAndSearch: zoomToAndSearch
   };
 })();

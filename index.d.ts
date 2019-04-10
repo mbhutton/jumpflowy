@@ -125,7 +125,7 @@ interface JumpFlowy {
 
   openInNewTab(url: string): void;
 
-  openItemHere(item: Item, searchQuery: string | null): void;
+  zoomToAndSearch(item: Item, searchQuery: string | null): void;
 
   promptToChooseItem(items: Array<Item>): Item;
 
