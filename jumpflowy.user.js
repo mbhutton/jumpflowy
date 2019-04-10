@@ -1394,8 +1394,10 @@ global WF:false
    * @see itemToFollowAction
    */
   function followItem(item) {
-    const action = itemToFollowAction(item);
-    action();
+    const target = itemToTarget(item);
+    if (target) {
+      target.go();
+    }
   }
 
   /**
@@ -1434,28 +1436,28 @@ global WF:false
   }
 
   /**
-   * Returns a no-arg function which will 'follow' the given item,
+   * Returns a target which will 'follow' the given item,
    * performing some action depending on the content of the item.
    * Note: the behaviour of this method is expected to change.
    * @param {Item} item The item to follow.
-   * @returns {function} A no-arg function which 'follows' the item.
+   * @returns {Target} A target which 'follows' the item.
    */
-  function itemToFollowAction(item) {
+  function itemToTarget(item) {
     if (!item) {
-      return () => {}; // Return a no-op
+      return new FunctionTarget("no-op", () => {}); // Return a no-op;
     }
     for (let nameOrNote of [
       itemToPlainTextName(item),
       itemToPlainTextNote(item)
     ]) {
       let target = textToTarget(nameOrNote);
-      if (target && target.actionFunction) {
-        return target.actionFunction;
+      if (target) {
+        return target;
       }
     }
 
-    // Otherwise, go directly to the item itself
-    return () => openItemHere(item, null);
+    // Otherwise, return a target which goes directly to the item itself
+    return new ItemTarget(item, null);
   }
 
   /**
@@ -1506,6 +1508,10 @@ global WF:false
       this.actionFunction = actionFunction;
       const context = `Building target ${description}`;
       _validateNoArgsFunction(actionFunction, context, true, true);
+    }
+
+    go() {
+      this.actionFunction();
     }
 
     toString() {
@@ -1862,9 +1868,9 @@ global WF:false
         continue;
       }
       if (isValidCanonicalCode(keyCode)) {
-        const action = itemToFollowAction(item);
-        validateFunctionForKeyDownEvent(keyCode, action);
-        rMap.set(keyCode, action);
+        const target = itemToTarget(item);
+        validateFunctionForKeyDownEvent(keyCode, target.actionFunction);
+        rMap.set(keyCode, target.actionFunction);
       } else {
         console.log(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`);
       }
