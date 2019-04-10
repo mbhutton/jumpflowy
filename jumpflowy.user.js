@@ -1940,12 +1940,24 @@ global WF:false
    */
   function _appendAllToFunctionTargetsMap(map, functionsArray) {
     for (let f of functionsArray) {
-      const context = "Populating map of no-args functions";
-      if (_validateNoArgsFunction(f, context, true, false)) {
-        const functionName = f.name;
-        const target = new FunctionTarget(functionName, f);
-        map.set(functionName, target);
+      const target = _functionToTargetUsingFunctionName(f);
+      if (target) {
+        map.set(f.name, target);
       }
+    }
+  }
+
+  /**
+   * @param {function} f The function to create a FunctionTarget for.
+   * @returns {FunctionTarget} The target, or null if the function is invalid.
+   */
+  function _functionToTargetUsingFunctionName(f) {
+    const context = `Converting function ${f} to a FunctionTarget`;
+    if (_validateNoArgsFunction(f, context, true, false)) {
+      const functionName = f.name;
+      return new FunctionTarget(functionName, f);
+    } else {
+      return null;
     }
   }
 
