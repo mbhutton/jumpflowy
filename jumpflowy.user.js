@@ -201,8 +201,8 @@ global WF:false
   let abbrevsFromTags = new Map();
   /** @type {Map<string, function>} */
   let kbShortcutsFromTags = new Map();
-  /** @type {Map<string, function>} */
-  const bindableActionsByName = new Map();
+  /** @type {Map<string, FunctionTarget>} */
+  const builtInFunctionTargetsByName = new Map();
   /** @type {Map<string, Item>} */
   let bookmarksToItems = new Map();
   /** @type {Map<string, string>} */
@@ -1480,10 +1480,8 @@ global WF:false
         console.log(`Couldn't find WorkFlowy item for URL: ${trimmed}`);
         target = null;
       }
-    } else if (bindableActionsByName.has(trimmed)) {
-      // If it's the name of a built-in function, call it
-      const fn = bindableActionsByName.get(trimmed);
-      target = new FunctionTarget(trimmed, fn);
+    } else if (builtInFunctionTargetsByName.has(trimmed)) {
+      target = builtInFunctionTargetsByName.get(trimmed);
     } else if (trimmed.startsWith("javascript:")) {
       const bookmarkletBody = trimmed.substring("javascript:".length);
       target = new JavaScriptTarget(bookmarkletBody, bookmarkletBody);
@@ -1935,11 +1933,18 @@ global WF:false
     }
   }
 
-  function _populateMapWithNoArgFunctions(map, functionsArray) {
+  /**
+   * @param {Map<string, FunctionTarget>} map Map to populate.
+   * @param {Array<function>} functionsArray The array of functions.
+   * @returns {void}
+   */
+  function _appendAllToFunctionTargetsMap(map, functionsArray) {
     for (let f of functionsArray) {
       const context = "Populating map of no-args functions";
       if (_validateNoArgsFunction(f, context, true, false)) {
-        map.set(f.name, f);
+        const functionName = f.name;
+        const target = new FunctionTarget(functionName, f);
+        map.set(functionName, target);
       }
     }
   }
@@ -1963,7 +1968,7 @@ global WF:false
     // Keyboard shortcuts
     document.removeEventListener("keydown", _keyDownListener);
     kbShortcutsFromTags.clear();
-    bindableActionsByName.clear();
+    builtInFunctionTargetsByName.clear();
 
     // Built-in expansions
     builtInExpansionsMap.clear();
@@ -1992,8 +1997,8 @@ global WF:false
       }
 
       // Keyboard shortcuts
-      bindableActionsByName.clear();
-      _populateMapWithNoArgFunctions(bindableActionsByName, [
+      builtInFunctionTargetsByName.clear();
+      _appendAllToFunctionTargetsMap(builtInFunctionTargetsByName, [
         // Alphabetical order
         // *******************************************************
         // Maintenance note: keep this list in sync with README.md
