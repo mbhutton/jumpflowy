@@ -203,8 +203,8 @@ global WF:false
   let kbShortcutsFromTags = new Map();
   /** @type {Map<string, FunctionTarget>} */
   const builtInFunctionTargetsByName = new Map();
-  /** @type {Map<string, Item>} */
-  let bookmarksToItems = new Map();
+  /** @type {Map<string, ItemTarget>} */
+  let bookmarksToItemTargets = new Map();
   /** @type {Map<string, string>} */
   let itemIdsToFirstBookmarks = new Map();
   /** @type {Map<string, string>} */
@@ -276,7 +276,7 @@ global WF:false
   function zoomToAndSearch(item, searchQuery) {
     if (searchQuery) {
       // This is much faster than zooming and searching in two steps.
-      openHere(toWorkFlowyUrlOnCurrentDomain(item, searchQuery));
+      openHere(itemAndSearchToWorkFlowyUrl("current", item, searchQuery));
     } else {
       WF.zoomTo(item);
     }
@@ -527,23 +527,36 @@ global WF:false
   }
 
   /**
+   * @param {'prod' | 'beta' | 'dev' | 'current'} domainType Domain to use.
+   * @returns {string} The base WorkFlowy URL for the given domain type.
+   */
+  function getWorkFlowyBaseUrlForDomainType(domainType) {
+    switch (domainType) {
+      case "current":
+        return location.origin;
+      case "prod":
+        return "https://workflowy.com";
+      case "beta":
+        return "https://beta.workflowy.com";
+      case "dev":
+        return "https://dev.workflowy.com";
+      default:
+        throw "Unrecognized domain type: " + domainType;
+    }
+  }
+
+  /**
+   * @param {'prod' | 'beta' | 'dev' | 'current'} domainType Domain to use.
    * @param {Item} item The item to create a WorkFlowy URL for.
    * @param {string} searchQuery (Optional) search query string.
    * @returns {string} The WorkFlowy URL pointing to the item.
    */
-  function toWorkFlowyUrlOnCurrentDomain(item, searchQuery) {
+  function itemAndSearchToWorkFlowyUrl(domainType, item, searchQuery) {
+    const baseUrl = getWorkFlowyBaseUrlForDomainType(domainType);
     const searchSuffix = searchQuery
       ? `?q=${encodeURIComponent(searchQuery)}`
       : "";
-    return `${location.origin}/${itemToHashSegment(item)}${searchSuffix}`;
-  }
-
-  /**
-   * @param {Item} item The item to create a WorkFlowy URL for.
-   * @returns {string} The WorkFlowy URL pointing to the item.
-   */
-  function toWorkFlowyUrlOnProductionDomain(item) {
-    return `https://workflowy.com/${itemToHashSegment(item)}`;
+    return `${baseUrl}/${itemToHashSegment(item)}${searchSuffix}`;
   }
 
   /**
@@ -818,7 +831,9 @@ global WF:false
         parts.push(this.description);
       }
       if (this.item) {
-        parts.push(`See ${toWorkFlowyUrlOnCurrentDomain(this.item, null)} .`);
+        parts.push(
+          `See ${itemAndSearchToWorkFlowyUrl("current", this.item, null)} .`
+        );
       }
       if (this.causes) {
         parts.push(`Caused by: ${this.causes}.`);
@@ -1085,7 +1100,7 @@ global WF:false
    */
   function cleanConfiguration() {
     customExpansions = new Map();
-    bookmarksToItems = new Map();
+    bookmarksToItemTargets = new Map();
     itemIdsToFirstBookmarks = new Map();
     canonicalKeyCodesToTargets.clear();
   }
@@ -1152,9 +1167,9 @@ global WF:false
       configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
     bookmarksConfig.forEach((wfUrl, bookmarkName) => {
       if (isWorkFlowyUrl(wfUrl)) {
-        const [item] = findItemAndSearchQueryForWorkFlowyUrl(wfUrl);
+        const [item, query] = findItemAndSearchQueryForWorkFlowyUrl(wfUrl);
         if (item) {
-          bookmarksToItems.set(bookmarkName, item);
+          bookmarksToItemTargets.set(bookmarkName, new ItemTarget(item, query));
           if (!itemIdsToFirstBookmarks.has(item.getId())) {
             itemIdsToFirstBookmarks.set(item.getId(), bookmarkName);
           }
@@ -1558,6 +1573,8 @@ global WF:false
       }
       let zoomToItemFn = () => zoomToAndSearch(item, searchQuery);
       super("item", id, description, zoomToItemFn);
+      this.item = item;
+      this.searchQuery = searchQuery;
     }
   }
 
@@ -1582,7 +1599,8 @@ global WF:false
   function promptToFindGlobalBookmarkThenFollow() {
     const startTime = new Date();
     const itemsWithBmTag = findItemsWithTag(bookmarkTag, WF.rootItem());
-    const itemsFromConfig = Array.from(bookmarksToItems.values());
+    const itemTargetsFromConfig = Array.from(bookmarksToItemTargets.values());
+    const itemsFromConfig = itemTargetsFromConfig.map(t => t.item);
     const items = [...itemsFromConfig, ...itemsWithBmTag];
     logElapsedTime(startTime, `Found items with ${bookmarkTag} tag`);
     const chosenItem = promptToChooseItem(items);
@@ -1595,6 +1613,7 @@ global WF:false
    */
   function promptToAddBookmarkForCurrentItem() {
     const currentItem = WF.currentItem();
+    const query = WF.currentSearchQuery();
     if (currentItem === null) {
       return;
     }
@@ -1606,14 +1625,16 @@ global WF:false
       return;
     }
     bookmarkName = bookmarkName.trim();
-    if (bookmarksToItems.has(bookmarkName)) {
-      const existingItem = bookmarksToItems.get(bookmarkName);
-      if (existingItem.getId() === currentItem.getId()) {
+    if (bookmarksToItemTargets.has(bookmarkName)) {
+      const existingItemTarget = bookmarksToItemTargets.get(bookmarkName);
+      if (
+        existingItemTarget.item.getId() === currentItem.getId() &&
+        existingItemTarget.searchQuery === query
+      ) {
         // Nothing to do
       } else {
         WF.showMessage(
-          `Bookmark "${bookmarkName}" already used,
-            for ${toWorkFlowyUrlOnCurrentDomain(existingItem, null)}.`
+          `Bookmark "${bookmarkName}" already used, for ${existingItemTarget}.`
         );
       }
     } else {
@@ -1627,7 +1648,11 @@ global WF:false
             const newBookmarkItem = WF.createItem(bookmarksSectionItem, 0);
             if (newBookmarkItem) {
               WF.setItemName(newBookmarkItem, bookmarkName);
-              const prodUrl = toWorkFlowyUrlOnProductionDomain(currentItem);
+              const prodUrl = itemAndSearchToWorkFlowyUrl(
+                "prod",
+                currentItem,
+                query
+              );
               WF.setItemNote(newBookmarkItem, prodUrl);
               // Success! Don't show an unnecessary success message, as config
               // reload logic may need to display validation messages.
@@ -1640,7 +1665,11 @@ global WF:false
         } else {
           WF.showMessage(
             `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found under` +
-              `${toWorkFlowyUrlOnCurrentDomain(configurationRootItem, null)}.`
+              `${itemAndSearchToWorkFlowyUrl(
+                "current",
+                configurationRootItem,
+                null
+              )}.`
           );
         }
       } else {
