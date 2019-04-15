@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.18
+// @version      0.1.6.19
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -303,7 +303,11 @@ global WF:false
   }
 
   function createItemAtTopOfCurrent() {
-    const item = WF.createItem(WF.currentItem(), 0);
+    let item = null;
+    // Workaround: Use edit group to avoid WF.createItem() returning undefined
+    WF.editGroup(() => {
+      item = WF.createItem(WF.currentItem(), 0);
+    });
     if (item) {
       WF.editItemName(item);
     }
