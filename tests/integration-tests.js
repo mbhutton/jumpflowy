@@ -33,6 +33,8 @@ loading the expect.js and jumpflowy modules.
     expect(item.getNumDescendants()).to.be.a("number");
     expect(item.getUrl).to.be.a("function");
     expect(item.getUrl()).to.be.a("string");
+    expect(item.isEmbedded).to.be.a("function");
+    expect(item.isEmbedded()).to.be.a("boolean");
   }
 
   /** Tests the Item type. */

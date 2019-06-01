@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.20
+// @version      0.1.6.22
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -93,15 +93,6 @@ global WF:false
       doesStringHaveTag(tagToMatch, item.getNameInPlainText()) ||
       doesStringHaveTag(tagToMatch, item.getNoteInPlainText())
     );
-  }
-
-  /**
-   * @param {Item} item The item to query
-   * @returns {boolean} True if and only if the given item is in the
-   *                    same tree as the root item.
-   */
-  function isItemLocal(item) {
-    return item.childrenAreInSameTree(WF.rootItem());
   }
 
   /**
@@ -1721,7 +1712,7 @@ global WF:false
     let localItems = 0;
     applyToEachItem(item => {
       totalItems++;
-      if (isItemLocal(item)) {
+      if (!item.isEmbedded()) {
         localItems++;
       }
     }, rootItem);

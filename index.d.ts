@@ -185,6 +185,8 @@ interface Item {
 
   // Temporary workaround for WF.createItem() return type
   projectid: string;
+
+  isEmbedded(): boolean;
 }
 
 //****************************
