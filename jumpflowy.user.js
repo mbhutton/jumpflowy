@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.19
+// @version      0.1.6.20
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1649,7 +1649,11 @@ global WF:false
         if (bookmarksSectionItem) {
           WF.zoomTo(bookmarksSectionItem);
           WF.editGroup(() => {
-            const newBookmarkItem = WF.createItem(bookmarksSectionItem, 0);
+            var newBookmarkItem = WF.createItem(bookmarksSectionItem, 0);
+            // Workaround: coerce return value of createItem to correct type
+            if (typeof newBookmarkItem.projectid === "string") {
+              newBookmarkItem = WF.getItemById(newBookmarkItem.projectid);
+            }
             if (newBookmarkItem) {
               WF.setItemName(newBookmarkItem, bookmarkName);
               const prodUrl = itemAndSearchToWorkFlowyUrl(

@@ -182,6 +182,9 @@ interface Item {
   getUrl(): string;
 
   isCompleted(): boolean;
+
+  // Temporary workaround for WF.createItem() return type
+  projectid: string;
 }
 
 //****************************
