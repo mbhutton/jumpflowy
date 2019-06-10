@@ -26,9 +26,9 @@
       > (cd ~/git/jumpflowy && python3 -m http.server 17362)
       The port must match the port used elsewhere in this script.
 
-  (2) Disable cache in Chrome dev tools under the Network tab.
+  (2) Disable cache in Chrome/Firefox dev tools under the Network tab.
 
-  (3) Run this script once in the Chrome developer console to add the
+  (3) Run this script once in the Chrome/Firefox developer console to add the
       reload button, if not already installed as a user script in Tampermonkey.
 
   To reload and run the integration tests each time, either:
@@ -40,8 +40,8 @@
   To clean up:
 
   (1) Stop the HTTP server
-  (2) Re-enable Chrome's cache
-  (3) Close and reload WorkFlowy tab in Chrome
+  (2) Re-enable network cache in Chrome/Firefox
+  (3) Close and reload WorkFlowy tab in Chrome/Firefox
 
 */
 
