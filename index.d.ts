@@ -119,6 +119,8 @@ interface JumpFlowy {
 
   markFocusedAndDescendantsNotComplete(): void;
 
+  moveToBookmarkAtTop(): void;
+
   openFirstLinkInFocusedItem(): void;
 
   openHere(url: string): void;
@@ -182,6 +184,8 @@ interface Item {
   getUrl(): string;
 
   isCompleted(): boolean;
+
+  isReadOnly(): boolean;
 
   // Temporary workaround for WF.createItem() return type
   projectid: string;

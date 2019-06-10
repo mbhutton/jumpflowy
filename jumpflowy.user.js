@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.22
+// @version      0.1.6.23
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -497,6 +497,51 @@ global WF:false
       .slice()
       .reverse() // root ... parent
       .concat(item); // root ... parent, item
+  }
+
+  /**
+   * @param {Item} itemToMove The item to be moved.
+   * @param {Item} targetItem The target item being moved to.
+   * @returns {boolean} Whether it's safe to move the item to the target.
+   */
+  function isSafeToMoveItemToTarget(itemToMove, targetItem) {
+    // Both must be specified
+    if (!itemToMove || !targetItem) {
+      return false;
+    }
+    // Can't be the same item
+    if (itemToMove.getId() === targetItem.getId()) {
+      return false;
+    }
+    // Neither can be read-only
+    if (itemToMove.isReadOnly() || targetItem.isReadOnly()) {
+      return false;
+    }
+    // Can't move an ancestor to a descendant
+    if (isAAncestorOfB(itemToMove, targetItem)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * @param {Item} a Item A.
+   * @param {Item} b Item B.
+   * @returns {boolean} Whether item A is an ancestor of item B.
+   */
+  function isAAncestorOfB(a, b) {
+    if (!a || !b) {
+      return false;
+    }
+    let ancestorOfB = b.getParent();
+    while (ancestorOfB) {
+      if (a.getId() === ancestorOfB.getId()) {
+        return true;
+      }
+      ancestorOfB = ancestorOfB.getParent();
+    }
+    return false;
   }
 
   /**
@@ -1592,14 +1637,58 @@ global WF:false
    * @see followItem
    */
   function promptToFindGlobalBookmarkThenFollow() {
+    const chosenItem = promptToChooseBookmark();
+    followItem(chosenItem);
+  }
+
+  /**
+   * Prompts the user to choose from the bookmarked items, then returns
+   * the chosen item.
+   * Note: the behaviour of this method is expected to change.
+   * @returns {Item} Returns the chosen item, or null if cancelled.
+   */
+  function promptToChooseBookmark() {
     const startTime = new Date();
     const itemsWithBmTag = findItemsWithTag(bookmarkTag, WF.rootItem());
     const itemTargetsFromConfig = Array.from(bookmarksToItemTargets.values());
     const itemsFromConfig = itemTargetsFromConfig.map(t => t.item);
     const items = [...itemsFromConfig, ...itemsWithBmTag];
     logElapsedTime(startTime, `Found items with ${bookmarkTag} tag`);
-    const chosenItem = promptToChooseItem(items);
-    followItem(chosenItem);
+    return promptToChooseItem(items);
+  }
+
+  /**
+   * @param {Item} item The item to format as a string.
+   * @returns {string} A string representation of the item.
+   */
+  function formatItem(item) {
+    if (item) {
+      return item.getName();
+    } else {
+      return "<no item>";
+    }
+  }
+
+  /**
+   * Prompts to choose a bookmark name, then moves the currently
+   * focused item to it.
+   * @returns {void}
+   */
+  function moveToBookmarkAtTop() {
+    const targetItem = promptToChooseBookmark();
+    const itemToMove = WF.focusedItem();
+    const formattedItem = `"${formatItem(itemToMove)}"`;
+    const formattedTarget = `"${formatItem(targetItem)}"`;
+    if (isSafeToMoveItemToTarget(itemToMove, targetItem)) {
+      WF.moveItems([itemToMove], targetItem, 0);
+      WF.showMessage(
+        `Success: Moved ${formattedItem} to the top of ${formattedTarget}.`
+      );
+    } else {
+      WF.showMessage(
+        `Failure: Not safe to move ${formattedItem} to ${formattedTarget}.`
+      );
+    }
   }
 
   /**
@@ -2048,6 +2137,7 @@ global WF:false
         editParentOfFocusedItem,
         logShortReport,
         markFocusedAndDescendantsNotComplete,
+        moveToBookmarkAtTop,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
         promptToAddBookmarkForCurrentItem,
@@ -2134,6 +2224,7 @@ global WF:false
     logElapsedTime: logElapsedTime,
     logShortReport: logShortReport,
     markFocusedAndDescendantsNotComplete: markFocusedAndDescendantsNotComplete,
+    moveToBookmarkAtTop: moveToBookmarkAtTop,
     openFirstLinkInFocusedItem: openFirstLinkInFocusedItem,
     openHere: openHere,
     openInNewTab: openInNewTab,

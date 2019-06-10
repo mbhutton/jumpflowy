@@ -39,6 +39,8 @@ declare namespace WF {
 
   function hideMessage(): void;
 
+  function moveItems(Items: Item[], newParent: Item, priority: number);
+
   function rootItem(): Item;
 
   function search(query: string): void;
