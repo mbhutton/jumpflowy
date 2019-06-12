@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.23
+// @version      0.1.6.24
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1681,12 +1681,13 @@ global WF:false
     const formattedTarget = `"${formatItem(targetItem)}"`;
     if (isSafeToMoveItemToTarget(itemToMove, targetItem)) {
       WF.moveItems([itemToMove], targetItem, 0);
+      const pad = "&nbsp".repeat(5);
       WF.showMessage(
-        `Success: Moved ${formattedItem} to the top of ${formattedTarget}.`
+        `✅${pad}${formattedItem}${pad}➡️${pad}${formattedTarget}`
       );
     } else {
       WF.showMessage(
-        `Failure: Not safe to move ${formattedItem} to ${formattedTarget}.`
+        `❌: Not safe to move ${formattedItem} to ${formattedTarget}.`
       );
     }
   }
