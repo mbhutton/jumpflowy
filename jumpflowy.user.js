@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.25
+// @version      0.1.6.26
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1673,10 +1673,10 @@ global WF:false
 
   /**
    * Prompts to choose a bookmark name, then moves the currently
-   * focused item to it.
+   * selected item(s) or focused item to the top of it.
    * @returns {void}
    */
-  function moveToBookmarkAtTop() {
+  function moveToBookmark() {
     const selection = WF.getSelection();
     const focusedItem = WF.focusedItem();
 
@@ -2162,7 +2162,7 @@ global WF:false
         editParentOfFocusedItem,
         logShortReport,
         markFocusedAndDescendantsNotComplete,
-        moveToBookmarkAtTop,
+        moveToBookmark,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
         promptToAddBookmarkForCurrentItem,
@@ -2249,7 +2249,7 @@ global WF:false
     logElapsedTime: logElapsedTime,
     logShortReport: logShortReport,
     markFocusedAndDescendantsNotComplete: markFocusedAndDescendantsNotComplete,
-    moveToBookmarkAtTop: moveToBookmarkAtTop,
+    moveToBookmark: moveToBookmark,
     openFirstLinkInFocusedItem: openFirstLinkInFocusedItem,
     openHere: openHere,
     openInNewTab: openInNewTab,

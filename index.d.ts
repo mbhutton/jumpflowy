@@ -119,7 +119,7 @@ interface JumpFlowy {
 
   markFocusedAndDescendantsNotComplete(): void;
 
-  moveToBookmarkAtTop(): void;
+  moveToBookmark(): void;
 
   openFirstLinkInFocusedItem(): void;
 

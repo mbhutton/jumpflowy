@@ -124,6 +124,7 @@ The available named functions:
 - `editParentOfFocusedItem`
 - `logShortReport`
 - `markFocusedAndDescendantsNotComplete`
+- `moveToBookmark`
 - `openFirstLinkInFocusedItem`
 - `promptToAddBookmarkForCurrentItem`
 - `promptToFindGlobalBookmarkThenFollow`
