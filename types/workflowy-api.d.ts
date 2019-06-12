@@ -35,6 +35,8 @@ declare namespace WF {
 
   function getItemNoteTags(item: Item): Array<{ index: number; tag: string }>;
 
+  function getSelection(): Item[];
+
   function insertText(content: string);
 
   function hideMessage(): void;

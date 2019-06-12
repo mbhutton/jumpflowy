@@ -129,7 +129,7 @@ interface JumpFlowy {
 
   zoomToAndSearch(item: Item, searchQuery: string | null): void;
 
-  promptToChooseItem(items: Array<Item>): Item;
+  promptToChooseItem(items: Array<Item>, promptMessage: string): Item;
 
   promptToExpandAndInsertAtCursor(): void;
 

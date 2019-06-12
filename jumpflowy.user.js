@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.24
+// @version      0.1.6.25
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -438,7 +438,7 @@ global WF:false
     if (matchingItems.length === 0) {
       alert(`No items under current location match '${regExpString}'.`);
     } else {
-      const chosenItem = promptToChooseItem(matchingItems);
+      const chosenItem = promptToChooseItem(matchingItems, null);
       if (chosenItem) {
         zoomToAndSearch(chosenItem, null);
       }
@@ -1357,9 +1357,10 @@ global WF:false
    * using a mix of choosing by index, or choosing by bookmark name, or by text.
    * Note: the behaviour of this method is expected to change.
    * @param {Array<Item>} items The array of items to choose from.
+   * @param {string} promptMessage Optional message to prompt the user with.
    * @returns {Item} Returns the chosen item, or null if cancelled.
    */
-  function promptToChooseItem(items) {
+  function promptToChooseItem(items, promptMessage) {
     // Build aliases
     const itemAliases = Array();
     for (let item of items) {
@@ -1376,7 +1377,7 @@ global WF:false
       itemAliases.push(aliasToUse);
     }
 
-    let text = "Choose from one of the following:\n";
+    let text = (promptMessage || "Choose from one of the following:") + "\n";
     for (let i = 0; i < items.length; i++) {
       const aliasPart = (itemAliases[i] && `[${itemAliases[i]}] `) || "";
       const namePart = itemToPlainTextName(items[i]) || "<No name>";
@@ -1431,12 +1432,12 @@ global WF:false
     }
     if (resultItems.length > 1) {
       // Choose again amongst only the matches
-      return promptToChooseItem(resultItems);
+      return promptToChooseItem(resultItems, promptMessage);
     } else if (resultItems.length === 1) {
       return resultItems[0];
     } else {
       if (confirm(`No matches for "${answer}". Try again or cancel.`)) {
-        return promptToChooseItem(items);
+        return promptToChooseItem(items, promptMessage);
       }
     }
   }
@@ -1637,7 +1638,7 @@ global WF:false
    * @see followItem
    */
   function promptToFindGlobalBookmarkThenFollow() {
-    const chosenItem = promptToChooseBookmark();
+    const chosenItem = promptToChooseBookmark("Choose a bookmark to go to:");
     followItem(chosenItem);
   }
 
@@ -1645,16 +1646,17 @@ global WF:false
    * Prompts the user to choose from the bookmarked items, then returns
    * the chosen item.
    * Note: the behaviour of this method is expected to change.
+   * @param {string} promptMessage The prompt message to display to the user.
    * @returns {Item} Returns the chosen item, or null if cancelled.
    */
-  function promptToChooseBookmark() {
+  function promptToChooseBookmark(promptMessage) {
     const startTime = new Date();
     const itemsWithBmTag = findItemsWithTag(bookmarkTag, WF.rootItem());
     const itemTargetsFromConfig = Array.from(bookmarksToItemTargets.values());
     const itemsFromConfig = itemTargetsFromConfig.map(t => t.item);
     const items = [...itemsFromConfig, ...itemsWithBmTag];
     logElapsedTime(startTime, `Found items with ${bookmarkTag} tag`);
-    return promptToChooseItem(items);
+    return promptToChooseItem(items, promptMessage);
   }
 
   /**
@@ -1675,21 +1677,43 @@ global WF:false
    * @returns {void}
    */
   function moveToBookmarkAtTop() {
-    const targetItem = promptToChooseBookmark();
-    const itemToMove = WF.focusedItem();
-    const formattedItem = `"${formatItem(itemToMove)}"`;
-    const formattedTarget = `"${formatItem(targetItem)}"`;
-    if (isSafeToMoveItemToTarget(itemToMove, targetItem)) {
-      WF.moveItems([itemToMove], targetItem, 0);
-      const pad = "&nbsp".repeat(5);
-      WF.showMessage(
-        `✅${pad}${formattedItem}${pad}➡️${pad}${formattedTarget}`
-      );
+    const selection = WF.getSelection();
+    const focusedItem = WF.focusedItem();
+
+    let formattedItems;
+    let itemsToMove;
+    if (selection.length > 0) {
+      itemsToMove = selection;
+      formattedItems =
+        selection.length === 1
+          ? `the selected item "${formatItem(selection[0])}"`
+          : `the selected ${selection.length} items`;
+    } else if (focusedItem) {
+      itemsToMove = [focusedItem];
+      formattedItems = `the focused item "${formatItem(focusedItem)}"`;
     } else {
-      WF.showMessage(
-        `❌: Not safe to move ${formattedItem} to ${formattedTarget}.`
-      );
+      WF.showMessage("Nothing to move: nothing selected or focused.", true);
+      return;
     }
+
+    const targetItem = promptToChooseBookmark(`Move ${formattedItems} to:`);
+    if (!targetItem) {
+      return; // User cancelled, nothing to do
+    }
+
+    const formattedTarget = `${formatItem(targetItem)}`;
+    for (let itemToMove of itemsToMove) {
+      if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
+        WF.showMessage(
+          `Not moving ${formattedItems}, because not safe to move 
+          "${formatItem(itemToMove)}" to "${formattedTarget}".`,
+          true
+        );
+        return;
+      }
+    }
+    WF.moveItems(itemsToMove, targetItem, 0);
+    WF.showMessage(`Moved to: "${formattedTarget}".`);
   }
 
   /**
