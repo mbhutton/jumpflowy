@@ -173,6 +173,8 @@ interface Item {
 
   getNameInPlainText(): string | null;
 
+  getNextVisibleSibling(ignoreSearch?: boolean): Item | null;
+
   getNote(): string | null;
 
   getNoteInPlainText(): string | null;

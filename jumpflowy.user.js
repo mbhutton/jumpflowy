@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.27
+// @version      0.1.6.28
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1678,14 +1678,18 @@ global WF:false
   /**
    * Prompts to choose a bookmark name, then moves the currently
    * selected item(s) or focused item to the top of it.
+   * Following the move of a focused item, as long as it's not the currently
+   * zoomed item, it will then focus the next sibling of the moved item.
    * @returns {void}
    */
   function moveToBookmark() {
     const selection = WF.getSelection();
     const focusedItem = WF.focusedItem();
+    const currentItem = WF.currentItem();
 
     let formattedItems;
     let itemsToMove;
+    let itemToFocusAfterwards = null;
     if (selection.length > 0) {
       itemsToMove = selection;
       formattedItems =
@@ -1695,6 +1699,9 @@ global WF:false
     } else if (focusedItem) {
       itemsToMove = [focusedItem];
       formattedItems = `the focused item "${formatItem(focusedItem)}"`;
+      if (focusedItem.getId() !== currentItem.getId()) {
+        itemToFocusAfterwards = focusedItem.getNextVisibleSibling();
+      }
     } else {
       WF.showMessage("Nothing to move: nothing selected or focused.", true);
       return;
@@ -1718,6 +1725,9 @@ global WF:false
     }
     WF.moveItems(itemsToMove, targetItem, 0);
     WF.showMessage(`Moved to: "${formattedTarget}".`);
+    if (itemToFocusAfterwards) {
+      WF.editItemName(itemToFocusAfterwards);
+    }
   }
 
   /**
