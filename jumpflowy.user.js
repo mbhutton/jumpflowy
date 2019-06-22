@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.29
+// @version      0.1.6.30
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1747,10 +1747,18 @@ global WF:false
   }
 
   /**
-   * Prompts user for bookmark name, using it to bookmark the current item.
+   * @deprecated Use addBookmarkForActiveItem instead.
    * @returns {void}
    */
   function promptToAddBookmarkForCurrentItem() {
+    addBookmarkForActiveItem();
+  }
+
+  /**
+   * Prompts user for bookmark name, using it to bookmark the current item.
+   * @returns {void}
+   */
+  function addBookmarkForActiveItem() {
     const currentItem = WF.currentItem();
     const query = WF.currentSearchQuery();
     if (currentItem === null) {
@@ -2202,6 +2210,7 @@ global WF:false
         // *******************************************************
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        addBookmarkForActiveItem,
         createItemAtTopOfCurrent,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
@@ -2212,7 +2221,7 @@ global WF:false
         moveToBookmark,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
-        promptToAddBookmarkForCurrentItem,
+        promptToAddBookmarkForCurrentItem, // Deprecated
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
@@ -2256,6 +2265,7 @@ global WF:false
   // Create jumpflowy object and make it available at 'jumpflowy' in the window
   self.jumpflowy = {
     // Functions by alphabetical order
+    addBookmarkForActiveItem: addBookmarkForActiveItem,
     applyToEachItem: applyToEachItem,
     callAfterDocumentLoaded: callAfterDocumentLoaded,
     cleanUp: cleanUp,
@@ -2302,7 +2312,7 @@ global WF:false
     openInNewTab: openInNewTab,
     promptToChooseItem: promptToChooseItem,
     promptToExpandAndInsertAtCursor: promptToExpandAndInsertAtCursor,
-    promptToAddBookmarkForCurrentItem: promptToAddBookmarkForCurrentItem,
+    promptToAddBookmarkForCurrentItem: promptToAddBookmarkForCurrentItem, // Deprecated
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,

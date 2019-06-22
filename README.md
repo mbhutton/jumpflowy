@@ -118,6 +118,7 @@ For a description of what each of these named functions do, find its comments in
 
 The available named functions:
 
+- `addBookmarkForActiveItem`
 - `createItemAtTopOfCurrent`
 - `dismissNotification`
 - `editCurrentItem`
@@ -126,7 +127,7 @@ The available named functions:
 - `markFocusedAndDescendantsNotComplete`
 - `moveToBookmark`
 - `openFirstLinkInFocusedItem`
-- `promptToAddBookmarkForCurrentItem`
+- `promptToAddBookmarkForCurrentItem` (Deprecated: use `addBookmarkForActiveItem`)
 - `promptToFindGlobalBookmarkThenFollow`
 - `promptToFindLocalRegexMatchThenZoom`
 - `promptToNormalLocalSearch`

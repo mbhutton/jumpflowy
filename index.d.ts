@@ -23,6 +23,8 @@ type ItemPredicate = (item: Item) => boolean;
 type ItemHandler = (item: Item) => void;
 
 interface JumpFlowy {
+  addBookmarkForActiveItem(): void;
+
   applyToEachItem(functionToApply: ItemHandler, searchRoot: Item): void;
 
   callAfterDocumentLoaded(callbackFn: () => void);
