@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.32
+// @version      0.1.6.33
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1685,7 +1685,7 @@ global WF:false
    */
   function formatItem(item) {
     if (item) {
-      return `"${item.getName()}"`;
+      return `"${item.getNameInPlainText()}"`;
     } else {
       return "<no item>";
     }
@@ -1793,20 +1793,25 @@ global WF:false
   }
 
   /**
-   * Prompts user for bookmark name, using it to bookmark the current item.
+   * Prompts user for bookmark name, using it to bookmark the active item.
+   * The active item is the selected item if any, otherwise the
+   * focused item if any, otherwise the currently zoomed item.
+   * When using the currently zoomed item, the search query is also considered.
    * @returns {void}
    */
   function addBookmark() {
-    const currentItem = WF.currentItem();
-    const query = WF.currentSearchQuery();
-    if (currentItem === null) {
+    const activeItems = getActiveItems();
+    if (activeItems.items.length !== 1) {
+      WF.showMessage("Can only bookmark 1 item at a time.");
       return;
     }
-    const formattedTarget = formatItem(currentItem);
-    let bookmarkName = prompt(
-      "Choose bookmark name for zoomed item " +
-        `"${currentItem.getNameInPlainText()}".`
-    );
+    const targetItem = activeItems.items[0];
+    const targetQuery =
+      targetItem.getId() === WF.currentItem().getId()
+        ? WF.currentSearchQuery()
+        : null;
+    const formattedTarget = activeItems.toString();
+    let bookmarkName = prompt(`Choose bookmark name for ${formattedTarget}:`);
     if (bookmarkName === null || !bookmarkName.trim()) {
       return;
     }
@@ -1818,8 +1823,8 @@ global WF:false
       const existingItemTarget = bookmarksToItemTargets.get(bookmarkName);
       const formattedExistingTarget = formatItem(existingItemTarget.item);
       if (
-        existingItemTarget.item.getId() === currentItem.getId() &&
-        existingItemTarget.searchQuery === query
+        existingItemTarget.item.getId() === targetItem.getId() &&
+        existingItemTarget.searchQuery === targetQuery
       ) {
         // Nothing to do: there's an existing bookmark pointing to the target
         WF.showMessage(
@@ -1855,12 +1860,12 @@ global WF:false
               WF.setItemName(newBookmarkItem, bookmarkName);
               const prodUrl = itemAndSearchToWorkFlowyUrl(
                 "prod",
-                currentItem,
-                query
+                targetItem,
+                targetQuery
               );
               WF.setItemNote(newBookmarkItem, prodUrl);
               WF.showMessage(
-                `Success: Bookmark "${bookmarkName}" now points to ${formattedTarget}.`
+                `Bookmark "${bookmarkName}" now points to ${formattedTarget}.`
               );
             } else {
               WF.showMessage(
@@ -2016,7 +2021,7 @@ global WF:false
    * @returns {void}
    */
   function promptToExpandAndInsertAtCursor() {
-    const abbreviation = prompt("Type abbreviation", "ymd");
+    const abbreviation = prompt("Type abbreviation:", "ymd");
     if (!abbreviation) {
       return;
     }
