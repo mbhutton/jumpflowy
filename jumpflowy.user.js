@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.31
+// @version      0.1.6.32
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1685,42 +1685,80 @@ global WF:false
    */
   function formatItem(item) {
     if (item) {
-      return item.getName();
+      return `"${item.getName()}"`;
     } else {
       return "<no item>";
     }
   }
 
   /**
-   * Prompts to choose a bookmark name, then moves the currently
-   * selected item(s) or focused item to the top of it.
+   * The active item(s) are the selected items if any, otherwise the
+   * focused item if any, otherwise the currently zoomed item.
+   */
+  class ActiveItems {
+    /**
+     * @param {Array<Item>} items The selected/focused/current item(s).
+     * @param {"selection" | "focused" | "zoomed"} type The type of active item.
+     */
+    constructor(items, type) {
+      this.items = items;
+      this.type = type;
+    }
+
+    toString() {
+      switch (this.type) {
+        case "selection":
+          return this.items.length === 1
+            ? `selected item ${formatItem(this.items[0])}`
+            : `selected ${this.items.length} items`;
+        case "focused":
+          return `focused item ${formatItem(this.items[0])}`;
+        case "zoomed":
+          return `zoomed item ${formatItem(this.items[0])}`;
+      }
+    }
+  }
+
+  /**
+   * The active item(s) are the selected items if any, otherwise the
+   * focused item if any, otherwise the currently zoomed item.
+   * @returns {ActiveItems} The active items.
+   */
+  function getActiveItems() {
+    const selection = WF.getSelection();
+    const focusedItem = WF.focusedItem();
+    const currentItem = WF.currentItem();
+
+    if (selection.length > 0) {
+      return new ActiveItems(selection, "selection");
+    } else if (focusedItem) {
+      return new ActiveItems([focusedItem], "focused");
+    } else {
+      return new ActiveItems([currentItem], "zoomed");
+    }
+  }
+
+  /**
+   * Prompts to choose a bookmark name, then moves the active item(s)
+   * to the top of it.
+   * The active item(s) are the selected items if any, otherwise the
+   * focused item if any, otherwise the currently zoomed item.
    * Following the move of a focused item, as long as it's not the currently
    * zoomed item, it will then focus the next sibling of the moved item.
    * @returns {void}
    */
   function moveToBookmark() {
-    const selection = WF.getSelection();
-    const focusedItem = WF.focusedItem();
     const currentItem = WF.currentItem();
 
-    let formattedItems;
-    let itemsToMove;
     let itemToFocusAfterwards = null;
-    if (selection.length > 0) {
-      itemsToMove = selection;
-      formattedItems =
-        selection.length === 1
-          ? `the selected item "${formatItem(selection[0])}"`
-          : `the selected ${selection.length} items`;
-    } else if (focusedItem) {
-      itemsToMove = [focusedItem];
-      formattedItems = `the focused item "${formatItem(focusedItem)}"`;
-      if (focusedItem.getId() !== currentItem.getId()) {
-        itemToFocusAfterwards = focusedItem.getNextVisibleSibling();
+    const activeItems = getActiveItems();
+    let itemsToMove = activeItems.items;
+    let formattedItems = activeItems.toString();
+
+    if (activeItems.type === "focused") {
+      if (itemsToMove[0].getId() !== currentItem.getId()) {
+        itemToFocusAfterwards = itemsToMove[0].getNextVisibleSibling();
       }
-    } else {
-      WF.showMessage("Nothing to move: nothing selected or focused.", true);
-      return;
     }
 
     const targetItem = promptToChooseBookmark(`Move ${formattedItems} to:`);
@@ -1733,7 +1771,7 @@ global WF:false
       if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
         WF.showMessage(
           `Not moving ${formattedItems}, because not safe to move 
-          "${formatItem(itemToMove)}" to "${formattedTarget}".`,
+          ${formatItem(itemToMove)} to ${formattedTarget}.`,
           true
         );
         return;
@@ -1785,15 +1823,15 @@ global WF:false
       ) {
         // Nothing to do: there's an existing bookmark pointing to the target
         WF.showMessage(
-          `No action required: Bookmark "${bookmarkName}" already points to "${formattedTarget}".`
+          `No action required: Bookmark "${bookmarkName}" already points to ${formattedTarget}.`
         );
       } else if (existingSourceItem) {
         shouldCreate = confirm(
-          `Update existing bookmark "${bookmarkName}", pointing to "${formattedExistingTarget}"?`
+          `Update existing bookmark "${bookmarkName}", pointing to ${formattedExistingTarget}?`
         );
       } else {
         WF.showMessage(
-          `Failed: Bookmark "${bookmarkName} is already specified via a tag, pointing to target item "${formattedExistingTarget}."`
+          `Failed: Bookmark "${bookmarkName} is already specified via a tag, pointing to target item ${formattedExistingTarget}.`
         );
       }
     } else {
@@ -1822,7 +1860,7 @@ global WF:false
               );
               WF.setItemNote(newBookmarkItem, prodUrl);
               WF.showMessage(
-                `Success: Bookmark "${bookmarkName}" now points to "${formattedTarget}".`
+                `Success: Bookmark "${bookmarkName}" now points to ${formattedTarget}.`
               );
             } else {
               WF.showMessage(
