@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.30
+// @version      0.1.6.31
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1747,18 +1747,18 @@ global WF:false
   }
 
   /**
-   * @deprecated Use addBookmarkForActiveItem instead.
+   * @deprecated Use addBookmark instead.
    * @returns {void}
    */
   function promptToAddBookmarkForCurrentItem() {
-    addBookmarkForActiveItem();
+    addBookmark();
   }
 
   /**
    * Prompts user for bookmark name, using it to bookmark the current item.
    * @returns {void}
    */
-  function addBookmarkForActiveItem() {
+  function addBookmark() {
     const currentItem = WF.currentItem();
     const query = WF.currentSearchQuery();
     if (currentItem === null) {
@@ -2210,7 +2210,7 @@ global WF:false
         // *******************************************************
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        addBookmarkForActiveItem,
+        addBookmark,
         createItemAtTopOfCurrent,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
@@ -2265,7 +2265,7 @@ global WF:false
   // Create jumpflowy object and make it available at 'jumpflowy' in the window
   self.jumpflowy = {
     // Functions by alphabetical order
-    addBookmarkForActiveItem: addBookmarkForActiveItem,
+    addBookmark: addBookmark,
     applyToEachItem: applyToEachItem,
     callAfterDocumentLoaded: callAfterDocumentLoaded,
     cleanUp: cleanUp,
