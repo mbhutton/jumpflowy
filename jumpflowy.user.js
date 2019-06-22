@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.28
+// @version      0.1.6.29
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -196,6 +196,8 @@ global WF:false
   const builtInFunctionTargetsByName = new Map();
   /** @type {Map<string, ItemTarget>} */
   let bookmarksToItemTargets = new Map();
+  /** @type {Map<string, Item>} */
+  let bookmarksToSourceItems = new Map();
   /** @type {Map<string, string>} */
   let itemIdsToFirstBookmarks = new Map();
   /** @type {Map<string, string>} */
@@ -963,6 +965,16 @@ global WF:false
   }
 
   /**
+   * Returns a ConversionResult with a Map of items based on the given item.
+   * @param {Item} item The WorkFlowy item which contains the values.
+   * @returns {ConversionResult} Result, with a Map of converted strings to items.
+   */
+  function convertToMapOfItems(item) {
+    const wrapItemAsResult = i => new ConversionResult(i, true, null);
+    return convertToMap(item, () => wrapItemAsResult);
+  }
+
+  /**
    * Returns a ConversionResult with an Array of values based on the given item.
    * Ignores completed items.
    * @param {Item} item The WorkFlowy item which contains the values.
@@ -1078,8 +1090,9 @@ global WF:false
   function convertJumpFlowyConfiguration(item) {
     function keyToConverter(key) {
       switch (key) {
+        case CONFIG_SECTION_BOOKMARKS:
+          return convertToMapOfItems;
         case CONFIG_SECTION_EXPANSIONS: // Falls through
-        case CONFIG_SECTION_BOOKMARKS: // Falls through
         case CONFIG_SECTION_KB_SHORTCUTS:
           return convertToMapOfStrings;
       }
@@ -1141,6 +1154,7 @@ global WF:false
   function cleanConfiguration() {
     customExpansions = new Map();
     bookmarksToItemTargets = new Map();
+    bookmarksToSourceItems = new Map();
     itemIdsToFirstBookmarks = new Map();
     canonicalKeyCodesToTargets.clear();
   }
@@ -1202,10 +1216,11 @@ global WF:false
    * @returns {void}
    */
   function applyBookmarksConfiguration(configObject) {
-    /** @type Map<string, string> */
+    /** @type Map<string, Item> */
     const bookmarksConfig =
       configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
-    bookmarksConfig.forEach((wfUrl, bookmarkName) => {
+    bookmarksConfig.forEach((sourceItem, bookmarkName) => {
+      const wfUrl = sourceItem.getNoteInPlainText();
       if (isWorkFlowyUrl(wfUrl)) {
         const [item, query] = findItemAndSearchQueryForWorkFlowyUrl(wfUrl);
         if (item) {
@@ -1213,6 +1228,7 @@ global WF:false
           if (!itemIdsToFirstBookmarks.has(item.getId())) {
             itemIdsToFirstBookmarks.set(item.getId(), bookmarkName);
           }
+          bookmarksToSourceItems.set(bookmarkName, sourceItem);
         } else {
           WF.showMessage(
             `No item found for URL ${wfUrl}, re bookmark "${bookmarkName}".`
@@ -1740,6 +1756,7 @@ global WF:false
     if (currentItem === null) {
       return;
     }
+    const formattedTarget = formatItem(currentItem);
     let bookmarkName = prompt(
       "Choose bookmark name for zoomed item " +
         `"${currentItem.getNameInPlainText()}".`
@@ -1748,27 +1765,42 @@ global WF:false
       return;
     }
     bookmarkName = bookmarkName.trim();
+    let shouldCreate = false;
+    let existingSourceItem = null;
     if (bookmarksToItemTargets.has(bookmarkName)) {
+      existingSourceItem = bookmarksToSourceItems.get(bookmarkName);
       const existingItemTarget = bookmarksToItemTargets.get(bookmarkName);
+      const formattedExistingTarget = formatItem(existingItemTarget.item);
       if (
         existingItemTarget.item.getId() === currentItem.getId() &&
         existingItemTarget.searchQuery === query
       ) {
-        // Nothing to do
+        // Nothing to do: there's an existing bookmark pointing to the target
+        WF.showMessage(
+          `No action required: Bookmark "${bookmarkName}" already points to "${formattedTarget}".`
+        );
+      } else if (existingSourceItem) {
+        shouldCreate = confirm(
+          `Update existing bookmark "${bookmarkName}", pointing to "${formattedExistingTarget}"?`
+        );
       } else {
         WF.showMessage(
-          `Bookmark "${bookmarkName}" already used, for ${existingItemTarget}.`
+          `Failed: Bookmark "${bookmarkName} is already specified via a tag, pointing to target item "${formattedExistingTarget}."`
         );
       }
     } else {
+      shouldCreate = true; // No existing bookmark
+    }
+    if (shouldCreate) {
       if (configurationRootItem) {
         const bookmarksSectionItem = findConfigurationSection(
           CONFIG_SECTION_BOOKMARKS
         );
         if (bookmarksSectionItem) {
-          WF.zoomTo(bookmarksSectionItem);
           WF.editGroup(() => {
-            var newBookmarkItem = WF.createItem(bookmarksSectionItem, 0);
+            var newBookmarkItem = existingSourceItem
+              ? existingSourceItem
+              : WF.createItem(bookmarksSectionItem, 0);
             // Workaround: coerce return value of createItem to correct type
             if (typeof newBookmarkItem.projectid === "string") {
               newBookmarkItem = WF.getItemById(newBookmarkItem.projectid);
@@ -1781,11 +1813,12 @@ global WF:false
                 query
               );
               WF.setItemNote(newBookmarkItem, prodUrl);
-              // Success! Don't show an unnecessary success message, as config
-              // reload logic may need to display validation messages.
+              WF.showMessage(
+                `Success: Bookmark "${bookmarkName}" now points to "${formattedTarget}".`
+              );
             } else {
               WF.showMessage(
-                "Failed to create new bookmark. Check the console log."
+                "Failed to create or update new bookmark. Check the console log."
               );
             }
           });
