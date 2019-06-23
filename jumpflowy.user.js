@@ -1778,7 +1778,7 @@ global WF:false
       }
     }
     WF.moveItems(itemsToMove, targetItem, 0);
-    WF.showMessage(`Moved to: "${formattedTarget}".`);
+    WF.showMessage(`Moved to: ${formattedTarget}.`);
     if (itemToFocusAfterwards) {
       WF.editItemName(itemToFocusAfterwards);
     }
