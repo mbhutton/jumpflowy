@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.34
+// @version      0.1.6.35
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1220,6 +1220,7 @@ global WF:false
     const bookmarksConfig =
       configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
     bookmarksConfig.forEach((sourceItem, bookmarkName) => {
+      bookmarksToSourceItems.set(bookmarkName, sourceItem);
       const wfUrl = sourceItem.getNoteInPlainText();
       if (isWorkFlowyUrl(wfUrl)) {
         const [item, query] = findItemAndSearchQueryForWorkFlowyUrl(wfUrl);
@@ -1228,7 +1229,6 @@ global WF:false
           if (!itemIdsToFirstBookmarks.has(item.getId())) {
             itemIdsToFirstBookmarks.set(item.getId(), bookmarkName);
           }
-          bookmarksToSourceItems.set(bookmarkName, sourceItem);
         } else {
           WF.showMessage(
             `No item found for URL ${wfUrl}, re bookmark "${bookmarkName}".`
@@ -1817,12 +1817,14 @@ global WF:false
     }
     bookmarkName = bookmarkName.trim();
     let shouldCreate = false;
-    let existingSourceItem = null;
-    if (bookmarksToItemTargets.has(bookmarkName)) {
-      existingSourceItem = bookmarksToSourceItems.get(bookmarkName);
+    let existingSourceItem = bookmarksToSourceItems.get(bookmarkName);
+    if (existingSourceItem || bookmarksToItemTargets.has(bookmarkName)) {
       const existingItemTarget = bookmarksToItemTargets.get(bookmarkName);
-      const formattedExistingTarget = formatItem(existingItemTarget.item);
+      const formattedExistingTarget = existingItemTarget
+        ? formatItem(existingItemTarget.item)
+        : "<invalid or deleted item>";
       if (
+        existingItemTarget &&
         existingItemTarget.item.getId() === targetItem.getId() &&
         existingItemTarget.searchQuery === targetQuery
       ) {
