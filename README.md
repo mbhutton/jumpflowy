@@ -123,6 +123,7 @@ The available named functions:
 - `dismissNotification`
 - `editCurrentItem`
 - `editParentOfFocusedItem`
+- `gatherFlywheel`
 - `logShortReport`
 - `markFocusedAndDescendantsNotComplete`
 - `moveToBookmark`

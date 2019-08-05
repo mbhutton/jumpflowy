@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.35
+// @version      0.1.6.36
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -56,6 +56,48 @@ global WF:false
       }
     }
     applyToEachItem(addIfMatch, searchRoot);
+    return matches;
+  }
+
+  /**
+   * @param {function} itemPredicate A function (Item -> boolean) which
+   *                                 returns whether or not an item is a match.
+   * @param {function} branchFilter A function (Item -> boolean) which returns
+   *                                whether or not to traverse into a branch.
+   * @param {boolean} descendIntoMatches Whether or not to descent into matches.
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Array<Item>} The matching items.
+   */
+  function findMatchingItemsFilteringBranches(
+    itemPredicate,
+    branchFilter,
+    descendIntoMatches,
+    searchRoot
+  ) {
+    const matches = Array();
+
+    /**
+     * @param {Item} currentBranch The current branch (item) in the search.
+     * @returns {void}
+     */
+    function recurse(currentBranch) {
+      if (!branchFilter(currentBranch)) {
+        return;
+      }
+
+      const isMatch = itemPredicate(currentBranch);
+      if (isMatch) {
+        matches.push(currentBranch);
+      }
+
+      let shouldRecurse = !isMatch || descendIntoMatches;
+      if (shouldRecurse) {
+        for (let child of currentBranch.getChildren()) {
+          recurse(child);
+        }
+      }
+    }
+    recurse(searchRoot);
     return matches;
   }
 
@@ -1259,6 +1301,100 @@ global WF:false
   }
 
   /**
+   * Finds (non-embedded) matching items outside the given destination item,
+   * and moves them to the destination item.
+   * @param {function} itemPredicate A function (Item -> boolean) which
+   *                                 returns whether or not an item is a match.
+   * @param {Item} destinationItem Where to move the found items to.
+   * @param {boolean} toTop Whether to move the items to the top of the list.
+   * @returns {boolean} Whether the move took place.
+   */
+  function gatherExternalMatches(itemPredicate, destinationItem, toTop) {
+    /**
+     * @param {Item} branchItem The item to test.
+     * @returns {boolean} Whether to descend into the given branch.
+     */
+    function branchFilter(branchItem) {
+      // Don't descend into the destination item itself
+      const isDestination = branchItem.getId() === destinationItem.getId();
+      return !branchItem.isEmbedded() && !isDestination;
+    }
+    const outOfPlaceRoots = findMatchingItemsFilteringBranches(
+      itemPredicate,
+      branchFilter,
+      false,
+      WF.rootItem()
+    );
+    const toMoveCount = outOfPlaceRoots.length;
+    if (toMoveCount === 0) {
+      WF.showMessage("Found no matches to gather.");
+      return false;
+    }
+    const formattedDest = formatItem(destinationItem);
+    for (let toMove of outOfPlaceRoots) {
+      if (isAAncestorOfB(toMove, destinationItem)) {
+        WF.showMessage(
+          `Can't move ${formatItem(
+            toMove
+          )} to its descendant: ${formattedDest}}.`
+        );
+        return false;
+      }
+    }
+    const prompt = `Move ${toMoveCount} item(s) to ${formattedDest}?`;
+    if (confirm(prompt)) {
+      const priority = toTop ? 0 : destinationItem.getChildren().length;
+      WF.editGroup(() => {
+        WF.moveItems(outOfPlaceRoots, destinationItem, priority);
+      });
+      WF.showMessage(`Moved ${toMoveCount} item(s) to ${formattedDest}`);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * For use with a "flywheel" list whose root item contains a tag in its name,
+   * unique to the list, and whose children also have the tag in their names.
+   * For use when flywheel items may have been moved to other locations in the
+   * document outside of the root.
+   * This action finds any (non-embedded) flywheel items which are outside the
+   * list, and moves them back to the flywheel list, at the top.
+   * The active item is interpreted as the root of the flywheel.
+   * @returns {void}
+   */
+  function gatherFlywheel() {
+    const activeItems = getActiveItems().items;
+    if (activeItems.length !== 1) {
+      WF.showMessage("Can only run this action on exactly 1 item at a time.");
+      return;
+    }
+    const destinationItem = activeItems[0];
+
+    function getNameTags(item) {
+      return WF.getItemNameTags(item).map(x => x.tag);
+    }
+
+    const tags = getNameTags(destinationItem);
+    if (tags.length !== 1) {
+      WF.showMessage(
+        `Item ${formatItem(destinationItem)} has ${
+          tags.length
+        } tags (must have 1).`
+      );
+      return;
+    }
+    const tag = tags[0];
+
+    function itemPredicate(item) {
+      return getNameTags(item).includes(tag);
+    }
+
+    gatherExternalMatches(itemPredicate, destinationItem, true);
+  }
+
+  /**
    * @param {function} callbackFn Function to call when the document is loaded,
    *                              of type () -> void.
    * @returns {void}
@@ -2261,6 +2397,7 @@ global WF:false
         dismissNotification,
         editCurrentItem,
         editParentOfFocusedItem,
+        gatherFlywheel,
         logShortReport,
         markFocusedAndDescendantsNotComplete,
         moveToBookmark,
@@ -2333,6 +2470,7 @@ global WF:false
     findTopItemsByScore: findTopItemsByScore,
     followItem: followItem,
     followZoomedItem: followZoomedItem,
+    gatherFlywheel: gatherFlywheel,
     getCurrentTimeSec: getCurrentTimeSec,
     getZoomedItem: getZoomedItem,
     getZoomedItemAsLongId: getZoomedItemAsLongId,

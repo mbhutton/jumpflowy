@@ -143,6 +143,8 @@ interface JumpFlowy {
 
   promptToNormalLocalSearch(): void;
 
+  gatherFlywheel(): void;
+
   showZoomedAndMostRecentlyEdited(): void;
 
   splitStringToSearchTerms(s: string): string;
