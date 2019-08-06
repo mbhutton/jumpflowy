@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.36
+// @version      0.1.6.37
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1365,33 +1365,38 @@ global WF:false
    * @returns {void}
    */
   function gatherFlywheel() {
+    const flywheelTag = "#flywheel";
     const activeItems = getActiveItems().items;
     if (activeItems.length !== 1) {
       WF.showMessage("Can only run this action on exactly 1 item at a time.");
       return;
     }
-    const destinationItem = activeItems[0];
+    const flywheelRoot = activeItems[0];
 
-    function getNameTags(item) {
-      return WF.getItemNameTags(item).map(x => x.tag);
+    function getNameTagsLowered(item) {
+      return WF.getItemNameTags(item).map(x => x.tag.toLowerCase());
     }
 
-    const tags = getNameTags(destinationItem);
-    if (tags.length !== 1) {
+    const allTagsInRoot = getNameTagsLowered(flywheelRoot);
+    const formattedRoot = formatItem(flywheelRoot);
+    if (!allTagsInRoot.includes("#flywheel")) {
+      WF.showMessage(`Item ${formattedRoot} doesn't have ${flywheelTag} tag.`);
+      return;
+    }
+    const filteredTags = allTagsInRoot.filter(x => x !== flywheelTag);
+    if (filteredTags.length !== 1) {
       WF.showMessage(
-        `Item ${formatItem(destinationItem)} has ${
-          tags.length
-        } tags (must have 1).`
+        `Flywheel item ${formattedRoot} can only have 1 tag other than "${flywheelTag}".`
       );
       return;
     }
-    const tag = tags[0];
+    const tag = filteredTags[0];
 
     function itemPredicate(item) {
-      return getNameTags(item).includes(tag);
+      return getNameTagsLowered(item).includes(tag);
     }
 
-    gatherExternalMatches(itemPredicate, destinationItem, true);
+    gatherExternalMatches(itemPredicate, flywheelRoot, true);
   }
 
   /**
