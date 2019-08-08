@@ -30,7 +30,16 @@ type ItemPredicate = (item: Item) => boolean;
 
 type ItemHandler = (item: Item) => void;
 
+interface NameTreeModule {
+  itemNameToNameChain(itemName: string): string | null;
+  sendToNameTree(): void;
+  reassembleNameTree(): void;
+  validateAllNameTrees(): void;
+}
+
 interface JumpFlowy {
+  nameTree: NameTreeModule;
+
   addBookmark(): void;
 
   applyToEachItem(functionToApply: ItemHandler, searchRoot: Item): void;
@@ -168,8 +177,6 @@ interface JumpFlowy {
   promptToFindLocalRegexMatchThenZoom(): void;
 
   promptToNormalLocalSearch(): void;
-
-  gatherFlywheel(): void;
 
   showZoomedAndMostRecentlyEdited(): void;
 

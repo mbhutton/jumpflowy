@@ -60,48 +60,6 @@ global WF:false
   }
 
   /**
-   * @param {function} itemPredicate A function (Item -> boolean) which
-   *                                 returns whether or not an item is a match.
-   * @param {function} branchFilter A function (Item -> boolean) which returns
-   *                                whether or not to traverse into a branch.
-   * @param {boolean} descendIntoMatches Whether or not to descent into matches.
-   * @param {Item} searchRoot The root item of the search.
-   * @returns {Array<Item>} The matching items.
-   */
-  function findMatchingItemsFilteringBranches(
-    itemPredicate,
-    branchFilter,
-    descendIntoMatches,
-    searchRoot
-  ) {
-    const matches = Array();
-
-    /**
-     * @param {Item} currentBranch The current branch (item) in the search.
-     * @returns {void}
-     */
-    function recurse(currentBranch) {
-      if (!branchFilter(currentBranch)) {
-        return;
-      }
-
-      const isMatch = itemPredicate(currentBranch);
-      if (isMatch) {
-        matches.push(currentBranch);
-      }
-
-      let shouldRecurse = !isMatch || descendIntoMatches;
-      if (shouldRecurse) {
-        for (let child of currentBranch.getChildren()) {
-          recurse(child);
-        }
-      }
-    }
-    recurse(searchRoot);
-    return matches;
-  }
-
-  /**
    * @template K
    * @template V
    * @param {function} itemFunction A function of type (Item -> Array<K>).
@@ -111,7 +69,7 @@ global WF:false
    */
   function toItemMultimapWithMultipleKeys(itemFunction, searchRoot) {
     /** @type Map<K, Array<Item>> */
-    const itemMap = new Map();
+    const itemMultimap = new Map();
     /**
      * @param {Item} item The item
      * @returns {void}
@@ -120,16 +78,12 @@ global WF:false
       const keysForItem = itemFunction(item);
       if (keysForItem && keysForItem.length) {
         for (let key of keysForItem) {
-          if (itemMap.has(key)) {
-            itemMap.get(key).push(item);
-          } else {
-            itemMap.set(key, [item]);
-          }
+          addToMultimap(key, item, itemMultimap);
         }
       }
     }
     applyToEachItem(visitorFunction, searchRoot);
-    return itemMap;
+    return itemMultimap;
   }
 
   /**
@@ -351,7 +305,7 @@ global WF:false
 
   /**
    * @param {Date} date The given date.
-   * @return {number} Seconds from epoch to the given date, rounding down.
+   * @returns {number} Seconds from epoch to the given date, rounding down.
    */
   function dateToSecondsSinceEpoch(date) {
     return Math.floor(date.getTime() / 1000);
@@ -1501,106 +1455,642 @@ global WF:false
     );
   }
 
-  /**
-   * Finds (non-embedded) matching items outside the given destination item,
-   * and moves them to the destination item.
-   * @param {function} itemPredicate A function (Item -> boolean) which
-   *                                 returns whether or not an item is a match.
-   * @param {Item} destinationItem Where to move the found items to.
-   * @param {boolean} toTop Whether to move the items to the top of the list.
-   * @returns {boolean} Whether the move took place.
-   */
-  function gatherExternalMatches(itemPredicate, destinationItem, toTop) {
+  /** @type {NameTreeModule} */
+  const nameTreeModule = (function() {
+    const nameTreeSeparator = "::";
+    const exampleNameChain = `a${nameTreeSeparator}b${nameTreeSeparator}...${nameTreeSeparator}`;
+
     /**
-     * @param {Item} branchItem The item to test.
-     * @returns {boolean} Whether to descend into the given branch.
+     * @param {string} nameChain The name chain.
+     * @returns {string?} The parent name chain, or null if a name tree root,
+     *                    or not a name chain.
      */
-    function branchFilter(branchItem) {
-      // Don't descend into the destination item itself
-      const isDestination = branchItem.getId() === destinationItem.getId();
-      return !branchItem.isEmbedded() && !isDestination;
+    function nameChainToParent(nameChain) {
+      if (!nameChain) {
+        return null;
+      }
+      const separatorLength = nameTreeSeparator.length;
+      // Slice off the last part of the chain
+      const penultimateSeparatorIndex = nameChain.lastIndexOf(
+        nameTreeSeparator,
+        nameChain.length - (separatorLength + 1)
+      );
+      const parentChain =
+        penultimateSeparatorIndex === -1 || penultimateSeparatorIndex === 0
+          ? null
+          : nameChain.substring(0, penultimateSeparatorIndex + separatorLength);
+      return parentChain;
     }
-    const outOfPlaceRoots = findMatchingItemsFilteringBranches(
-      itemPredicate,
-      branchFilter,
-      false,
-      WF.rootItem()
-    );
-    const toMoveCount = outOfPlaceRoots.length;
-    if (toMoveCount === 0) {
-      WF.showMessage("Found no matches to gather.");
-      return false;
-    }
-    const formattedDest = formatItem(destinationItem);
-    for (let toMove of outOfPlaceRoots) {
-      if (isAAncestorOfB(toMove, destinationItem)) {
-        WF.showMessage(
-          `Can't move ${formatItem(
-            toMove
-          )} to its descendant: ${formattedDest}}.`
-        );
-        return false;
+
+    /**
+     * @param {string} nameChain The name chain.
+     * @returns {string?} The root name chain, or null if not a name chain.
+     */
+    function nameChainToRoot(nameChain) {
+      if (!nameChain) {
+        return null;
+      }
+      const parentChain = nameChainToParent(nameChain);
+      if (parentChain === null) {
+        // We are a name chain with no parent, therefore we're the root
+        return nameChain;
+      } else {
+        // Recurse
+        return nameChainToRoot(parentChain);
       }
     }
-    const prompt = `Move ${toMoveCount} item(s) to ${formattedDest}?`;
-    if (confirm(prompt)) {
-      const priority = toTop ? 0 : destinationItem.getChildren().length;
-      WF.editGroup(() => {
-        WF.moveItems(outOfPlaceRoots, destinationItem, priority);
-      });
-      WF.showMessage(`Moved ${toMoveCount} item(s) to ${formattedDest}`);
-      return true;
-    } else {
-      return false;
-    }
-  }
 
-  /**
-   * For use with a "flywheel" list whose root item contains a tag in its name,
-   * unique to the list, and whose children also have the tag in their names.
-   * For use when flywheel items may have been moved to other locations in the
-   * document outside of the root.
-   * This action finds any (non-embedded) flywheel items which are outside the
-   * list, and moves them back to the flywheel list, at the top.
-   * The active item is interpreted as the root of the flywheel.
-   * @returns {void}
-   */
-  function gatherFlywheel() {
-    const flywheelTag = "#flywheel";
-    const activeItems = getActiveItems().items;
-    if (activeItems.length !== 1) {
-      WF.showMessage("Can only run this action on exactly 1 item at a time.");
-      return;
-    }
-    const flywheelRoot = activeItems[0];
-
-    function getNameTagsLowered(item) {
-      return WF.getItemNameTags(item).map(x => x.tag.toLowerCase());
+    /**
+     * @param {string} a The name chain A.
+     * @param {string} b The name chain B.
+     * @returns {boolean} Whether A is a parent of B.
+     */
+    // eslint-disable-next-line no-unused-vars
+    function isNameChainAParentOfB(a, b) {
+      return a && b && a === nameChainToParent(b);
     }
 
-    const allTagsInRoot = getNameTagsLowered(flywheelRoot);
-    const formattedRoot = formatItem(flywheelRoot);
-    if (!allTagsInRoot.includes("#flywheel")) {
-      WF.showMessage(`Item ${formattedRoot} doesn't have ${flywheelTag} tag.`);
-      return;
+    /**
+     * @param {string} a The name chain A.
+     * @param {string} b The name chain B.
+     * @returns {boolean} Whether A is an ancestor of B.
+     */
+    function isNameChainAAncestorOfB(a, b) {
+      return a && b && a !== b && b.startsWith(a);
     }
-    const filteredTags = allTagsInRoot.filter(
-      x => x !== flywheelTag && x !== "#bm"
-    );
-    if (filteredTags.length !== 1) {
-      WF.showMessage(
-        `Flywheel item ${formattedRoot} can only have 1 tag other than "${flywheelTag}".`
+
+    class NameChainAndItem {
+      /**
+       * @param {string} nameChain The name chain of the item.
+       * @param {Item} item The item itself.
+       */
+      constructor(nameChain, item) {
+        this.nameChain = nameChain;
+        this.item = item;
+      }
+    }
+
+    /**
+     * @param {string} text The text to simplify.
+     * @param {string} openingBracket Opening bracket char.
+     * @param {string} closingBracket Closing bracket char.
+     * @returns {string} The updated text.
+     */
+    function trimBracketedText(text, openingBracket, closingBracket) {
+      if (openingBracket.length !== 1 || closingBracket.length !== 1) {
+        throw "Programmer error: opening or closing bracket must be 1 character.";
+      }
+      const trimmedText = text.trim();
+      if (
+        trimmedText.startsWith(openingBracket) &&
+        trimmedText.includes(closingBracket)
+      ) {
+        const closingIndex = text.lastIndexOf(closingBracket);
+        return trimmedText.substring(closingIndex + 1).trimLeft();
+      } else if (trimmedText.endsWith(closingBracket)) {
+        const openingIndex = text.indexOf(openingBracket);
+        return trimmedText.substring(0, openingIndex).trimRight();
+      } else {
+        return text;
+      }
+    }
+
+    function simplifyNameTreeName(name) {
+      let shouldContinue = true;
+      name = name.toLowerCase();
+      while (shouldContinue) {
+        const nameBeforeLoop = name;
+        name = trimBracketedText(name, "[", "]");
+        name = trimBracketedText(name, "(", ")");
+        name = trimBracketedText(name, "{", "}");
+        name = name.trim();
+        shouldContinue = nameBeforeLoop !== name; // Until we reach a fixed point
+      }
+      return name;
+    }
+
+    /**
+     * @param {string} itemNameOrNote Name or note of the item to parse.
+     * @returns {string?} Name chain for the item, or null.
+     */
+    function itemNameToNameChain(itemNameOrNote) {
+      // Optimisation: eliminate the common case first (not in a name tree):
+      if (!itemNameOrNote.includes(nameTreeSeparator)) {
+        return null;
+      }
+      // For multiline strings, only analyse the first line
+      if (itemNameOrNote.includes("\n")) {
+        itemNameOrNote = itemNameOrNote.split("\n", 1)[0];
+        if (!itemNameOrNote.includes(nameTreeSeparator)) {
+          return null;
+        }
+      }
+
+      const rawNames = itemNameOrNote.split(nameTreeSeparator);
+      rawNames.pop(); // Remove any text after the last separator
+      const simplifiedNames = rawNames.map(simplifyNameTreeName);
+      return simplifiedNames.join(nameTreeSeparator) + nameTreeSeparator;
+    }
+
+    /**
+     * @param {Item} item Item to extract the name chain from.
+     * @returns {string?} Name chain for the item, or null.
+     */
+    function itemToNameChain(item) {
+      if (!item) {
+        return null;
+      }
+      return (
+        itemNameToNameChain(item.getNameInPlainText()) ||
+        itemNameToNameChain(item.getNoteInPlainText())
       );
-      return;
-    }
-    const tag = filteredTags[0];
-
-    function itemPredicate(item) {
-      return getNameTagsLowered(item).includes(tag);
     }
 
-    gatherExternalMatches(itemPredicate, flywheelRoot, true);
-  }
+    function toNameChainAndItem(item) {
+      return new NameChainAndItem(itemToNameChain(item), item);
+    }
+
+    /**
+     * @returns {Array<NameChainAndItem>} All name trees local to document.
+     */
+    function getAllLocalNameTrees() {
+      return findMatchingItems(
+        item => !item.isEmbedded() && itemToNameChain(item),
+        WF.rootItem()
+      ).map(toNameChainAndItem);
+    }
+
+    class ItemMove {
+      constructor(itemToMove, targetItem) {
+        this.itemToMove = itemToMove;
+        this.targetItem = targetItem;
+      }
+    }
+
+    /**
+     * @param {ItemMove} itemMove The move to validate.
+     * @returns {string} An error message if failed, or null if succeeded.
+     */
+    function validateMove(itemMove) {
+      const itemToMove = itemMove.itemToMove;
+      const targetItem = itemMove.targetItem;
+      if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
+        return `Cannot move ${formatItem(itemToMove)} to ${formatItem(
+          targetItem
+        )}.`;
+      }
+      return null;
+    }
+
+    /**
+     * @param {Array<ItemMove>} itemMoves The moves to validate.
+     * @returns {string} An error message if failed, or null if succeeded.
+     */
+    function validateMoves(itemMoves) {
+      for (const itemMove of itemMoves) {
+        const failureMessage = validateMove(itemMove);
+        if (failureMessage) {
+          return failureMessage;
+        }
+      }
+      return null;
+    }
+
+    /**
+     * @param {Array<ItemMove>} itemMoves The moves to perform.
+     * @returns {string?} An error message if failed, or null if succeeded.
+     */
+    function performMoves(itemMoves) {
+      let whyUnsafe = validateMoves(itemMoves);
+      let itemsMovedAlready = 0;
+      if (whyUnsafe) {
+        return whyUnsafe;
+      }
+      // Re-do move safety checks, as the structure can changes as we go
+      for (const itemMove of itemMoves) {
+        const itemToMove = itemMove.itemToMove;
+        const targetItem = itemMove.targetItem;
+        if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
+          const prefix = itemsMovedAlready
+            ? `Partial failure: ${itemsMovedAlready} item(s) moved already, but: `
+            : "";
+          return `${prefix}Cannot move ${formatItem(
+            itemToMove
+          )} to ${formatItem(targetItem)}.`;
+        }
+        WF.moveItems([itemToMove], targetItem, 0);
+        itemsMovedAlready++;
+      }
+      return null;
+    }
+
+    /**
+     * @param {Array<ItemMove>} itemMoves The moves to make.
+     * @throws {AbortActionError}
+     * @returns {void}
+     */
+    function confirmAndMoveInEditGroupOrFail(itemMoves) {
+      const toMoveCount = itemMoves.length;
+      if (toMoveCount === 0) {
+        WF.showMessage("No moves required.");
+        return;
+      }
+      const prompt = `Move ${toMoveCount} item(s)?`;
+      if (confirm(prompt)) {
+        let errorMessage;
+        WF.editGroup(() => {
+          errorMessage = performMoves(itemMoves);
+        });
+        failIf(errorMessage, errorMessage);
+        WF.showMessage(`Moved ${toMoveCount} item(s).`);
+      }
+    }
+
+    /**
+     * @param {Array<NameChainAndItem>} nameChainsAndItems Entries to map.
+     * @returns {Map<string, Array<Item>>} The entries as a map.
+     */
+    function mapNameTreesByNameChains(nameChainsAndItems) {
+      /** @type {Map<string, Array<Item>>} */
+      const multimap = new Map();
+      for (const entry of nameChainsAndItems) {
+        addToMultimap(entry.nameChain, entry.item, multimap);
+      }
+      return multimap;
+    }
+
+    class ItemAndNameTreeParents {
+      /**
+       * @param {Item} item The item.
+       * @param {string} nameChain The name chain.
+       * @param {Array<Item>} parents The item's parents.
+       */
+      constructor(item, nameChain, parents) {
+        this.item = item;
+        this.nameChain = nameChain;
+        this.parents = parents;
+      }
+    }
+
+    class ProcessNameTreesResult {
+      /**
+       * @param {Array<ItemAndNameTreeParents>} singleParentItems Items with 1 parent.
+       * @param {Array<ItemAndNameTreeParents>} noParentItems Items with no parent.
+       * @param {Array<ItemAndNameTreeParents>} manyParentItems Items with many parents.
+       * @param {Array<ItemAndNameTreeParents>} nameTreeRoots Name tree root items.
+       * @param {Map<string, Array<Item>>} duplicateNameChains Name chains with multiple items.
+       * @param {Array<ItemMove>} requiredMoves The required moves to restore name trees.
+       * @param {Array<String>} impossibleMoves Messages describing impossible moves.
+       */
+      constructor(
+        singleParentItems,
+        noParentItems,
+        manyParentItems,
+        nameTreeRoots,
+        duplicateNameChains,
+        requiredMoves,
+        impossibleMoves
+      ) {
+        this.singleParentItems = singleParentItems;
+        this.noParentItems = noParentItems;
+        this.manyParentItems = manyParentItems;
+        this.nameTreeRoots = nameTreeRoots;
+        this.duplicateNameChains = duplicateNameChains;
+        this.requiredMoves = requiredMoves;
+        this.impossibleMoves = impossibleMoves;
+      }
+    }
+
+    /**
+     * Processes the given name tree items.
+     * Can be used to either (a) gather information about the status of
+     * name trees, or (b) calculate required moves to restore the chosen
+     * name tree items to the implied name tree structure. In the latter case,
+     * both the impossibleMoves and requiredMoves results should inform what
+     * action to take, and the other fields of the result can be ignored.
+     *
+     * @param {Map<string, Array<Item>>} nameTrees Name trees.
+     * @param {function} nameChainPredicate A function (string -> boolean) which
+     *                                 returns whether or not to process a name tree item
+     *                                 based on its name chain.
+     * @param {function} itemPredicate A function (Item -> boolean) which
+     *                                 returns whether or not to process a name tree item
+     *                                 based on the Item.
+     * @returns {ProcessNameTreesResult} See ProcessNameTreesResult class.
+     */
+    function analyseNameTrees(nameTrees, nameChainPredicate, itemPredicate) {
+      /** @type {Array<ItemAndNameTreeParents>} */
+      const singleParentItems = [];
+      /** @type {Array<ItemAndNameTreeParents>} */
+      const noParentItems = [];
+      /** @type {Array<ItemAndNameTreeParents>} */
+      const manyParentItems = [];
+      /** @type {Array<ItemAndNameTreeParents>} */
+      const nameTreeRoots = [];
+      /** @type {Map<string, Array<Item>>} */
+      const nameChainsToItems = new Map();
+      /** @type {Array<ItemMove>} */
+      const requiredMoves = [];
+
+      /** @type {Array<String>} */
+      const impossibleMoves = [];
+
+      /**
+       * @param {Item} item The item to test.
+       * @param {Array<Item>} candidateParents The possible parents.
+       * @returns {boolean} Whether or not the item is a child of one of them.
+       */
+      function isItemAChildOfOneOf(item, candidateParents) {
+        for (const parent of candidateParents) {
+          if (item.getParent().getId() === parent.getId()) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      for (const [nameChain, items] of nameTrees) {
+        if (nameChainPredicate && !nameChainPredicate(nameChain)) {
+          continue;
+        }
+        const parentNameChain = nameChainToParent(nameChain);
+        const parentItems =
+          (parentNameChain && nameTrees.get(parentNameChain)) || [];
+        const parentCount = parentItems.length;
+        for (const item of items) {
+          if (itemPredicate && !itemPredicate(item)) {
+            continue;
+          }
+          addToMultimap(nameChain, item, nameChainsToItems);
+          const itemAndNameTreeParents = new ItemAndNameTreeParents(
+            item,
+            nameChain,
+            parentItems
+          );
+          let arrayToPushTo;
+          if (!parentNameChain) {
+            arrayToPushTo = nameTreeRoots;
+            // No move required
+          } else if (parentCount === 0) {
+            arrayToPushTo = noParentItems;
+            impossibleMoves.push(
+              `No name tree parent found for item ${formatItem(item)} ` +
+                `which has name chain "${nameChain}".`
+            );
+          } else if (parentCount === 1) {
+            arrayToPushTo = singleParentItems;
+            if (!isItemAChildOfOneOf(item, parentItems)) {
+              requiredMoves.push(new ItemMove(item, parentItems[0]));
+            }
+          } else {
+            arrayToPushTo = manyParentItems;
+            if (!isItemAChildOfOneOf(item, parentItems)) {
+              impossibleMoves.push(
+                "Multiple name tree parents found for item " +
+                  `${formatItem(item)} which has name chain "${nameChain}:"` +
+                  `${parentItems.map(formatItem)}`
+              );
+            }
+          }
+          arrayToPushTo.push(itemAndNameTreeParents);
+        }
+      }
+
+      /** @type {Map<string, Array<Item>>} */
+      const duplicateNameChains = filterMapByValues(
+        items => items.length > 1,
+        nameChainsToItems
+      );
+
+      /** @type {Array<ItemMove>} */
+      const validRequiredMoves = [];
+      for (const move of requiredMoves) {
+        const failureMessage = validateMove(move);
+        if (failureMessage) {
+          impossibleMoves.push(failureMessage);
+        } else {
+          validRequiredMoves.push(move);
+        }
+      }
+
+      return new ProcessNameTreesResult(
+        singleParentItems,
+        noParentItems,
+        manyParentItems,
+        nameTreeRoots,
+        duplicateNameChains,
+        validRequiredMoves,
+        impossibleMoves
+      );
+    }
+
+    const always = () => true;
+
+    /**
+     * @param {string} existingMessage Message to append to
+     * @param {number} indentCount Number of space to indent each line
+     * @param {string} toAppend The string to append to the message
+     * @returns {string} The resulting string
+     */
+    function appendIndented(existingMessage, indentCount, toAppend) {
+      existingMessage = existingMessage || "";
+      for (const line of toAppend.split("\n")) {
+        existingMessage += " ".repeat(indentCount) + line + "\n";
+      }
+      return existingMessage;
+    }
+
+    /**
+     * Validates all local name trees and shows a summary message via a dialog.
+     * @returns {void}
+     */
+    function validateAllNameTrees() {
+      /**
+       * Takes a single map of name chains to item arrays, and splits those
+       * maps by root name chain, returning a map of maps.
+       * @param {Map<string, Array<Item>>} nameTreesByChains Items by name chain
+       * @returns {Map<string, Map<string, Array<Item>>>} The split maps
+       */
+      function mapNameTreesByChainsByRoots(nameTreesByChains) {
+        /** @type {Map<string, Map<string, Array<Item>>>} */
+        const byRoots = new Map();
+        for (const [nameChain, items] of nameTreesByChains.entries()) {
+          const rootChain = nameChainToRoot(nameChain);
+          /** @type {Map<string, Array<Item>>} */
+          let mapForRoot = null;
+          if (byRoots.has(rootChain)) {
+            mapForRoot = byRoots.get(rootChain);
+          } else {
+            mapForRoot = new Map();
+            byRoots.set(rootChain, mapForRoot);
+          }
+          mapForRoot.set(nameChain, items);
+        }
+        return byRoots;
+      }
+
+      const localNameTrees = getAllLocalNameTrees();
+      const nameTreesByChains = mapNameTreesByNameChains(localNameTrees);
+      const mapsByRoots = mapNameTreesByChainsByRoots(nameTreesByChains);
+
+      let message = "Summary of name tree status for local name trees:\n";
+      const addMsg = (indent, toAppend) => {
+        message = appendIndented(message, indent, toAppend);
+      };
+      const fmt = formatItem;
+      // Iterate over the name chain roots
+      const sortedRootChains = Array.from(mapsByRoots.keys()).sort();
+      for (const rootChain of sortedRootChains) {
+        const nameTreesByChainsForRoot = mapsByRoots.get(rootChain);
+        const result = analyseNameTrees(
+          nameTreesByChainsForRoot,
+          always,
+          always
+        );
+        const r = result;
+        addMsg(1, `For name tree ${rootChain}:`);
+        addMsg(2, `${r.requiredMoves.length} item(s) needing moving:`);
+        for (const move of r.requiredMoves) {
+          addMsg(3, `${fmt(move.itemToMove)} -> ${fmt(move.targetItem)}`);
+        }
+        addMsg(2, `${r.duplicateNameChains.size} duplicate name chain(s):`);
+        for (const dupedNameChain of r.duplicateNameChains.keys()) {
+          addMsg(3, `For name chain "${dupedNameChain}:"`);
+          for (const item of r.duplicateNameChains.get(dupedNameChain)) {
+            addMsg(4, fmt(item));
+          }
+        }
+        addMsg(2, `${r.noParentItems.length} item(s) with no parent:`);
+        for (const orphan of r.noParentItems) {
+          addMsg(3, fmt(orphan.item));
+        }
+        addMsg(2, `${r.manyParentItems.length} item(s) with many parents:`);
+        for (const manyParentItem of r.manyParentItems) {
+          addMsg(3, `${fmt(manyParentItem.item)} has many parents:`);
+          for (const parent of manyParentItem.parents) {
+            addMsg(4, fmt(parent));
+          }
+        }
+        addMsg(2, `${r.nameTreeRoots.length} name tree root(s):`);
+        for (const nameTreeRoot of r.nameTreeRoots) {
+          addMsg(3, formatItem(nameTreeRoot.item));
+        }
+        addMsg(2, `${r.impossibleMoves.length} impossible moves:`);
+        for (const impossibleMove of r.impossibleMoves) {
+          addMsg(3, impossibleMove);
+        }
+        addMsg(1, `(End of summary for name tree ${rootChain})`);
+      }
+
+      alert(message);
+      console.log(message);
+    }
+
+    /**
+     * @param {Item} item The item to check.
+     * @returns {void}
+     * @throws {AbortActionError} If the item is embedded.
+     */
+    function validateItemIsLocalOrFail(item) {
+      failIf(
+        item && item.isEmbedded(),
+        () =>
+          `${formatItem(
+            item
+          )} is embedded from another document. Was expecting local items only.`
+      );
+    }
+
+    /**
+     * Fails if the given item does not have a valid name chain.
+     * @param {Item} item The item to validate
+     * @returns {void}
+     */
+    function validateItemIsNameTreeOrFail(item) {
+      failIf(
+        !toNameChainAndItem(item).nameChain,
+        `${formatItem(
+          item
+        )} doesn't have a valid name chain. Expected pattern is "${exampleNameChain}".`
+      );
+    }
+
+    /**
+     * This action pushes the active item(s) back to their name tree parents.
+     * @throws {AbortActionError}
+     * @returns {void}
+     */
+    function _sendToNameTreeOrFail() {
+      const activeItems = getActiveItems().items;
+      activeItems.forEach(validateItemIsLocalOrFail);
+      activeItems.forEach(validateItemIsNameTreeOrFail);
+      const nameTreesByChain = mapNameTreesByNameChains(getAllLocalNameTrees());
+
+      // Calculate moves for active name tree items
+      const isActiveItem = a => activeItems.some(b => b.getId() === a.getId());
+      const nameTreeResult = analyseNameTrees(
+        nameTreesByChain,
+        always,
+        isActiveItem
+      );
+
+      // Fail if analysis showed impossible moves
+      const impossibleMoves = nameTreeResult.impossibleMoves;
+      failIf(impossibleMoves.length > 0, impossibleMoves.join("\n"));
+
+      // Perform the sends
+      confirmAndMoveInEditGroupOrFail(nameTreeResult.requiredMoves);
+    }
+
+    /**
+     * For use with a name tree list or sub-list.
+     * For use when items in the name tree may have been moved to other locations
+     * in the document outside of the root.
+     * This action finds any (non-embedded) name tree items which are outside the
+     * name tree list, and moves them back to the name tree list, at the top.
+     * The active items are interpreted as the roots of the name trees.
+     * @throws {AbortActionError}
+     * @returns {void}
+     */
+    function _reassembleNameTreeOrFail() {
+      const activeItems = getActiveItems().items;
+      activeItems.forEach(validateItemIsLocalOrFail);
+      activeItems.forEach(validateItemIsNameTreeOrFail);
+      const nameTreesByChain = mapNameTreesByNameChains(getAllLocalNameTrees());
+
+      // Calculate moves for name tree items which are under target name chains
+      const activeNameChains = activeItems.map(itemToNameChain);
+      const isUnderTargetRoot = nameChain =>
+        activeNameChains.some(activeNameChain =>
+          isNameChainAAncestorOfB(activeNameChain, nameChain)
+        );
+      const nameTreeResult = analyseNameTrees(
+        nameTreesByChain,
+        isUnderTargetRoot,
+        always
+      );
+
+      // Fail if analysis showed impossible moves
+      const impossibleMoves = nameTreeResult.impossibleMoves;
+      failIf(impossibleMoves.length > 0, impossibleMoves.join("\n"));
+
+      // Perform the sends
+      confirmAndMoveInEditGroupOrFail(nameTreeResult.requiredMoves);
+    }
+
+    const reassembleNameTree = () =>
+      callWithErrorHandling(_reassembleNameTreeOrFail);
+    const sendToNameTree = () => callWithErrorHandling(_sendToNameTreeOrFail);
+
+    return {
+      itemNameToNameChain: itemNameToNameChain,
+      simplifyNameTreeName: simplifyNameTreeName,
+      reassembleNameTree: reassembleNameTree,
+      sendToNameTree: sendToNameTree,
+      validateAllNameTrees: validateAllNameTrees,
+      nameChainToParent: nameChainToParent
+    };
+  })();
 
   /**
    * @param {function} callbackFn Function to call when the document is loaded,
@@ -2701,7 +3191,7 @@ global WF:false
         dismissNotification,
         editCurrentItem,
         editParentOfFocusedItem,
-        gatherFlywheel,
+        nameTreeModule.reassembleNameTree,
         logShortReport,
         markFocusedAndDescendantsNotComplete,
         moveToBookmark,
@@ -2711,6 +3201,7 @@ global WF:false
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
+        nameTreeModule.sendToNameTree,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
@@ -2750,6 +3241,7 @@ global WF:false
 
   // Create jumpflowy object and make it available at 'jumpflowy' in the window
   self.jumpflowy = {
+    nameTree: nameTreeModule,
     // Functions by alphabetical order
     addBookmark: addBookmark,
     applyToEachItem: applyToEachItem,
@@ -2778,7 +3270,6 @@ global WF:false
     findTopItemsByScore: findTopItemsByScore,
     followItem: followItem,
     followZoomedItem: followZoomedItem,
-    gatherFlywheel: gatherFlywheel,
     getCurrentTimeSec: getCurrentTimeSec,
     getTagsForFilteredItems: getTagsForFilteredItems,
     getZoomedItem: getZoomedItem,

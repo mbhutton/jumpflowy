@@ -124,7 +124,7 @@ The available named functions:
 - `dismissNotification`
 - `editCurrentItem`
 - `editParentOfFocusedItem`
-- `gatherFlywheel`
+- `reassembleNameTree`
 - `logShortReport`
 - `markFocusedAndDescendantsNotComplete`
 - `moveToBookmark`
@@ -133,7 +133,9 @@ The available named functions:
 - `promptToFindGlobalBookmarkThenFollow`
 - `promptToFindLocalRegexMatchThenZoom`
 - `promptToNormalLocalSearch`
+- `sendToNameTree`
 - `showZoomedAndMostRecentlyEdited`
+- `validateAllNameTrees`
 
 #### Suggestions for what to configure
 
