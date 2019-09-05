@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.37
+// @version      0.1.6.38
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1383,7 +1383,7 @@ global WF:false
       WF.showMessage(`Item ${formattedRoot} doesn't have ${flywheelTag} tag.`);
       return;
     }
-    const filteredTags = allTagsInRoot.filter(x => x !== flywheelTag);
+    const filteredTags = allTagsInRoot.filter(x => x !== flywheelTag && x !== "#bm");
     if (filteredTags.length !== 1) {
       WF.showMessage(
         `Flywheel item ${formattedRoot} can only have 1 tag other than "${flywheelTag}".`
