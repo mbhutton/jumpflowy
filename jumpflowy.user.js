@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.39
+// @version      0.1.6.40
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1517,6 +1517,7 @@ global WF:false
    * Prompts the user to choose an item from among the given array of items,
    * using a mix of choosing by index, or choosing by bookmark name, or by text.
    * Note: the behaviour of this method is expected to change.
+   * Prefixes: "?" will force a re-prompt before returning the item.
    * @param {Array<Item>} items The array of items to choose from.
    * @param {string} promptMessage Optional message to prompt the user with.
    * @returns {Item} Returns the chosen item, or null if cancelled.
@@ -1549,6 +1550,12 @@ global WF:false
       return;
     }
     answer = answer.trim();
+    let queryFlag = false;
+    const queryFlagPrefix = "?";
+    if (answer.startsWith(queryFlagPrefix)) {
+      queryFlag = true;
+      answer = answer.substring(queryFlagPrefix.length).trimLeft();
+    }
     if (answer === "") {
       return;
     }
@@ -1594,7 +1601,8 @@ global WF:false
         }
       }
     }
-    if (resultItems.length > 1 || (resultItems.length === 1 && !hasFullMatch)) {
+    const needsPrompt = queryFlag || !hasFullMatch;
+    if (resultItems.length > 1 || (resultItems.length === 1 && needsPrompt)) {
       // Choose again amongst only the matches
       return promptToChooseItem(resultItems, promptMessage);
     } else if (resultItems.length === 1) {
