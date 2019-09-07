@@ -1550,11 +1550,11 @@ global WF:false
       return;
     }
     answer = answer.trim();
-    let queryFlag = false;
-    const queryFlagPrefix = "?";
-    if (answer.startsWith(queryFlagPrefix)) {
-      queryFlag = true;
-      answer = answer.substring(queryFlagPrefix.length).trimLeft();
+    let rePromptFlag = false;
+    const rePromptFlagPrefix = "?";
+    if (answer.startsWith(rePromptFlagPrefix)) {
+      rePromptFlag = true;
+      answer = answer.substring(rePromptFlagPrefix.length).trimLeft();
     }
     if (answer === "") {
       return;
@@ -1601,7 +1601,7 @@ global WF:false
         }
       }
     }
-    const needsPrompt = queryFlag || !hasFullMatch;
+    const needsPrompt = rePromptFlag || !hasFullMatch;
     if (resultItems.length > 1 || (resultItems.length === 1 && needsPrompt)) {
       // Choose again amongst only the matches
       return promptToChooseItem(resultItems, promptMessage);
