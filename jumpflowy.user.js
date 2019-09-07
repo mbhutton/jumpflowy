@@ -1562,7 +1562,7 @@ global WF:false
     const answerAsInt = parseInt(answer);
     const resultItems = Array();
     const answerLC = answer.toLowerCase();
-    let hasFullMatch = false;
+    let hasPartialMatch = false;
     if (!isNaN(answerAsInt) && `${answerAsInt}` === answer) {
       // It's a number
       if (answerAsInt < 0 || answerAsInt >= items.length) {
@@ -1570,7 +1570,6 @@ global WF:false
         return;
       } else {
         resultItems.push(items[answerAsInt]);
-        hasFullMatch = true;
       }
     }
     if (resultItems.length === 0) {
@@ -1579,7 +1578,6 @@ global WF:false
         const alias = itemAliases[i];
         if (alias && alias.toLowerCase() === answerLC) {
           resultItems.push(items[i]);
-          hasFullMatch = true;
         }
       }
     }
@@ -1589,6 +1587,7 @@ global WF:false
         const alias = itemAliases[i];
         if (alias && alias.toLowerCase().startsWith(answerLC)) {
           resultItems.push(items[i]);
+          hasPartialMatch = true;
         }
       }
     }
@@ -1598,10 +1597,11 @@ global WF:false
         const plainTextNameLC = itemToPlainTextName(item).toLowerCase();
         if (plainTextNameLC.includes(answerLC)) {
           resultItems.push(item);
+          hasPartialMatch = true;
         }
       }
     }
-    const needsPrompt = rePromptFlag || !hasFullMatch;
+    const needsPrompt = rePromptFlag || hasPartialMatch;
     if (resultItems.length > 1 || (resultItems.length === 1 && needsPrompt)) {
       // Choose again amongst only the matches
       return promptToChooseItem(resultItems, promptMessage);
