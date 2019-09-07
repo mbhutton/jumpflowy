@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.40
+// @version      0.1.6.41
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1518,6 +1518,8 @@ global WF:false
    * using a mix of choosing by index, or choosing by bookmark name, or by text.
    * Note: the behaviour of this method is expected to change.
    * Prefixes: "?" will force a re-prompt before returning the item.
+   * Suffixes: "*" will force include bookmarks based on prefix matching, even
+   *           if there's a full match.
    * @param {Array<Item>} items The array of items to choose from.
    * @param {string} promptMessage Optional message to prompt the user with.
    * @returns {Item} Returns the chosen item, or null if cancelled.
@@ -1551,15 +1553,22 @@ global WF:false
     }
     answer = answer.trim();
     let rePromptFlag = false;
-    const rePromptFlagPrefix = "?";
-    if (answer.startsWith(rePromptFlagPrefix)) {
+    const rePromptPrefix = "?";
+    if (answer.startsWith(rePromptPrefix)) {
       rePromptFlag = true;
-      answer = answer.substring(rePromptFlagPrefix.length).trimLeft();
+      answer = answer.substring(rePromptPrefix.length).trimLeft();
+    }
+    let includePrefixMatchesFlag = false;
+    const includePrefixMatchesSuffix = "*";
+    if (answer.endsWith(includePrefixMatchesSuffix)) {
+      includePrefixMatchesFlag = true;
+      answer = answer.slice(0, -includePrefixMatchesSuffix.length).trimRight();
     }
     if (answer === "") {
       return;
     }
     const answerAsInt = parseInt(answer);
+    /** @type {Array<Item>} */
     const resultItems = Array();
     const answerLC = answer.toLowerCase();
     let hasPartialMatch = false;
@@ -1568,6 +1577,8 @@ global WF:false
       if (answerAsInt < 0 || answerAsInt >= items.length) {
         alert("Invalid choice: " + answer);
         return;
+      } else if (includePrefixMatchesFlag || rePromptFlag) {
+        alert(`Cannot combine a numeric answer (${answer}) with search flags.`);
       } else {
         resultItems.push(items[answerAsInt]);
       }
@@ -1581,9 +1592,13 @@ global WF:false
         }
       }
     }
-    if (resultItems.length === 0) {
+    if (resultItems.length === 0 || includePrefixMatchesFlag) {
       // Match aliases which start with the string (ignoring case)
       for (let i = 0; i < items.length; i++) {
+        if (resultItems.includes(items[i])) {
+          // Don't re-add full matches
+          continue;
+        }
         const alias = itemAliases[i];
         if (alias && alias.toLowerCase().startsWith(answerLC)) {
           resultItems.push(items[i]);
@@ -1601,7 +1616,8 @@ global WF:false
         }
       }
     }
-    const needsPrompt = rePromptFlag || hasPartialMatch;
+    const needsPrompt =
+      rePromptFlag || includePrefixMatchesFlag || hasPartialMatch;
     if (resultItems.length > 1 || (resultItems.length === 1 && needsPrompt)) {
       // Choose again amongst only the matches
       return promptToChooseItem(resultItems, promptMessage);
