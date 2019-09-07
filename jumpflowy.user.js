@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.38
+// @version      0.1.6.39
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -1555,6 +1555,7 @@ global WF:false
     const answerAsInt = parseInt(answer);
     const resultItems = Array();
     const answerLC = answer.toLowerCase();
+    let hasFullMatch = false;
     if (!isNaN(answerAsInt) && `${answerAsInt}` === answer) {
       // It's a number
       if (answerAsInt < 0 || answerAsInt >= items.length) {
@@ -1562,6 +1563,7 @@ global WF:false
         return;
       } else {
         resultItems.push(items[answerAsInt]);
+        hasFullMatch = true;
       }
     }
     if (resultItems.length === 0) {
@@ -1570,6 +1572,7 @@ global WF:false
         const alias = itemAliases[i];
         if (alias && alias.toLowerCase() === answerLC) {
           resultItems.push(items[i]);
+          hasFullMatch = true;
         }
       }
     }
@@ -1591,7 +1594,7 @@ global WF:false
         }
       }
     }
-    if (resultItems.length > 1) {
+    if (resultItems.length > 1 || (resultItems.length === 1 && !hasFullMatch)) {
       // Choose again amongst only the matches
       return promptToChooseItem(resultItems, promptMessage);
     } else if (resultItems.length === 1) {
