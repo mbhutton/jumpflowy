@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.41
+// @version      0.1.6.42
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -246,6 +246,8 @@ global WF:false
   const hashSegmentsToIds = new Map();
   /** @type {Set<string>} */
   const unknownHashSegments = new Set();
+  /** @type {Map<string, string>} */
+  let bannedBookmarkSearchPrefixesToSuggestions = new Map();
 
   // DEPRECATED TAGS START
   const bookmarkTag = "#bm";
@@ -264,6 +266,8 @@ global WF:false
   const CONFIG_SECTION_EXPANSIONS = "textExpansions";
   const CONFIG_SECTION_BOOKMARKS = "bookmarks";
   const CONFIG_SECTION_KB_SHORTCUTS = "keyboardShortcuts";
+  const CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES =
+    "bannedBookmarkSearchPrefixes";
 
   // Global event listener data
   const gelData = [0, 0, 0, 0];
@@ -1136,6 +1140,7 @@ global WF:false
           return convertToMapOfItems;
         case CONFIG_SECTION_EXPANSIONS: // Falls through
         case CONFIG_SECTION_KB_SHORTCUTS:
+        case CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES:
           return convertToMapOfStrings;
       }
     }
@@ -1199,6 +1204,7 @@ global WF:false
     bookmarksToSourceItems = new Map();
     itemIdsToFirstBookmarks = new Map();
     canonicalKeyCodesToTargets.clear();
+    bannedBookmarkSearchPrefixesToSuggestions = new Map();
   }
 
   /**
@@ -1247,6 +1253,11 @@ global WF:false
     allKeyCodesToFunctions.forEach((target, code) => {
       canonicalKeyCodesToTargets.set(code, target);
     });
+
+    // Banned bookmark searches
+    bannedBookmarkSearchPrefixesToSuggestions =
+      configObject.get(CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES) ||
+      new Map();
 
     // Bookmarks
     applyBookmarksConfiguration(configObject);
@@ -1567,6 +1578,18 @@ global WF:false
     if (answer === "") {
       return;
     }
+    for (const [
+      banned,
+      suggestion
+    ] of bannedBookmarkSearchPrefixesToSuggestions.entries()) {
+      if (answer.toLowerCase().startsWith(banned.toLowerCase())) {
+        alert(
+          `Bookmark searches starting with "${banned}" are banned. Suggestion: "${suggestion}".`
+        );
+        return;
+      }
+    }
+
     const answerAsInt = parseInt(answer);
     /** @type {Array<Item>} */
     const resultItems = Array();
