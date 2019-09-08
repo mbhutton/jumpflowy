@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.42
+// @version      0.1.6.43
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -2173,6 +2173,62 @@ global WF:false
   }
 
   /**
+   * Escapes all HTML characters in the text.
+   * @param {string} text The text to escape.
+   * @returns {string} The escaped text.
+   */
+  function escapeHtmlCharacters(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  /**
+   * Action which creates an ordinary link below the current single focused
+   * or selected item.
+   * @returns {void}
+   */
+  function createOrdinaryLink() {
+    const activeItems = getActiveItems();
+    if (activeItems.type !== "selection" && activeItems.type !== "focused") {
+      WF.showMessage("Select or focus an item first.");
+      return;
+    }
+    if (activeItems.items.length !== 1) {
+      WF.showMessage("Select or focus exactly 1 item first.");
+      return;
+    }
+    const targetItem = activeItems.items[0];
+    if (targetItem.getId() === WF.currentItem().getId()) {
+      WF.showMessage("Can't create a link for the zoomed item. Zoom up first.");
+      return;
+    }
+    // The link's name is based on the target's name, but with neutered tags
+    const linkName =
+      "#link: " +
+      targetItem
+        .getNameInPlainText()
+        .replace("@", "@\\")
+        .replace("#", "#\\");
+    const targetUrl = itemAndSearchToWorkFlowyUrl("prod", targetItem, null);
+
+    let linkItem;
+    WF.editGroup(() => {
+      linkItem = WF.createItem(
+        targetItem.getParent(),
+        targetItem.getPriority() + 1
+      );
+      WF.setItemName(linkItem, escapeHtmlCharacters(linkName));
+      WF.setItemNote(linkItem, targetUrl);
+    });
+    // Note: without the timeout, the selection is not set correctly
+    setTimeout(() => WF.setSelection([linkItem]), 0);
+  }
+
+  /**
    * @returns {string} The expanded form of the given abbreviation, or null if
    *                   no such expansion is found. Gives preference to user
    *                   defined #abbrev(theAbbrev theExpansion) expansions,
@@ -2448,6 +2504,7 @@ global WF:false
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         addBookmark,
         createItemAtTopOfCurrent,
+        createOrdinaryLink,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
         editCurrentItem,
@@ -2507,6 +2564,7 @@ global WF:false
     callAfterDocumentLoaded: callAfterDocumentLoaded,
     cleanUp: cleanUp,
     createItemAtTopOfCurrent: createItemAtTopOfCurrent,
+    createOrdinaryLink: createOrdinaryLink,
     dateToYMDString: dateToYMDString,
     deleteFocusedItemIfNoChildren: deleteFocusedItemIfNoChildren,
     dismissNotification: dismissNotification,

@@ -29,6 +29,8 @@ interface JumpFlowy {
 
   callAfterDocumentLoaded(callbackFn: () => void);
 
+  createOrdinaryLink(): void;
+
   createItemAtTopOfCurrent(): void;
 
   cleanUp(): void;
@@ -186,6 +188,8 @@ interface Item {
   getNumDescendants(): number;
 
   getParent(): Item;
+
+  getPriority(): number;
 
   getUrl(): string;
 

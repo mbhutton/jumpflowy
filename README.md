@@ -120,6 +120,7 @@ The available named functions:
 
 - `addBookmark`
 - `createItemAtTopOfCurrent`
+- `createOrdinaryLink`
 - `dismissNotification`
 - `editCurrentItem`
 - `editParentOfFocusedItem`

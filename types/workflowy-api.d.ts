@@ -51,6 +51,8 @@ declare namespace WF {
 
   function setItemNote(item: Item, content: string);
 
+  function setSelection(items: Item[]);
+
   function showMessage(html: string, isError?: boolean);
 
   function toggleCompletedVisible(): void;
