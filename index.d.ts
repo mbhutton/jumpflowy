@@ -87,6 +87,8 @@ interface JumpFlowy {
 
   followZoomedItem(): void;
 
+  getAllTagsUnder(searchRoot: Item): Set<string>;
+
   getCurrentTimeSec(): number;
 
   getZoomedItem(): Item;

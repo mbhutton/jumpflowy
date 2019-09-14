@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.43
+// @version      0.1.6.44
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -117,6 +117,23 @@ global WF:false
     const tagsForNote = WF.getItemNoteTags(item);
     const allTags = tagsForName.concat(tagsForNote);
     return allTags.map(x => x.tag);
+  }
+
+  /**
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Set<string>} All tags under the given search root.
+   */
+  function getAllTagsUnder(searchRoot) {
+    const allTags = new Set();
+    /**
+     * @param {Item} item The item.
+     * @returns {void}
+     */
+    function appendTags(item) {
+      itemToTags(item).forEach(tag => allTags.add(tag));
+    }
+    applyToEachItem(appendTags, searchRoot);
+    return allTags;
   }
 
   /**
@@ -2585,6 +2602,7 @@ global WF:false
     followZoomedItem: followZoomedItem,
     gatherFlywheel: gatherFlywheel,
     getCurrentTimeSec: getCurrentTimeSec,
+    getAllTagsUnder: getAllTagsUnder,
     getZoomedItem: getZoomedItem,
     getZoomedItemAsLongId: getZoomedItemAsLongId,
     isRootItem: isRootItem,
