@@ -224,3 +224,14 @@ declare namespace webkit.MessageHandlers.Toast {
 declare namespace expect {
   function fail(s: string): void;
 }
+
+//****************************
+// As a workaround, define more modern methods on in-built types here,
+// as importing the related *.d.ts files directly causes errors.
+//****************************
+
+interface String {
+  trimLeft(): string;
+
+  trimRight(): string;
+}
