@@ -41,7 +41,8 @@
 
   (1) Stop the HTTP server
   (2) Re-enable network cache in Chrome/Firefox
-  (3) Close and reload WorkFlowy tab in Chrome/Firefox
+  (3) Reload the script in Tampermonkey if a new version was pushed
+  (4) Close and reload WorkFlowy tab in Chrome/Firefox
 
 */
 
