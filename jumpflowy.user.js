@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.46
+// @version      0.1.6.47
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -102,6 +102,88 @@ global WF:false
   }
 
   /**
+   * @template K
+   * @template V
+   * @param {function} itemFunction A function of type (Item -> Array<K>).
+   *                                Can return null or empty array.
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Map<K, Array<Item>>} A map of keys to arrays of items.
+   */
+  function toItemMultimapWithMultipleKeys(itemFunction, searchRoot) {
+    /** @type Map<K, Array<Item>> */
+    const itemMap = new Map();
+    /**
+     * @param {Item} item The item
+     * @returns {void}
+     */
+    function visitorFunction(item) {
+      const keysForItem = itemFunction(item);
+      if (keysForItem && keysForItem.length) {
+        for (let key of keysForItem) {
+          if (itemMap.has(key)) {
+            itemMap.get(key).push(item);
+          } else {
+            itemMap.set(key, [item]);
+          }
+        }
+      }
+    }
+    applyToEachItem(visitorFunction, searchRoot);
+    return itemMap;
+  }
+
+  /**
+   * @template K
+   * @template V
+   * @param {function} itemFunction A function of type (Item -> K).
+   *                                Can return null.
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Map<K, Array<Item>>} A map of keys to arrays of items.
+   */
+  function toItemMultimapWithSingleKeys(itemFunction, searchRoot) {
+    /**
+     * @param {Item} item The item
+     * @returns {Array<K> | null} The returned result (if any) as an array.
+     */
+    function wrappedFunction(item) {
+      const key = itemFunction(item);
+      return (key && [key]) || null;
+    }
+    return toItemMultimapWithMultipleKeys(wrappedFunction, searchRoot);
+  }
+
+  /**
+   * @template K
+   * @template V
+   * @param {function} valueFilter The filter to apply to values in the map.
+   * @param {Map<K, V>} map The map to filter.
+   * @returns {Map<K, V>} map The filtered map.
+   */
+  function filterMapByValues(valueFilter, map) {
+    /** @type {Map<K, V>} */
+    const filteredMap = new Map();
+    map.forEach((v, k) => {
+      if (valueFilter(v)) {
+        filteredMap.set(k, v);
+      }
+    });
+    return filteredMap;
+  }
+
+  /**
+   * @param {Item} searchRoot The root item of the search.
+   * @returns {Map<string, Array<Item>>} Items with the same text, keyed by that
+   *                                     text.
+   */
+  function findItemsWithSameText(searchRoot) {
+    const allItemsByText = toItemMultimapWithSingleKeys(
+      itemToCombinedPlainText,
+      searchRoot
+    );
+    return filterMapByValues(items => items.length > 1, allItemsByText);
+  }
+
+  /**
    * Returns the tags found in the given item.
    * Returns the empty set if none are found.
    *
@@ -179,6 +261,18 @@ global WF:false
    */
   function itemToPlainTextNote(item) {
     return item.getNoteInPlainText() || "";
+  }
+
+  /**
+   * @param {Item} item The item.
+   * @returns {string} The item's name and note, concatenated. When the note is
+   *                   present, it is preceded by a newline character.
+   */
+  function itemToCombinedPlainText(item) {
+    const name = itemToPlainTextName(item);
+    const note = itemToPlainTextNote(item);
+    const combinedText = note.length === 0 ? name : `${name}\n${note}`;
+    return combinedText;
   }
 
   /**
@@ -473,9 +567,7 @@ global WF:false
       throw "regExp must be a compiled RegExp object. regExp: " + regExp;
     }
     function itemPredicate(item) {
-      const name = itemToPlainTextName(item);
-      const note = itemToPlainTextNote(item);
-      const combinedText = note.length === 0 ? name : `${name}\n${note}`;
+      const combinedText = itemToCombinedPlainText(item);
       return regExp.test(combinedText);
     }
     return findMatchingItems(itemPredicate, searchRoot);
@@ -2602,8 +2694,10 @@ global WF:false
     editCurrentItem: editCurrentItem,
     editParentOfFocusedItem: editParentOfFocusedItem,
     expandAbbreviation: expandAbbreviation,
+    filterMapByValues: filterMapByValues,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findItemsMatchingRegex: findItemsMatchingRegex,
+    findItemsWithSameText: findItemsWithSameText,
     findItemsWithTag: findItemsWithTag,
     findMatchingItems: findMatchingItems,
     findRecentlyEditedItems: findRecentlyEditedItems,
@@ -2619,6 +2713,7 @@ global WF:false
     isRootItem: isRootItem,
     isValidCanonicalCode: isValidCanonicalCode,
     itemsToVolatileSearchQuery: itemsToVolatileSearchQuery,
+    itemToCombinedPlainText: itemToCombinedPlainText,
     itemToHashSegment: itemToHashSegment,
     itemToLastModifiedSec: itemToLastModifiedSec,
     itemToPathAsItems: itemToPathAsItems,
@@ -2644,6 +2739,8 @@ global WF:false
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
+    toItemMultimapWithSingleKeys: toItemMultimapWithSingleKeys,
+    toItemMultimapWithMultipleKeys: toItemMultimapWithMultipleKeys,
     todayAsYMDString: todayAsYMDString,
     validRootUrls: validRootUrls,
     workFlowyUrlToHashSegmentAndSearchQuery: workFlowyUrlToHashSegmentAndSearchQuery,

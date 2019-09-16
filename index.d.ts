@@ -53,9 +53,16 @@ interface JumpFlowy {
 
   expandAbbreviation(abbreviation: string): string;
 
+  filterMapByValues<K, V>(
+    valueFilter: (V) => boolean,
+    map: Map<K, V>
+  ): Map<K, V>;
+
   findClosestCommonAncestor(itemA: Item, itemB: Item): Item;
 
   findItemsMatchingRegex(regExp: RegExp, searchRoot: Item): Array<Item>;
+
+  findItemsWithSameText(searchRoot: Item): Map<string, Array<Item>>;
 
   findItemsWithTag(tag: string, searchRoot: Item): Array<Item>;
 
@@ -103,6 +110,8 @@ interface JumpFlowy {
   isValidCanonicalCode(canonicalCode: string): void;
 
   itemsToVolatileSearchQuery(items: Array<Item>): string;
+
+  itemToCombinedPlainText(item: Item): string;
 
   itemToHashSegment(item: Item): string;
 
@@ -159,6 +168,16 @@ interface JumpFlowy {
   stringToTagArgsText(tagToMatch: string, s: string): string;
 
   todayAsYMDString(): string;
+
+  toItemMultimapWithSingleKeys<K>(
+    itemFunction: (Item) => K | null,
+    searchRoot: Item
+  ): Map<K, Array<Item>>;
+
+  toItemMultimapWithMultipleKeys<K>(
+    itemFunction: (Item) => Array<K> | null,
+    searchRoot: Item
+  ): Map<K, Array<Item>>;
 
   validRootUrls: Array<string>;
 
