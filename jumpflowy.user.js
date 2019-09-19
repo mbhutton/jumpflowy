@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.45
+// @version      0.1.6.46
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -148,13 +148,18 @@ global WF:false
    * @see {@link itemToTags} For notes, caveats regarding tag handling.
    */
   function doesItemHaveTag(tagToMatch, item) {
-    if (item === null) {
+    if (!item || !tagToMatch) {
       return false;
     }
 
+    // Optimisation: check for first character of tag in the raw rich text
+    // before converting to plain text, for both the name and the note.
+    const firstTagChar = tagToMatch[0];
     return (
-      doesStringHaveTag(tagToMatch, item.getNameInPlainText()) ||
-      doesStringHaveTag(tagToMatch, item.getNoteInPlainText())
+      (item.getName().includes(firstTagChar) &&
+        doesStringHaveTag(tagToMatch, item.getNameInPlainText())) ||
+      (item.getNote().includes(firstTagChar) &&
+        doesStringHaveTag(tagToMatch, item.getNoteInPlainText()))
     );
   }
 
