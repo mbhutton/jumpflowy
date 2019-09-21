@@ -53,6 +53,8 @@ interface JumpFlowy {
 
   expandAbbreviation(abbreviation: string): string;
 
+  filterMapByKeys<K, V>(keyFilter: (K) => boolean, map: Map<K, V>): Map<K, V>;
+
   filterMapByValues<K, V>(
     valueFilter: (V) => boolean,
     map: Map<K, V>

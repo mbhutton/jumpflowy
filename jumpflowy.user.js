@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.47
+// @version      0.1.6.48
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -150,6 +150,24 @@ global WF:false
       return (key && [key]) || null;
     }
     return toItemMultimapWithMultipleKeys(wrappedFunction, searchRoot);
+  }
+
+  /**
+   * @template K
+   * @template V
+   * @param {function} keyFilter The filter to apply to keys in the map.
+   * @param {Map<K, V>} map The map to filter.
+   * @returns {Map<K, V>} map The filtered map.
+   */
+  function filterMapByKeys(keyFilter, map) {
+    /** @type {Map<K, V>} */
+    const filteredMap = new Map();
+    map.forEach((v, k) => {
+      if (keyFilter(k)) {
+        filteredMap.set(k, v);
+      }
+    });
+    return filteredMap;
   }
 
   /**
@@ -2694,6 +2712,7 @@ global WF:false
     editCurrentItem: editCurrentItem,
     editParentOfFocusedItem: editParentOfFocusedItem,
     expandAbbreviation: expandAbbreviation,
+    filterMapByKeys: filterMapByKeys,
     filterMapByValues: filterMapByValues,
     findClosestCommonAncestor: findClosestCommonAncestor,
     findItemsMatchingRegex: findItemsMatchingRegex,
