@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.48
+// @version      0.1.6.49
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -220,12 +220,12 @@ global WF:false
   }
 
   /**
-   * @param {Item} searchRoot The root item of the search.
    * @param {function} itemPredicate A function (Item -> boolean) which
    *                                 returns whether or not to include an item.
+   * @param {Item} searchRoot The root item of the search.
    * @returns {Set<string>} All tags under the given search root.
    */
-  function getTagsForFilteredItemsUnder(searchRoot, itemPredicate) {
+  function getTagsForFilteredItems(itemPredicate, searchRoot) {
     const allTags = new Set();
     /**
      * @param {Item} item The item.
@@ -2726,7 +2726,7 @@ global WF:false
     followZoomedItem: followZoomedItem,
     gatherFlywheel: gatherFlywheel,
     getCurrentTimeSec: getCurrentTimeSec,
-    getTagsForFilteredItemsUnder: getTagsForFilteredItemsUnder,
+    getTagsForFilteredItems: getTagsForFilteredItems,
     getZoomedItem: getZoomedItem,
     getZoomedItemAsLongId: getZoomedItemAsLongId,
     isRootItem: isRootItem,

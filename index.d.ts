@@ -96,9 +96,9 @@ interface JumpFlowy {
 
   followZoomedItem(): void;
 
-  getTagsForFilteredItemsUnder(
-    searchRoot: Item,
-    itemPredicate: ItemPredicate
+  getTagsForFilteredItems(
+    itemPredicate: ItemPredicate,
+    searchRoot: Item
   ): Set<string>;
 
   getCurrentTimeSec(): number;
