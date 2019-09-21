@@ -1420,7 +1420,9 @@ global WF:false
       WF.showMessage(`Item ${formattedRoot} doesn't have ${flywheelTag} tag.`);
       return;
     }
-    const filteredTags = allTagsInRoot.filter(x => x !== flywheelTag && x !== "#bm");
+    const filteredTags = allTagsInRoot.filter(
+      x => x !== flywheelTag && x !== "#bm"
+    );
     if (filteredTags.length !== 1) {
       WF.showMessage(
         `Flywheel item ${formattedRoot} can only have 1 tag other than "${flywheelTag}".`
