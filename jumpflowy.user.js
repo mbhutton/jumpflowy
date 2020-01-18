@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JumpFlowy
 // @namespace    https://github.com/mbhutton/jumpflowy
-// @version      0.1.6.49
+// @version      0.1.6.50
 // @description  WorkFlowy user script for search and navigation
 // @author       Matt Hutton
 // @match        https://workflowy.com/*
@@ -2349,8 +2349,8 @@ global WF:false
       "#link: " +
       targetItem
         .getNameInPlainText()
-        .replace("@", "@\\")
-        .replace("#", "#\\");
+        .replace(/@/g, "@\\")
+        .replace(/#/g, "#\\");
     const targetUrl = itemAndSearchToWorkFlowyUrl("prod", targetItem, null);
 
     let linkItem;
