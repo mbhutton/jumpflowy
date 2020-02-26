@@ -134,6 +134,7 @@ The available named functions:
 - `promptToFindLocalRegexMatchThenZoom`
 - `promptToNormalLocalSearch`
 - `sendToNameTree`
+- `sendToNameTreeAndComplete`
 - `showZoomedAndMostRecentlyEdited`
 - `validateAllNameTrees`
 

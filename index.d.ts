@@ -33,6 +33,7 @@ type ItemHandler = (item: Item) => void;
 interface NameTreeModule {
   itemNameToNameChain(itemName: string): string | null;
   sendToNameTree(): void;
+  sendToNameTreeAndComplete(): void;
   reassembleNameTree(): void;
   validateAllNameTrees(): void;
 }

@@ -1686,24 +1686,24 @@ global WF:false
 
     /**
      * @param {Array<ItemMove>} itemMoves The moves to make.
+     * @param {boolean} shouldConfirm Whether to prompt the user to confirm.
      * @throws {AbortActionError}
      * @returns {void}
      */
-    function confirmAndMoveInEditGroupOrFail(itemMoves) {
+    function moveInEditGroupOrFail(itemMoves, shouldConfirm = false) {
       const toMoveCount = itemMoves.length;
       if (toMoveCount === 0) {
         WF.showMessage("No moves required.");
         return;
       }
       const prompt = `Move ${toMoveCount} item(s)?`;
-      if (confirm(prompt)) {
-        let errorMessage;
-        WF.editGroup(() => {
-          errorMessage = performMoves(itemMoves);
-        });
-        failIf(errorMessage, errorMessage);
-        WF.showMessage(`Moved ${toMoveCount} item(s).`);
-      }
+      failIf(shouldConfirm && !confirm(prompt), "Moves cancelled by user");
+      let errorMessage;
+      WF.editGroup(() => {
+        errorMessage = performMoves(itemMoves);
+      });
+      failIf(errorMessage, errorMessage);
+      WF.showMessage(`Moved ${toMoveCount} item(s).`);
     }
 
     /**
@@ -2039,7 +2039,25 @@ global WF:false
       failIf(impossibleMoves.length > 0, impossibleMoves.join("\n"));
 
       // Perform the sends
-      confirmAndMoveInEditGroupOrFail(nameTreeResult.requiredMoves);
+      moveInEditGroupOrFail(nameTreeResult.requiredMoves, false);
+    }
+
+    /**
+     * This action pushes the active item(s) back to their name tree parents,
+     * and marks them as complete.
+     * @throws {AbortActionError}
+     * @returns {void}
+     */
+    function _sendToNameTreeAndCompleteOrFail() {
+      const activeItems = getActiveItems().items;
+      _sendToNameTreeOrFail();
+      WF.editGroup(() => {
+        for (const item of activeItems) {
+          if (!item.isCompleted()) {
+            WF.completeItem(item);
+          }
+        }
+      });
     }
 
     /**
@@ -2075,18 +2093,21 @@ global WF:false
       failIf(impossibleMoves.length > 0, impossibleMoves.join("\n"));
 
       // Perform the sends
-      confirmAndMoveInEditGroupOrFail(nameTreeResult.requiredMoves);
+      moveInEditGroupOrFail(nameTreeResult.requiredMoves, false);
     }
 
     const reassembleNameTree = () =>
       callWithErrorHandling(_reassembleNameTreeOrFail);
     const sendToNameTree = () => callWithErrorHandling(_sendToNameTreeOrFail);
+    const sendToNameTreeAndComplete = () =>
+      callWithErrorHandling(_sendToNameTreeAndCompleteOrFail);
 
     return {
       itemNameToNameChain: itemNameToNameChain,
       simplifyNameTreeName: simplifyNameTreeName,
       reassembleNameTree: reassembleNameTree,
       sendToNameTree: sendToNameTree,
+      sendToNameTreeAndComplete: sendToNameTreeAndComplete,
       validateAllNameTrees: validateAllNameTrees,
       nameChainToParent: nameChainToParent
     };
@@ -3202,6 +3223,7 @@ global WF:false
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
         nameTreeModule.sendToNameTree,
+        nameTreeModule.sendToNameTreeAndComplete,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
