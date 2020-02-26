@@ -376,6 +376,15 @@ loading the expect.js and jumpflowy modules.
     checkUrlToHashAndQuery(`${baseUrl}/${hash}?q=foo`, hash, "foo");
   }
 
+  function whenUsingNameTreeFunctions() {
+    const itemNameToNameChain = jumpflowy.nameTree.itemNameToNameChain;
+    function checkExpectations(itemName, expectHasNameChain) {
+      const nameChain = itemNameToNameChain(itemName);
+      expect(nameChain !== null).to.equal(expectHasNameChain);
+    }
+    checkExpectations("@dfw::#am::Morning", true);
+  }
+
   function toastrIfAvailable(message, methodName) {
     if (typeof toastr !== "undefined" && toastr !== null) {
       if (typeof toastr[methodName] === "function") {
@@ -420,6 +429,7 @@ loading the expect.js and jumpflowy modules.
       whenUsingItemToPlainTextNote();
       whenUsingStringToTagArgsText();
       whenUsingHashSegmentFunctions();
+      whenUsingNameTreeFunctions();
       showSuccess("SUCCESS: Tests passed.");
     } catch (error) {
       showError("FAILURE: Tests failed: " + error.message);
