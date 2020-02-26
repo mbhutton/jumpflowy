@@ -10,6 +10,14 @@
 // annotated in JSDoc on the functions definitions in jumpflowy.user.js.
 //****************************************************************************
 
+interface String {
+  /** Removes the leading white space and line terminator characters from a string. */
+  trimLeft(): string;
+
+  /** Removes the trailing white space and line terminator characters from a string. */
+  trimRight(): string;
+}
+
 //****************************
 // JumpFlowy types
 //****************************
