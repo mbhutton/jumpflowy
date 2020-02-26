@@ -435,6 +435,44 @@ global WF:false
   const isDevDomain = location.origin === "https://dev.workflowy.com";
   const originalWindowOpenFn = window.open;
 
+  class AbortActionError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "AbortActionError";
+    }
+  }
+
+  /**
+   * Calls the given no-args function, catching any AbortActionError
+   * and showing its message.
+   * @param {function} f The function to call.
+   * @returns {void}
+   */
+  function callWithErrorHandling(f) {
+    try {
+      f();
+    } catch (err) {
+      if (err instanceof AbortActionError) {
+        WF.showMessage(`Action failed: ${err.message}`, true);
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * @param {boolean} condition Whether to throw the AbortActionError.
+   * @param {string | function} message The message to include in the error.
+   *                                    If a function, must return a string.
+   * @throws {AbortActionError} If the condition is true.
+   * @returns {void}
+   */
+  function failIf(condition, message) {
+    if (condition) {
+      throw new AbortActionError(message);
+    }
+  }
+
   function openHere(url) {
     open(url, "_self");
   }
