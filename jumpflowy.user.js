@@ -1455,6 +1455,99 @@ global WF:false
     );
   }
 
+  /** @type DatesModule */
+  const datesModule = (function() {
+    const domParser = new DOMParser();
+
+    class DateEntry {
+      /**
+       * Year month and day.
+       * @param {string?} startyear The year attribute or null
+       * @param {string?} startmonth The month attribute or null
+       * @param {string?} startday The day attribute or null
+       * @param {string} innerHTML The inner HTML visible in the name/note
+       */
+      constructor(startyear, startmonth, startday, innerHTML) {
+        this.startyear = startyear;
+        this.startmonth = startmonth;
+        this.startday = startday;
+        this.innerHTML = innerHTML;
+        this.name = "DateEntry";
+      }
+    }
+
+    const TIME_ATTR_STARTYEAR = "startyear";
+    const TIME_ATTR_STARTMONTH = "startmonth";
+    const TIME_ATTR_STARTDAY = "startday";
+    const ALL_TIME_ATTRS = [
+      TIME_ATTR_STARTYEAR,
+      TIME_ATTR_STARTMONTH,
+      TIME_ATTR_STARTDAY
+    ];
+
+    /**
+     * Converts the given <time> element to a DateEntry
+     * @param {HTMLElement} timeElement The <time> element to convert
+     * @returns {DateEntry} A corresponding date entry
+     */
+    function timeElementToDateEntry(timeElement) {
+      const dateEntry = new DateEntry(
+        timeElement.getAttribute(TIME_ATTR_STARTYEAR),
+        timeElement.getAttribute(TIME_ATTR_STARTMONTH),
+        timeElement.getAttribute(TIME_ATTR_STARTDAY),
+        timeElement.innerHTML
+      );
+      return dateEntry;
+    }
+
+    /**
+     * Returns a non-empty array of DateEntry objects for <time> elements in the
+     * string, or null if none are found.
+     * @param {string} s The full HTML text of the name/note to parse
+     * @returns {Array<DateEntry>} Non-empty array of date entries, or null
+     */
+    function stringToDateEntries(s) {
+      const htmlDoc = domParser.parseFromString(s, "text/html");
+      const timeElements = htmlDoc.body.getElementsByTagName("time");
+      if (timeElements && timeElements.length > 0) {
+        return Array.from(timeElements).map(timeElementToDateEntry);
+      } else {
+        return null;
+      }
+    }
+
+    /**
+     * Updates the given <time> element with data from the given date entry
+     * @param {HTMLElement} element The time element to update
+     * @param {DateEntry} dateEntry The date entry to use as a data source
+     * @returns {void}
+     */
+    function updateTimeElement(element, dateEntry) {
+      // Remove all unknown attributes
+      for (const attrName of element.getAttributeNames()) {
+        if (!ALL_TIME_ATTRS.includes(attrName)) {
+          element.removeAttribute(attrName);
+        }
+      }
+      const setOrRemoveAttribute = (el, name, value) => {
+        if (value) {
+          el.setAttribute(name, value);
+        } else {
+          el.removeAttribute(name);
+        }
+      };
+      setOrRemoveAttribute(element, TIME_ATTR_STARTYEAR, dateEntry.startyear);
+      setOrRemoveAttribute(element, TIME_ATTR_STARTMONTH, dateEntry.startmonth);
+      setOrRemoveAttribute(element, TIME_ATTR_STARTDAY, dateEntry.startday);
+      element.innerHTML = dateEntry.innerHTML;
+    }
+
+    return {
+      stringToDateEntries: stringToDateEntries,
+      updateTimeElement: updateTimeElement
+    };
+  })();
+
   /** @type {NameTreeModule} */
   const nameTreeModule = (function() {
     const nameTreeSeparator = "::";
@@ -3208,6 +3301,8 @@ global WF:false
         addBookmark,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
+        datesModule.stringToDateEntries,
+        datesModule.updateTimeElement,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
         editCurrentItem,
@@ -3264,6 +3359,7 @@ global WF:false
   // Create jumpflowy object and make it available at 'jumpflowy' in the window
   self.jumpflowy = {
     nameTree: nameTreeModule,
+    dates: datesModule,
     // Functions by alphabetical order
     addBookmark: addBookmark,
     applyToEachItem: applyToEachItem,

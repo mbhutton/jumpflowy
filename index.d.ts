@@ -38,8 +38,17 @@ interface NameTreeModule {
   validateAllNameTrees(): void;
 }
 
+interface DateEntry {}
+
+interface DatesModule {
+  stringToDateEntries(s: string): Array<DateEntry> | null;
+  updateTimeElement(element: HTMLElement, dateEntry: DateEntry): void;
+}
+
 interface JumpFlowy {
   nameTree: NameTreeModule;
+
+  dates: DatesModule;
 
   addBookmark(): void;
 
