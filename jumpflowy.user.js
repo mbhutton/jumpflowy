@@ -155,6 +155,22 @@ global WF:false
   /**
    * @template K
    * @template V
+   * @param {K} key The key.
+   * @param {V} value Value to append to the array associated with the key.
+   * @param {Map<K, Array<V>>} multimap A map of keys to arrays of values.
+   * @returns {void}
+   */
+  function addToMultimap(key, value, multimap) {
+    if (multimap.has(key)) {
+      multimap.get(key).push(value);
+    } else {
+      multimap.set(key, [value]);
+    }
+  }
+
+  /**
+   * @template K
+   * @template V
    * @param {function} keyFilter The filter to apply to keys in the map.
    * @param {Map<K, V>} map The map to filter.
    * @returns {Map<K, V>} map The filtered map.
