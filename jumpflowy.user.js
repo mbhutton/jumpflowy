@@ -3212,18 +3212,18 @@ global WF:false
         dismissNotification,
         editCurrentItem,
         editParentOfFocusedItem,
-        nameTreeModule.reassembleNameTree,
         logShortReport,
         markFocusedAndDescendantsNotComplete,
         moveToBookmark,
+        nameTreeModule.reassembleNameTree,
+        nameTreeModule.sendToNameTree,
+        nameTreeModule.sendToNameTreeAndComplete,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
         promptToAddBookmarkForCurrentItem, // Deprecated
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
-        nameTreeModule.sendToNameTree,
-        nameTreeModule.sendToNameTreeAndComplete,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
