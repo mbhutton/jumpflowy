@@ -88,7 +88,7 @@
     loadScript(hostPort + "/node_modules/expect.js/index.js");
     await pause(100);
     loadScript(hostPort + "/jumpflowy.user.js");
-    await pause(100);
+    await pause(400); // 100 fails; 200 works; 400 to be safe
     loadScript(hostPort + "/tests/integration-tests.js");
     console.log("Reloaded scripts.");
   }
