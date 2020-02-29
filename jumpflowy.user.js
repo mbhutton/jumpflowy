@@ -495,6 +495,17 @@ global WF:false
   }
 
   /**
+   * Prompts for X, then performs a local WorkFlowy search for last-changed:X
+   * @returns {void}
+   */
+  function promptToSearchByLastChanged() {
+    const timePeriod = prompt("last-changed=");
+    if (timePeriod) {
+      WF.search(`last-changed:${timePeriod.trim()}`);
+    }
+  }
+
+  /**
    * @returns {void} Dismisses a notification from the WorkFlowy UI, e.g. after
    *                 deleting a large tree of items.
    */
@@ -3493,6 +3504,7 @@ global WF:false
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
+        promptToSearchByLastChanged,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
@@ -3592,6 +3604,7 @@ global WF:false
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,
+    promptToSearchByLastChanged: promptToSearchByLastChanged,
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
