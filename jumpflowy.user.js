@@ -427,6 +427,21 @@ global WF:false
     }
   }
 
+  /**
+   * @param {Item} item The item to check.
+   * @returns {void}
+   * @throws {AbortActionError} If the item is embedded.
+   */
+  function validateItemIsLocalOrFail(item) {
+    failIf(
+      item && item.isEmbedded(),
+      () =>
+        `${formatItem(
+          item
+        )} is embedded from another document. Was expecting local items only.`
+    );
+  }
+
   function openHere(url) {
     open(url, "_self");
   }
@@ -2077,21 +2092,6 @@ global WF:false
 
       alert(message);
       console.log(message);
-    }
-
-    /**
-     * @param {Item} item The item to check.
-     * @returns {void}
-     * @throws {AbortActionError} If the item is embedded.
-     */
-    function validateItemIsLocalOrFail(item) {
-      failIf(
-        item && item.isEmbedded(),
-        () =>
-          `${formatItem(
-            item
-          )} is embedded from another document. Was expecting local items only.`
-      );
     }
 
     /**
