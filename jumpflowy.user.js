@@ -1982,7 +1982,7 @@ global WF:false
      * if not already present.
      * @returns {void}
      */
-    function _setDateOnActiveItemsOrFail() {
+    function _updateDateOnActiveItemsOrFail() {
       const activeItems = getActiveItems().items;
       activeItems.forEach(validateItemIsLocalOrFail);
 
@@ -2005,10 +2005,10 @@ global WF:false
       );
     }
 
-    const setDate = () => callWithErrorHandling(_setDateOnActiveItemsOrFail);
+    const updateDate = () => callWithErrorHandling(_updateDateOnActiveItemsOrFail);
 
     return {
-      setDate: setDate,
+      updateDate: updateDate,
       interpretDate: interpretDate
     };
   })();
@@ -3751,7 +3751,7 @@ global WF:false
         addBookmark,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
-        datesModule.setDate,
+        datesModule.updateDate,
         datesModule.interpretDate,
         deleteFocusedItemIfNoChildren,
         dismissNotification,

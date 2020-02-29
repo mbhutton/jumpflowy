@@ -135,7 +135,7 @@ The available named functions:
 - `promptToNormalLocalSearch`
 - `sendToNameTree`
 - `sendToNameTreeAndComplete`
-- `setDate`
+- `updateDate`
 - `showZoomedAndMostRecentlyEdited`
 - `validateAllNameTrees`
 

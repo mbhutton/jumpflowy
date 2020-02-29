@@ -41,7 +41,7 @@ interface NameTreeModule {
 interface DateEntry {}
 
 interface DatesModule {
-  setDate(): void;
+  updateDate(): void;
   interpretDate(s: string): [Date?, string?];
 }
 
