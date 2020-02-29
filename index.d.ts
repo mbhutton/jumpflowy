@@ -42,6 +42,7 @@ interface DateEntry {}
 
 interface DatesModule {
   setDate(): void;
+  interpretDate(s: string): [Date?, string?];
 }
 
 interface JumpFlowy {

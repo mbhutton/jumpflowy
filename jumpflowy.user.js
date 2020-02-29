@@ -1502,7 +1502,7 @@ global WF:false
       }
     }
 
-    const MONTH_NAMES = [
+    const STANDARD_MONTH_NAMES = [
       "Jan",
       "Feb",
       "Mar",
@@ -1516,7 +1516,7 @@ global WF:false
       "Nov",
       "Dec"
     ];
-    const DAY_NAMES_FROM_SUNDAY = [
+    const STANDARD_DAY_NAMES_FROM_SUNDAY = [
       "Sun",
       "Mon",
       "Tue",
@@ -1525,6 +1525,265 @@ global WF:false
       "Fri",
       "Sat"
     ];
+    const FULL_DAY_NAMES_FROM_SUNDAY = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ];
+
+    const DAY_TOKEN_ARRAYS_FROM_SUNDAY = [
+      ["su", "sun", "sunday"],
+      ["m", "mo", "mon", "monday"],
+      ["tu", "tue", "tues", "tuesday"],
+      ["w", "we", "wed", "wednesday"],
+      ["th", "thu", "thursday"],
+      ["f", "fr", "fri", "friday"],
+      ["sa", "sat", "saturday"]
+    ];
+    const TODAY_TOKENS = ["td", "tod", "tdy", "today"];
+    const TOMORROW_TOKENS = ["tm", "tw", "tmw", "tom", "tmrw", "tomorrow"];
+    const YESTERDAY_TOKENS = [
+      "y",
+      "ye",
+      "ys",
+      "yes",
+      "yest",
+      "yst",
+      "yd",
+      "yesterday"
+    ];
+
+    // Only use for simple alphanumeric strings
+    function asCapturingGroup(arrayOfStrings) {
+      return `(${arrayOfStrings.join("|")})`;
+    }
+
+    const ALL_DAY_NAMES_CAPTURING_GROUP = asCapturingGroup(
+      DAY_TOKEN_ARRAYS_FROM_SUNDAY.flat()
+    );
+
+    const NAME_WEEK_TOKENS = ["w", "we", "wk", "week"];
+    const NAME_LAST_TOKENS = ["l", "la", "lst", "last"];
+
+    const onePatternWithSpaces = p => new RegExp(`^ *${p} *$`, "i");
+    const twoPatternsWithSpaces = (a, b) => new RegExp(`^ *${a} +${b} *$`, "i");
+
+    class DateInterpretation {
+      /**
+       * @param {Date} date Date object form
+       * @param {string} description The description of the interpreted date,
+       *                             e.g. "Monday week, 8 days away"
+       */
+      constructor(date, description) {
+        this.date = date;
+        this.description = description;
+      }
+    }
+
+    /**
+     * @param {string} givenNamedDay The token representing a named day
+     * @returns {number} 0 for Sunday, ..., 6 for Saturday, -1 if not found
+     */
+    function nameTokenToDayNumber(givenNamedDay) {
+      for (var dayNumber = 0; dayNumber < 7; dayNumber++) {
+        if (
+          DAY_TOKEN_ARRAYS_FROM_SUNDAY[dayNumber].includes(
+            givenNamedDay.toLowerCase()
+          )
+        ) {
+          return dayNumber;
+        }
+      }
+      return -1;
+    }
+
+    /**
+     * @param {Date} referenceDate The date to use as a reference
+     * @param {number} dayNumber The day number to find (Sunday is 0)
+     * @returns {number} The number of days until the next occurrence of the
+     *                   given day number after the reference
+     */
+    function daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber) {
+      const refDayNumber = referenceDate.getDay();
+      return dayNumber === refDayNumber
+        ? 7
+        : (dayNumber + 7 - refDayNumber) % 7;
+    }
+
+    /**
+     * @param {Date} referenceDate The date to use as a reference
+     * @param {number} dayNumber The day number to find (Sunday is 0)
+     * @returns {number} The number of days since the most recent previous
+     *                   occurrence of the given day number before the reference
+     */
+    function daysFromRecentDayNumberUntilReference(referenceDate, dayNumber) {
+      const refDayNumber = referenceDate.getDay();
+      return dayNumber === refDayNumber
+        ? 7
+        : (refDayNumber + 7 - dayNumber) % 7;
+    }
+
+    function interpretAsYesterday(s, referenceDate) {
+      if (s.match(onePatternWithSpaces(asCapturingGroup(YESTERDAY_TOKENS)))) {
+        return new DateInterpretation(
+          getNoonDateNDaysAway(-1, referenceDate),
+          "Yesterday"
+        );
+      } else return null;
+    }
+
+    function interpretAsToday(s, referenceDate) {
+      if (s.match(onePatternWithSpaces(asCapturingGroup(TODAY_TOKENS)))) {
+        return new DateInterpretation(
+          getNoonDateNDaysAway(0, referenceDate),
+          "Today"
+        );
+      } else return null;
+    }
+
+    function interpretAsTodayWeek(s, referenceDate) {
+      if (
+        s.match(
+          twoPatternsWithSpaces(
+            asCapturingGroup(TODAY_TOKENS),
+            asCapturingGroup(NAME_WEEK_TOKENS)
+          )
+        )
+      ) {
+        return new DateInterpretation(
+          getNoonDateNDaysAway(7, referenceDate),
+          "A week from today, 7 days away"
+        );
+      } else return null;
+    }
+
+    function interpretAsTomorrow(s, referenceDate) {
+      if (s.match(onePatternWithSpaces(asCapturingGroup(TOMORROW_TOKENS)))) {
+        return new DateInterpretation(
+          getNoonDateNDaysAway(1, referenceDate),
+          "Tomorrow"
+        );
+      } else return null;
+    }
+
+    function interpretAsTomorrowWeek(s, referenceDate) {
+      if (
+        s.match(
+          twoPatternsWithSpaces(
+            asCapturingGroup(TOMORROW_TOKENS),
+            asCapturingGroup(NAME_WEEK_TOKENS)
+          )
+        )
+      ) {
+        return new DateInterpretation(
+          getNoonDateNDaysAway(8, referenceDate),
+          "A week from tomorrow, 8 days away"
+        );
+      } else return null;
+    }
+
+    function interpretAsMostRecentNamedDay(s, referenceDate) {
+      const result = s.match(
+        twoPatternsWithSpaces(
+          ALL_DAY_NAMES_CAPTURING_GROUP,
+          asCapturingGroup(NAME_LAST_TOKENS)
+        )
+      );
+      if (result) {
+        const givenNamedDay = result[1];
+        const dayNumber = nameTokenToDayNumber(givenNamedDay);
+        const daysPrior = daysFromRecentDayNumberUntilReference(
+          referenceDate,
+          dayNumber
+        );
+        return new DateInterpretation(
+          getNoonDateNDaysAway(-daysPrior, referenceDate),
+          `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} gone, ${daysPrior} days prior`
+        );
+      } else return null;
+    }
+
+    function interpretAsComingNamedDay(s, referenceDate) {
+      const result = s.match(
+        onePatternWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP)
+      );
+      if (result) {
+        const givenNamedDay = result[1];
+        const dayNumber = nameTokenToDayNumber(givenNamedDay);
+        const daysAway = daysFromReferenceUntilComingDayNumber(
+          referenceDate,
+          dayNumber
+        );
+        return new DateInterpretation(
+          getNoonDateNDaysAway(daysAway, referenceDate),
+          `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]}, ${daysAway} days away`
+        );
+      } else return null;
+    }
+
+    function interpretAsComingNamedDayPlusWeek(s, referenceDate) {
+      const result = s.match(
+        twoPatternsWithSpaces(
+          ALL_DAY_NAMES_CAPTURING_GROUP,
+          asCapturingGroup(NAME_WEEK_TOKENS)
+        )
+      );
+      if (result) {
+        const givenNamedDay = result[1];
+        const dayNumber = nameTokenToDayNumber(givenNamedDay);
+        const daysAway =
+          7 + daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber);
+        return new DateInterpretation(
+          getNoonDateNDaysAway(daysAway, referenceDate),
+          `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} week, ${daysAway} days away`
+        );
+      } else return null;
+    }
+
+    /**
+     * Attempts to parse the given date string, returning a corresponding
+     * Date object at noon (12pm) or an error message.
+     * @param {string} s The string to parse
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @return {[DateInterpretation?, string?]} A tuple with exactly one of a
+     *   DateInterpretation, or an error explaining why it couldn't be recognized.
+     *   The other value will be null.
+     */
+    function interpretDate(s, referenceDate) {
+      // Note: optimise for flexibility and maintainability, not runtime speed.
+
+      const interpretations = [];
+      const addIfMatch = interpretation => {
+        if (interpretation) {
+          interpretations.push(interpretation);
+        }
+      };
+      addIfMatch(interpretAsYesterday(s, referenceDate));
+      addIfMatch(interpretAsToday(s, referenceDate));
+      addIfMatch(interpretAsTodayWeek(s, referenceDate));
+      addIfMatch(interpretAsTomorrow(s, referenceDate));
+      addIfMatch(interpretAsTomorrowWeek(s, referenceDate));
+      addIfMatch(interpretAsComingNamedDay(s, referenceDate));
+      addIfMatch(interpretAsComingNamedDayPlusWeek(s, referenceDate));
+      addIfMatch(interpretAsMostRecentNamedDay(s, referenceDate));
+
+      if (interpretations.length === 0) {
+        return [null, `"${s}" was not recognized as a date`];
+      } else if (interpretations.length > 1) {
+        return [
+          null,
+          `"${s}" was recognized in too many ways: ${interpretations
+            .map(i => i.description)
+            .join(", ")}`
+        ];
+      } else {
+        return [interpretations[0], null];
+      }
+    }
 
     /**
      * @param {Date} date The date object to format in WorkFlowy's default style
@@ -1534,8 +1793,8 @@ global WF:false
       // E.g. Sat, Feb 29, 2020
       const year = date.getFullYear().toString();
       const dayNumber = date.getDate().toString();
-      const monthName = MONTH_NAMES[date.getMonth()];
-      const dayName = DAY_NAMES_FROM_SUNDAY[date.getDay()];
+      const monthName = STANDARD_MONTH_NAMES[date.getMonth()];
+      const dayName = STANDARD_DAY_NAMES_FROM_SUNDAY[date.getDay()];
       return `${dayName}, ${monthName} ${dayNumber}, ${year}`;
     }
 
@@ -1551,16 +1810,19 @@ global WF:false
     }
 
     /**
-     * Returns a Date object the given number of days from today, at noon (12pm)
-     * @param {number} daysFromNow The number of days from today
+     * Returns a Date object the given number of days from the reference date,
+     * at noon (12pm)
+     * @param {number} daysFromReference The number of days from today
+     * @param {Date} referenceDate The "today" date to use as a reference
      * @returns {Date} A future Date
      */
-    function getNoonDateNDaysFromNow(daysFromNow) {
-      const date = new Date();
+    function getNoonDateNDaysAway(daysFromReference, referenceDate) {
+      const date = referenceDate ? new Date(referenceDate) : new Date();
       // This is to reduce likelihood of out by one errors re leap seconds
       setToNoon(date);
       const epochMillis = date.getTime();
-      const newEpochMillis = epochMillis + 1000 * 60 * 60 * 24 * daysFromNow;
+      const newEpochMillis =
+        epochMillis + 1000 * 60 * 60 * 24 * daysFromReference;
       date.setTime(newEpochMillis);
       setToNoon(date);
       return date;
@@ -1724,15 +1986,13 @@ global WF:false
       const activeItems = getActiveItems().items;
       activeItems.forEach(validateItemIsLocalOrFail);
 
-      const message = `Set date on ${activeItems.length} item(s) how many days from now?`;
-      const daysString = prompt(message);
-      var daysNumber;
-      try {
-        daysNumber = parseInt(daysString.trim());
-      } catch (er) {
-        failIf(true, `${daysString} is not a valid integer.`);
-      }
-      const futureDate = getNoonDateNDaysFromNow(daysNumber);
+      const today = new Date();
+      const question = `Update date on ${activeItems.length} item(s) to what?`;
+      const suffix = ` (Today is ${formatDateWithoutTime(today)}})`;
+      const daysString = prompt(question + suffix);
+      const [interpretation, errorMessage] = interpretDate(daysString, today);
+      failIf(!!errorMessage, errorMessage);
+      const futureDate = interpretation.date;
       const futureDateEntry = dateToDateEntry(futureDate);
 
       WF.editGroup(() => {
@@ -1740,12 +2000,16 @@ global WF:false
           setFirstDateOnItem(activeItem, futureDateEntry);
         }
       });
+      WF.showMessage(
+        `Dated ${activeItems.length} item(s) for ${interpretation.description}`
+      );
     }
 
     const setDate = () => callWithErrorHandling(_setDateOnActiveItemsOrFail);
 
     return {
-      setDate: setDate
+      setDate: setDate,
+      interpretDate: interpretDate
     };
   })();
 
@@ -3488,6 +3752,7 @@ global WF:false
         createItemAtTopOfCurrent,
         createOrdinaryLink,
         datesModule.setDate,
+        datesModule.interpretDate,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
         editCurrentItem,
