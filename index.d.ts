@@ -41,8 +41,7 @@ interface NameTreeModule {
 interface DateEntry {}
 
 interface DatesModule {
-  stringToDateEntries(s: string): Array<DateEntry> | null;
-  updateTimeElement(element: HTMLElement, dateEntry: DateEntry): void;
+  setDate(): void;
 }
 
 interface JumpFlowy {

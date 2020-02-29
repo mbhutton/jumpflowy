@@ -1477,34 +1477,109 @@ global WF:false
     class DateEntry {
       /**
        * Year month and day.
-       * @param {string?} startyear The year attribute or null
-       * @param {string?} startmonth The month attribute or null
-       * @param {string?} startday The day attribute or null
+       * @param {string?} startYear The year attribute or null
+       * @param {string?} startMonth The month attribute or null
+       * @param {string?} startDay The day attribute or null
        * @param {string} innerHTML The inner HTML visible in the name/note
        */
-      constructor(startyear, startmonth, startday, innerHTML) {
-        this.startyear = startyear;
-        this.startmonth = startmonth;
-        this.startday = startday;
+      constructor(startYear, startMonth, startDay, innerHTML) {
+        this.startYear = startYear;
+        this.startMonth = startMonth;
+        this.startDay = startDay;
         this.innerHTML = innerHTML;
         this.name = "DateEntry";
       }
     }
 
-    const TIME_ATTR_STARTYEAR = "startyear";
-    const TIME_ATTR_STARTMONTH = "startmonth";
-    const TIME_ATTR_STARTDAY = "startday";
-    const ALL_TIME_ATTRS = [
-      TIME_ATTR_STARTYEAR,
-      TIME_ATTR_STARTMONTH,
-      TIME_ATTR_STARTDAY
+    const MONTH_NAMES = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
     ];
+    const DAY_NAMES_FROM_SUNDAY = [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ];
+
+    /**
+     * @param {Date} date The date object to format in WorkFlowy's default style
+     * @returns {string} The date as a string
+     */
+    function formatDateWithoutTime(date) {
+      // E.g. Sat, Feb 29, 2020
+      const year = date.getFullYear().toString();
+      const dayNumber = date.getDate().toString();
+      const monthName = MONTH_NAMES[date.getMonth()];
+      const dayName = DAY_NAMES_FROM_SUNDAY[date.getDay()];
+      return `${dayName}, ${monthName} ${dayNumber}, ${year}`;
+    }
+
+    /**
+     * Sets the time of the given date to noon (12pm).
+     * @param {Date} date The date to set
+     * @returns {void}
+     */
+    function setToNoon(date) {
+      date.setHours(12);
+      date.setMinutes(0);
+      date.setSeconds(0);
+    }
+
+    /**
+     * Returns a Date object the given number of days from today, at noon (12pm)
+     * @param {number} daysFromNow The number of days from today
+     * @returns {Date} A future Date
+     */
+    function getNoonDateNDaysFromNow(daysFromNow) {
+      const date = new Date();
+      // This is to reduce likelihood of out by one errors re leap seconds
+      setToNoon(date);
+      const epochMillis = date.getTime();
+      const newEpochMillis = epochMillis + 1000 * 60 * 60 * 24 * daysFromNow;
+      date.setTime(newEpochMillis);
+      setToNoon(date);
+      return date;
+    }
+
+    /**
+     * Converts the given date to a DateEntry, with year/month/date and
+     * innerHTML set.
+     * @param {Date} date The date object to convert
+     * @return {DateEntry} The converted date entry
+     */
+    function dateToDateEntry(date) {
+      return new DateEntry(
+        date.getFullYear().toString(),
+        (date.getMonth() + 1).toString(),
+        date.getDate().toString(),
+        formatDateWithoutTime(date)
+      );
+    }
+
+    const TIME_ATTR_STARTYEAR = "startYear";
+    const TIME_ATTR_STARTMONTH = "startMonth";
+    const TIME_ATTR_STARTDAY = "startDay";
 
     /**
      * Converts the given <time> element to a DateEntry
      * @param {HTMLElement} timeElement The <time> element to convert
      * @returns {DateEntry} A corresponding date entry
      */
+    // eslint-disable-next-line no-unused-vars
     function timeElementToDateEntry(timeElement) {
       const dateEntry = new DateEntry(
         timeElement.getAttribute(TIME_ATTR_STARTYEAR),
@@ -1516,50 +1591,150 @@ global WF:false
     }
 
     /**
-     * Returns a non-empty array of DateEntry objects for <time> elements in the
-     * string, or null if none are found.
-     * @param {string} s The full HTML text of the name/note to parse
-     * @returns {Array<DateEntry>} Non-empty array of date entries, or null
+     * WARNING: Never write the serialized DOM element back to
+     * items, as WorkFlowy reads some attributes case sensitively,
+     * but casing of HTML element attributes is not preserved in the DOM.
+     *
+     * Returns the string as an HTML body and <time> elements array.
+     *
+     * @param {string} s The string to parse
+     * @returns {[HTMLElement, Array<HTMLElement>]} HTML body and <time>s
      */
-    function stringToDateEntries(s) {
+    // eslint-disable-next-line no-unused-vars
+    function stringToHtmlBodyAndTimeElements(s) {
       const htmlDoc = domParser.parseFromString(s, "text/html");
-      const timeElements = htmlDoc.body.getElementsByTagName("time");
-      if (timeElements && timeElements.length > 0) {
-        return Array.from(timeElements).map(timeElementToDateEntry);
+      const body = htmlDoc.body;
+      const timeElements = Array.from(body.getElementsByTagName("time"));
+      return [body, timeElements];
+    }
+
+    /**
+     * @param {string} s The string to parse
+     * @returns {boolean} Whether or not the string contains <time> elements
+     */
+    function doesStringHaveTimeElements(s) {
+      return s.includes("<time");
+    }
+
+    /**
+     * Returns the text before the first date, then the string of the first
+     * date (the <time> element), then the text after.
+     * If there is no date, the first two values are empty.
+     * @param {string} s The string to split
+     * @returns {[string, string, string]} Before the date, the date, and after.
+     */
+    function splitByFirstDate(s) {
+      if (!doesStringHaveTimeElements(s)) {
+        return ["", "", s];
+      }
+      const indexOfDateEntryStart = s.indexOf("<time");
+      const endTag = "</time>";
+      const indexOfDateEntryEnd = s.indexOf(endTag) + endTag.length;
+      return [
+        s.substring(0, indexOfDateEntryStart),
+        s.substring(indexOfDateEntryStart, indexOfDateEntryEnd),
+        s.substring(indexOfDateEntryEnd, s.length)
+      ];
+    }
+
+    /**
+     * Creates a <time> entry string with data from the given date entry
+     * @param {DateEntry} dateEntry The date entry to use as a data source
+     * @returns {string} The <time> entry as a string
+     */
+    function createTimeElementText(dateEntry) {
+      var s = "<time";
+      const setAttribute = (name, value) => {
+        if (value) {
+          s = s + ` ${name}="${value}"`;
+        }
+      };
+      setAttribute(TIME_ATTR_STARTYEAR, dateEntry.startYear);
+      setAttribute(TIME_ATTR_STARTMONTH, dateEntry.startMonth);
+      setAttribute(TIME_ATTR_STARTDAY, dateEntry.startDay);
+      s = s + ">" + dateEntry.innerHTML + "</time>";
+      return s;
+    }
+
+    /**
+     * Updates the first <time> element in the given string, pre-pending one
+     * if not already present.
+     * @param {string} s The string to update
+     * @param {DateEntry} dateEntry The source of the date information
+     * @return {string} The updated string with updated/prepended first <time>
+     */
+    function setFirstDateOnString(s, dateEntry) {
+      var [pre, date, post] = splitByFirstDate(s);
+      date = createTimeElementText(dateEntry);
+      if (pre && !pre.endsWith(" ")) {
+        pre = pre + " ";
+      }
+      if (post && !post.startsWith(" ")) {
+        post = " " + post;
+      }
+      return pre + date + post;
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    function fixTimeTagCase(nameOrNote) {
+      if (!nameOrNote) {
+        return nameOrNote;
+      }
+      return nameOrNote
+        .replace(/<time([^>]*)startyear([^>]*)>/gi, "<time$1startYear$2>")
+        .replace(/<time([^>]*)startmonth([^>]*)>/gi, "<time$1startMonth$2>")
+        .replace(/<time([^>]*)startday([^>]*)>/gi, "<time$1startDay$2>");
+    }
+
+    /**
+     * Updates the first <time> element in the given item, pre-pending one
+     * if not already present.
+     * @param {Item} item The item to update
+     * @param {DateEntry} dateEntry The source of the date information
+     * @return {void}
+     */
+    function setFirstDateOnItem(item, dateEntry) {
+      if (doesStringHaveTimeElements(item.getName())) {
+        WF.setItemName(item, setFirstDateOnString(item.getName(), dateEntry));
+      } else if (doesStringHaveTimeElements(item.getNote())) {
+        WF.setItemNote(item, setFirstDateOnString(item.getNote(), dateEntry));
       } else {
-        return null;
+        // This will prepend a new <time> entry
+        WF.setItemName(item, setFirstDateOnString(item.getName(), dateEntry));
       }
     }
 
     /**
-     * Updates the given <time> element with data from the given date entry
-     * @param {HTMLElement} element The time element to update
-     * @param {DateEntry} dateEntry The date entry to use as a data source
+     * Updates the first <time> element in the active items, pre-pending one
+     * if not already present.
      * @returns {void}
      */
-    function updateTimeElement(element, dateEntry) {
-      // Remove all unknown attributes
-      for (const attrName of element.getAttributeNames()) {
-        if (!ALL_TIME_ATTRS.includes(attrName)) {
-          element.removeAttribute(attrName);
-        }
+    function _setDateOnActiveItemsOrFail() {
+      const activeItems = getActiveItems().items;
+      activeItems.forEach(validateItemIsLocalOrFail);
+
+      const message = `Set date on ${activeItems.length} item(s) how many days from now?`;
+      const daysString = prompt(message);
+      var daysNumber;
+      try {
+        daysNumber = parseInt(daysString.trim());
+      } catch (er) {
+        failIf(true, `${daysString} is not a valid integer.`);
       }
-      const setOrRemoveAttribute = (el, name, value) => {
-        if (value) {
-          el.setAttribute(name, value);
-        } else {
-          el.removeAttribute(name);
+      const futureDate = getNoonDateNDaysFromNow(daysNumber);
+      const futureDateEntry = dateToDateEntry(futureDate);
+
+      WF.editGroup(() => {
+        for (const activeItem of activeItems) {
+          setFirstDateOnItem(activeItem, futureDateEntry);
         }
-      };
-      setOrRemoveAttribute(element, TIME_ATTR_STARTYEAR, dateEntry.startyear);
-      setOrRemoveAttribute(element, TIME_ATTR_STARTMONTH, dateEntry.startmonth);
-      setOrRemoveAttribute(element, TIME_ATTR_STARTDAY, dateEntry.startday);
-      element.innerHTML = dateEntry.innerHTML;
+      });
     }
 
+    const setDate = () => callWithErrorHandling(_setDateOnActiveItemsOrFail);
+
     return {
-      stringToDateEntries: stringToDateEntries,
-      updateTimeElement: updateTimeElement
+      setDate: setDate
     };
   })();
 
@@ -3301,8 +3476,7 @@ global WF:false
         addBookmark,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
-        datesModule.stringToDateEntries,
-        datesModule.updateTimeElement,
+        datesModule.setDate,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
         editCurrentItem,
