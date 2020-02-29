@@ -188,7 +188,7 @@ interface JumpFlowy {
 
   promptToNormalLocalSearch(): void;
 
-  promptToSearchByLastChanged(): void;
+  promptToFindByLastChanged(): void;
 
   showZoomedAndMostRecentlyEdited(): void;
 

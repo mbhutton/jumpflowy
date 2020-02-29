@@ -498,7 +498,7 @@ global WF:false
    * Prompts for X, then performs a local WorkFlowy search for last-changed:X
    * @returns {void}
    */
-  function promptToSearchByLastChanged() {
+  function promptToFindByLastChanged() {
     const timePeriod = prompt("last-changed=");
     if (timePeriod) {
       WF.search(`last-changed:${timePeriod.trim()}`);
@@ -3769,7 +3769,7 @@ global WF:false
         promptToFindGlobalBookmarkThenFollow,
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
-        promptToSearchByLastChanged,
+        promptToFindByLastChanged,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
@@ -3869,7 +3869,7 @@ global WF:false
     promptToFindGlobalBookmarkThenFollow: promptToFindGlobalBookmarkThenFollow,
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,
-    promptToSearchByLastChanged: promptToSearchByLastChanged,
+    promptToFindByLastChanged: promptToFindByLastChanged,
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
