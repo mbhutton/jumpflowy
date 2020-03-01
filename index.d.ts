@@ -40,8 +40,10 @@ interface NameTreeModule {
 
 interface DateEntry {}
 
+interface DateInterpretation {}
+
 interface DatesModule {
-  interpretDate(s: string): [Date?, string?];
+  interpretDate(s: string, referenceDate: Date): [DateInterpretation?, string?];
   promptToFindByDateRange(): void;
   updateDate(): void;
 }
