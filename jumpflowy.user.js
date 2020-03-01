@@ -1981,6 +1981,7 @@ global WF:false
      * Updates the first <time> element in the active items, pre-pending one
      * if not already present.
      * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
      */
     function _updateDateOnActiveItemsOrFail() {
       const activeItems = getActiveItems().items;
@@ -2303,8 +2304,8 @@ global WF:false
     /**
      * @param {Array<ItemMove>} itemMoves The moves to make.
      * @param {boolean} shouldConfirm Whether to prompt the user to confirm.
-     * @throws {AbortActionError}
      * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
      */
     function moveInEditGroupOrFail(itemMoves, shouldConfirm = false) {
       const toMoveCount = itemMoves.length;
@@ -2606,6 +2607,7 @@ global WF:false
      * Fails if the given item does not have a valid name chain.
      * @param {Item} item The item to validate
      * @returns {void}
+     * @throws {AbortActionError} If the item is not a name tree
      */
     function validateItemIsNameTreeOrFail(item) {
       failIf(
@@ -2618,8 +2620,8 @@ global WF:false
 
     /**
      * This action pushes the active item(s) back to their name tree parents.
-     * @throws {AbortActionError}
      * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
      */
     function _sendToNameTreeOrFail() {
       const activeItems = getActiveItems().items;
@@ -2646,8 +2648,8 @@ global WF:false
     /**
      * This action pushes the active item(s) back to their name tree parents,
      * and marks them as complete.
-     * @throws {AbortActionError}
      * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
      */
     function _sendToNameTreeAndCompleteOrFail() {
       const activeItems = getActiveItems().items;
@@ -2668,8 +2670,8 @@ global WF:false
      * This action finds any (non-embedded) name tree items which are outside the
      * name tree list, and moves them back to the name tree list, at the top.
      * The active items are interpreted as the roots of the name trees.
-     * @throws {AbortActionError}
      * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
      */
     function _reassembleNameTreeOrFail() {
       const activeItems = getActiveItems().items;
