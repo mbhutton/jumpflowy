@@ -43,6 +43,7 @@ interface DateEntry {}
 interface DateInterpretation {}
 
 interface DatesModule {
+  clearDate(): void;
   interpretDate(s: string, referenceDate: Date): [DateInterpretation?, string?];
   promptToFindByDateRange(): void;
   updateDate(): void;

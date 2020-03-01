@@ -1873,7 +1873,6 @@ global WF:false
      * @param {string} s The string to parse
      * @returns {[HTMLElement, Array<HTMLElement>]} HTML body and <time>s
      */
-    // eslint-disable-next-line no-unused-vars
     function stringToHtmlBodyAndTimeElements(s) {
       const htmlDoc = domParser.parseFromString(s, "text/html");
       const body = htmlDoc.body;
@@ -1948,6 +1947,26 @@ global WF:false
       return pre + date + post;
     }
 
+    /**
+     * Removes the first <time> element in the given string, if any.
+     * @param {string} s The string to update
+     * @return {string} The updated string with removed first <time>
+     */
+    function clearFirstDateOnString(s) {
+      var [pre, , post] = splitByFirstDate(s);
+      // If deleting the date squashes to strings together, ensure a space
+      var padding = "";
+      if (
+        pre.trim() &&
+        post.trim() &&
+        !pre.endsWith(" ") &&
+        !post.startsWith(" ")
+      ) {
+        padding = " ";
+      }
+      return pre + padding + post;
+    }
+
     // eslint-disable-next-line no-unused-vars
     function fixTimeTagCase(nameOrNote) {
       if (!nameOrNote) {
@@ -1974,6 +1993,19 @@ global WF:false
       } else {
         // This will prepend a new <time> entry
         WF.setItemName(item, setFirstDateOnString(item.getName(), dateEntry));
+      }
+    }
+
+    /**
+     * Removes the first <time> element in the given item, if any.
+     * @param {Item} item The item to update
+     * @return {void}
+     */
+    function clearFirstDateOnItem(item) {
+      if (doesStringHaveTimeElements(item.getName())) {
+        WF.setItemName(item, clearFirstDateOnString(item.getName()));
+      } else if (doesStringHaveTimeElements(item.getNote())) {
+        WF.setItemNote(item, clearFirstDateOnString(item.getNote()));
       }
     }
 
@@ -2007,6 +2039,38 @@ global WF:false
       WF.showMessage(
         `Dated ${activeItems.length} item(s) for ${interpretation.description}`
       );
+    }
+
+    /**
+     * Clears the first <time> element in the active items, if any,
+     * failing if any items have multiple <time> elements.
+     * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
+     */
+    function _clearDateOnActiveItemsOrFail() {
+      const activeItems = getActiveItems().items;
+      activeItems.forEach(validateItemIsLocalOrFail);
+
+      const question = `CLEAR date on ${activeItems.length} item(s)?`;
+      if (!confirm(question)) {
+        return;
+      }
+
+      for (const activeItem of activeItems) {
+        const fullHtml = activeItem.getName() + activeItem.getNote();
+        const [, timeElements] = stringToHtmlBodyAndTimeElements(fullHtml);
+        failIf(
+          timeElements.length > 1,
+          `Item ${formatItem(activeItem)} has more than 1 date.`
+        );
+      }
+
+      WF.editGroup(() => {
+        for (const activeItem of activeItems) {
+          clearFirstDateOnItem(activeItem);
+        }
+      });
+      WF.showMessage(`Cleared dates on ${activeItems.length} item(s)`);
     }
 
     /**
@@ -2060,12 +2124,15 @@ global WF:false
       WF.search(dateClause);
     }
 
+    const clearDate = () =>
+      callWithErrorHandling(_clearDateOnActiveItemsOrFail);
     const updateDate = () =>
       callWithErrorHandling(_updateDateOnActiveItemsOrFail);
     const promptToFindByDateRange = () =>
       callWithErrorHandling(_promptToFindByDateRangeOrFail);
 
     return {
+      clearDate: clearDate,
       interpretDate: interpretDate,
       promptToFindByDateRange: promptToFindByDateRange,
       updateDate: updateDate
@@ -3811,6 +3878,7 @@ global WF:false
         addBookmark,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
+        datesModule.clearDate,
         datesModule.interpretDate,
         datesModule.promptToFindByDateRange,
         datesModule.updateDate,
