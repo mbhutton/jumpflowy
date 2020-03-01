@@ -1989,8 +1989,11 @@ global WF:false
       const today = new Date();
       const question = `Update date on ${activeItems.length} item(s) to what?`;
       const suffix = ` (Today is ${formatDateWithoutTime(today)}})`;
-      const daysString = prompt(question + suffix);
-      const [interpretation, errorMessage] = interpretDate(daysString, today);
+      const dateString = prompt(question + suffix);
+      if (!dateString || !dateString.trim()) {
+        return;
+      }
+      const [interpretation, errorMessage] = interpretDate(dateString, today);
       failIf(!!errorMessage, errorMessage);
       const futureDate = interpretation.date;
       const futureDateEntry = dateToDateEntry(futureDate);
@@ -2005,11 +2008,66 @@ global WF:false
       );
     }
 
-    const updateDate = () => callWithErrorHandling(_updateDateOnActiveItemsOrFail);
+    /**
+     * @param {string} dateOrRangeString The string to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {string} The given rate or date range, as a WF search clause
+     * @throws {AbortActionError} If not a valid relative date or date range
+     */
+    function toDateRangeClauseOrFail(dateOrRangeString, referenceDate) {
+      const toDateStringOrEmptyOrFail = s => {
+        if (!s) return "";
+        const [interpretation, errorMessage] = interpretDate(s, referenceDate);
+        failIf(!!errorMessage, errorMessage);
+        return formatDateWithoutTime(interpretation.date);
+      };
+
+      const parts = dateOrRangeString
+        .trim()
+        .split("-")
+        .map(s => s.trim());
+      failIf(
+        ![1, 2].includes(parts.length),
+        `Couldn't parse relative date or date range "${dateOrRangeString}". (Hint: use one hyphen at most)`
+      );
+      const firstDateOrEmpty = toDateStringOrEmptyOrFail(parts[0]);
+      const secondDateOrEmpty =
+        parts.length === 2 ? toDateStringOrEmptyOrFail(parts[1]) : "";
+      failIf(!firstDateOrEmpty && !secondDateOrEmpty, "No date specified");
+      const dateClause =
+        parts.length === 1
+          ? firstDateOrEmpty
+          : firstDateOrEmpty + "-" + secondDateOrEmpty;
+      return dateClause;
+    }
+
+    /**
+     * Prompts for a related date or range of relative dates, then
+     * performs an equivalent date search.
+     * @returns {void}
+     * @throws {AbortActionError} If a failure occurs
+     */
+    function _promptToFindByDateRangeOrFail() {
+      const dateOrRangeString = prompt(
+        "Enter relative date or range (a, a-, -b, a-b):"
+      );
+      if (!dateOrRangeString || !dateOrRangeString.trim()) {
+        return;
+      }
+      const today = new Date();
+      const dateClause = toDateRangeClauseOrFail(dateOrRangeString, today);
+      WF.search(dateClause);
+    }
+
+    const updateDate = () =>
+      callWithErrorHandling(_updateDateOnActiveItemsOrFail);
+    const promptToFindByDateRange = () =>
+      callWithErrorHandling(_promptToFindByDateRangeOrFail);
 
     return {
-      updateDate: updateDate,
-      interpretDate: interpretDate
+      interpretDate: interpretDate,
+      promptToFindByDateRange: promptToFindByDateRange,
+      updateDate: updateDate
     };
   })();
 
@@ -3751,8 +3809,9 @@ global WF:false
         addBookmark,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
-        datesModule.updateDate,
         datesModule.interpretDate,
+        datesModule.promptToFindByDateRange,
+        datesModule.updateDate,
         deleteFocusedItemIfNoChildren,
         dismissNotification,
         editCurrentItem,

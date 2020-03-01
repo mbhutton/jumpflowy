@@ -133,6 +133,8 @@ The available named functions:
 - `promptToFindGlobalBookmarkThenFollow`
 - `promptToFindLocalRegexMatchThenZoom`
 - `promptToNormalLocalSearch`
+- `promptToFindByDateRange`
+- `promptToFindByLastChanged`
 - `sendToNameTree`
 - `sendToNameTreeAndComplete`
 - `updateDate`

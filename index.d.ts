@@ -41,8 +41,9 @@ interface NameTreeModule {
 interface DateEntry {}
 
 interface DatesModule {
-  updateDate(): void;
   interpretDate(s: string): [Date?, string?];
+  promptToFindByDateRange(): void;
+  updateDate(): void;
 }
 
 interface JumpFlowy {
