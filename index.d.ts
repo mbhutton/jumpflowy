@@ -44,6 +44,8 @@ interface DateInterpretation {}
 
 interface DatesModule {
   clearDate(): void;
+  clearFirstDateOnRawString(s: string): string;
+  doesRawStringHaveDates(s: string): boolean;
   interpretDate(s: string, referenceDate: Date): [DateInterpretation?, string?];
   promptToFindByDateRange(): void;
   updateDate(): void;

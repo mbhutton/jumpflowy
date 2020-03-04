@@ -2142,6 +2142,8 @@ global WF:false
 
     return {
       clearDate: clearDate,
+      clearFirstDateOnRawString: clearFirstDateOnRawString,
+      doesRawStringHaveDates: doesRawStringHaveDates,
       interpretDate: interpretDate,
       promptToFindByDateRange: promptToFindByDateRange,
       updateDate: updateDate
