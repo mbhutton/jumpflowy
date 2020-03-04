@@ -1884,7 +1884,7 @@ global WF:false
      * @param {string} s The string to parse
      * @returns {boolean} Whether or not the string contains <time> elements
      */
-    function doesStringHaveTimeElements(s) {
+    function doesRawStringHaveDates(s) {
       return s.includes("<time");
     }
 
@@ -1896,7 +1896,7 @@ global WF:false
      * @returns {[string, string, string]} Before the date, the date, and after.
      */
     function splitByFirstDate(s) {
-      if (!doesStringHaveTimeElements(s)) {
+      if (!doesRawStringHaveDates(s)) {
         return ["", "", s];
       }
       const indexOfDateEntryStart = s.indexOf("<time");
@@ -1914,7 +1914,7 @@ global WF:false
      * @param {DateEntry} dateEntry The date entry to use as a data source
      * @returns {string} The <time> entry as a string
      */
-    function createTimeElementText(dateEntry) {
+    function createDateAsRawString(dateEntry) {
       var s = "<time";
       const setAttribute = (name, value) => {
         if (value) {
@@ -1935,9 +1935,9 @@ global WF:false
      * @param {DateEntry} dateEntry The source of the date information
      * @return {string} The updated string with updated/prepended first <time>
      */
-    function setFirstDateOnString(s, dateEntry) {
+    function setFirstDateOnRawString(s, dateEntry) {
       var [pre, date, post] = splitByFirstDate(s);
-      date = createTimeElementText(dateEntry);
+      date = createDateAsRawString(dateEntry);
       if (pre && !pre.endsWith(" ")) {
         pre = pre + " ";
       }
@@ -1952,7 +1952,7 @@ global WF:false
      * @param {string} s The string to update
      * @return {string} The updated string with removed first <time>
      */
-    function clearFirstDateOnString(s) {
+    function clearFirstDateOnRawString(s) {
       var [pre, , post] = splitByFirstDate(s);
       // If deleting the date squashes to strings together, ensure a space
       var padding = "";
@@ -1986,13 +1986,22 @@ global WF:false
      * @return {void}
      */
     function setFirstDateOnItem(item, dateEntry) {
-      if (doesStringHaveTimeElements(item.getName())) {
-        WF.setItemName(item, setFirstDateOnString(item.getName(), dateEntry));
-      } else if (doesStringHaveTimeElements(item.getNote())) {
-        WF.setItemNote(item, setFirstDateOnString(item.getNote(), dateEntry));
+      if (doesRawStringHaveDates(item.getName())) {
+        WF.setItemName(
+          item,
+          setFirstDateOnRawString(item.getName(), dateEntry)
+        );
+      } else if (doesRawStringHaveDates(item.getNote())) {
+        WF.setItemNote(
+          item,
+          setFirstDateOnRawString(item.getNote(), dateEntry)
+        );
       } else {
         // This will prepend a new <time> entry
-        WF.setItemName(item, setFirstDateOnString(item.getName(), dateEntry));
+        WF.setItemName(
+          item,
+          setFirstDateOnRawString(item.getName(), dateEntry)
+        );
       }
     }
 
@@ -2002,10 +2011,10 @@ global WF:false
      * @return {void}
      */
     function clearFirstDateOnItem(item) {
-      if (doesStringHaveTimeElements(item.getName())) {
-        WF.setItemName(item, clearFirstDateOnString(item.getName()));
-      } else if (doesStringHaveTimeElements(item.getNote())) {
-        WF.setItemNote(item, clearFirstDateOnString(item.getNote()));
+      if (doesRawStringHaveDates(item.getName())) {
+        WF.setItemName(item, clearFirstDateOnRawString(item.getName()));
+      } else if (doesRawStringHaveDates(item.getNote())) {
+        WF.setItemNote(item, clearFirstDateOnRawString(item.getNote()));
       }
     }
 
