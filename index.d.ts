@@ -31,7 +31,11 @@ type ItemPredicate = (item: Item) => boolean;
 type ItemHandler = (item: Item) => void;
 
 interface NameTreeModule {
-  itemNameToNameChain(itemName: string): string | null;
+  plainAndRichNameOrNoteToNameChain(
+    itemNamePlain: string,
+    itemNameRich: string
+  ): string | null;
+  itemToNameChain(item: Item): string?;
   sendToNameTree(): void;
   sendToNameTreeAndComplete(): void;
   reassembleNameTree(): void;

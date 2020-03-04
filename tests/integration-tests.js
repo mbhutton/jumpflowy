@@ -377,12 +377,12 @@ loading the expect.js and jumpflowy modules.
   }
 
   function whenUsingNameTreeFunctions() {
-    const itemNameToNameChain = jumpflowy.nameTree.itemNameToNameChain;
-    function checkExpectations(itemName, expectHasNameChain) {
-      const nameChain = itemNameToNameChain(itemName);
+    const toNameChain = jumpflowy.nameTree.plainAndRichNameOrNoteToNameChain;
+    function checkExpectations(plainText, richText, expectHasNameChain) {
+      const nameChain = toNameChain(plainText, richText);
       expect(nameChain !== null).to.equal(expectHasNameChain);
     }
-    checkExpectations("@dfw::#am::Morning", true);
+    checkExpectations("@dfw::#am::Morning", "@dfw::#am::Morning", true);
   }
 
   function toastrIfAvailable(message, methodName) {

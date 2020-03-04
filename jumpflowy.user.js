@@ -2288,23 +2288,35 @@ global WF:false
     }
 
     /**
-     * @param {string} itemNameOrNote Name or note of the item to parse.
+     * @param {string} plainText Plain text name or note of the item to parse.
+     * @param {string} richText Rich text name or note of the item to parse.
      * @returns {string?} Name chain for the item, or null.
      */
-    function itemNameToNameChain(itemNameOrNote) {
+    function plainAndRichNameOrNoteToNameChain(plainText, richText) {
       // Optimisation: eliminate the common case first (not in a name tree):
-      if (!itemNameOrNote.includes(nameTreeSeparator)) {
+      if (!plainText.includes(nameTreeSeparator)) {
         return null;
       }
-      // For multiline strings, only analyse the first line
-      if (itemNameOrNote.includes("\n")) {
-        itemNameOrNote = itemNameOrNote.split("\n", 1)[0];
-        if (!itemNameOrNote.includes(nameTreeSeparator)) {
+
+      // Strip all dates (<time> elements)
+      while (datesModule.doesRawStringHaveDates(richText)) {
+        richText = datesModule.clearFirstDateOnRawString(richText);
+        plainText = richTextToPlainText(richText);
+        // Check again for the separator, in case it only appeared in date text
+        if (!plainText.includes(nameTreeSeparator)) {
           return null;
         }
       }
 
-      const rawNames = itemNameOrNote.split(nameTreeSeparator);
+      // For multiline strings, only analyse the first line
+      if (plainText.includes("\n")) {
+        plainText = plainText.split("\n", 1)[0];
+        if (!plainText.includes(nameTreeSeparator)) {
+          return null;
+        }
+      }
+
+      const rawNames = plainText.split(nameTreeSeparator);
       rawNames.pop(); // Remove any text after the last separator
       const simplifiedNames = rawNames.map(simplifyNameTreeName);
       return simplifiedNames.join(nameTreeSeparator) + nameTreeSeparator;
@@ -2319,8 +2331,14 @@ global WF:false
         return null;
       }
       return (
-        itemNameToNameChain(item.getNameInPlainText()) ||
-        itemNameToNameChain(item.getNoteInPlainText())
+        plainAndRichNameOrNoteToNameChain(
+          item.getNameInPlainText(),
+          item.getName()
+        ) ||
+        plainAndRichNameOrNoteToNameChain(
+          item.getNoteInPlainText(),
+          item.getNote()
+        )
       );
     }
 
@@ -2807,7 +2825,8 @@ global WF:false
       callWithErrorHandling(_sendToNameTreeAndCompleteOrFail);
 
     return {
-      itemNameToNameChain: itemNameToNameChain,
+      itemToNameChain: itemToNameChain,
+      plainAndRichNameOrNoteToNameChain: plainAndRichNameOrNoteToNameChain,
       simplifyNameTreeName: simplifyNameTreeName,
       reassembleNameTree: reassembleNameTree,
       sendToNameTree: sendToNameTree,
