@@ -252,6 +252,29 @@ global WF:false
   }
 
   /**
+   * WARNING: The fastest way to get plain text name/note from an Item is
+   * to use the built-in methods for doing so. Only use this method when
+   * needing to convert to plain text after doing some processing of rich text.
+   *
+   * This function converts the given rich text to plain text, removing any tags
+   * (preserving their inner text), and un-escaping the required characters.
+   *
+   * Note that richTextToPlainText(Item.getName()) should always return the same
+   * result as Item.getNameInPlainText(), and a failure to do so would be a bug,
+   * and the same applies for getNote() and getNoteInPlainText().
+   *
+   * @param {string} richText The rich text to convert, e.g. from Item.getName()
+   * @returns {string} The plain text equivalent
+   */
+  function richTextToPlainText(richText) {
+    return richText
+      .replace(/<[^>]*>/g, "")
+      .replace(/&gt;/g, ">")
+      .replace(/&lt;/g, "<")
+      .replace(/&amp;/g, "&");
+  }
+
+  /**
    * @param {Item} item The item.
    * @returns {string} The item's name and note, concatenated. When the note is
    *                   present, it is preceded by a newline character.
