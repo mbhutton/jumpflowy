@@ -3636,7 +3636,6 @@ global WF:false
         createItemAtTopOfCurrent,
         createOrdinaryLink,
         datesModule.clearDate,
-        datesModule.interpretDate,
         datesModule.promptToFindByDateRange,
         datesModule.updateDate,
         deleteFocusedItemIfNoChildren,
