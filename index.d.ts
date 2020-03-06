@@ -35,7 +35,7 @@ interface NameTreeModule {
     itemNamePlain: string,
     itemNameRich: string
   ): string | null;
-  itemToNameChain(item: Item): string?;
+  itemToNameChain(item: Item): string | null;
   sendToNameTree(): void;
   sendToNameTreeAndComplete(): void;
   reassembleNameTree(): void;
