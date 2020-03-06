@@ -1808,7 +1808,10 @@ global WF:false
      */
     function clearFirstDateOnRawString(s) {
       var [pre, , post] = splitByFirstDate(s);
-      // If deleting the date squashes to strings together, ensure a space
+      // Trim on both sides, to remove any padding which had been added for the date
+      pre = pre.trimRight();
+      post = post.trimLeft();
+      // If deleting the date squashes non-space characters together, ensure a space
       var padding = "";
       if (pre.trim() && post.trim() && !pre.endsWith(" ") && !post.startsWith(" ")) {
         padding = " ";
