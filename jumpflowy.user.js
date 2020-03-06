@@ -164,10 +164,7 @@ global WF:false
    *                                     text.
    */
   function findItemsWithSameText(searchRoot) {
-    const allItemsByText = toItemMultimapWithSingleKeys(
-      itemToCombinedPlainText,
-      searchRoot
-    );
+    const allItemsByText = toItemMultimapWithSingleKeys(itemToCombinedPlainText, searchRoot);
     return filterMapByValues(items => items.length > 1, allItemsByText);
   }
 
@@ -226,10 +223,8 @@ global WF:false
     // before converting to plain text, for both the name and the note.
     const firstTagChar = tagToMatch[0];
     return (
-      (item.getName().includes(firstTagChar) &&
-        doesStringHaveTag(tagToMatch, item.getNameInPlainText())) ||
-      (item.getNote().includes(firstTagChar) &&
-        doesStringHaveTag(tagToMatch, item.getNoteInPlainText()))
+      (item.getName().includes(firstTagChar) && doesStringHaveTag(tagToMatch, item.getNameInPlainText())) ||
+      (item.getNote().includes(firstTagChar) && doesStringHaveTag(tagToMatch, item.getNoteInPlainText()))
     );
   }
 
@@ -313,10 +308,7 @@ global WF:false
    *                    name or note.
    */
   function doesItemNameOrNoteMatch(textPredicate, item) {
-    return (
-      textPredicate(itemToPlainTextName(item)) ||
-      textPredicate(itemToPlainTextNote(item))
-    );
+    return textPredicate(itemToPlainTextName(item)) || textPredicate(itemToPlainTextNote(item));
   }
 
   /**
@@ -340,9 +332,7 @@ global WF:false
    *                   unix epoch. For the root item, returns zero.
    */
   function itemToLastModifiedSec(item) {
-    return isRootItem(item)
-      ? 0
-      : dateToSecondsSinceEpoch(item.getLastModifiedDate());
+    return isRootItem(item) ? 0 : dateToSecondsSinceEpoch(item.getLastModifiedDate());
   }
 
   // Clean up any previous instance of JumpFlowy
@@ -386,8 +376,7 @@ global WF:false
   const shortcutTag = "#shortcut";
   // DEPRECATED TAGS END
 
-  const searchQueryToMatchNoItems =
-    "META:NO_MATCHING_ITEMS_" + new Date().getTime();
+  const searchQueryToMatchNoItems = "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
   let isCleanedUp = false;
 
@@ -397,8 +386,7 @@ global WF:false
   const CONFIG_SECTION_EXPANSIONS = "textExpansions";
   const CONFIG_SECTION_BOOKMARKS = "bookmarks";
   const CONFIG_SECTION_KB_SHORTCUTS = "keyboardShortcuts";
-  const CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES =
-    "bannedBookmarkSearchPrefixes";
+  const CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES = "bannedBookmarkSearchPrefixes";
 
   // Global event listener data
   const gelData = [0, 0, 0, 0];
@@ -458,10 +446,7 @@ global WF:false
   function validateItemIsLocalOrFail(item) {
     failIf(
       item && item.isEmbedded(),
-      () =>
-        `${formatItem(
-          item
-        )} is embedded from another document. Was expecting local items only.`
+      () => `${formatItem(item)} is embedded from another document. Was expecting local items only.`
     );
   }
 
@@ -693,10 +678,7 @@ global WF:false
    * @see {@link stringToTagArgsText} For semantics.
    */
   function itemToTagArgsText(tagToMatch, item) {
-    const resultForName = stringToTagArgsText(
-      tagToMatch,
-      itemToPlainTextName(item)
-    );
+    const resultForName = stringToTagArgsText(tagToMatch, itemToPlainTextName(item));
     if (resultForName !== null) {
       return resultForName;
     }
@@ -834,9 +816,7 @@ global WF:false
    */
   function itemAndSearchToWorkFlowyUrl(domainType, item, searchQuery) {
     const baseUrl = getWorkFlowyBaseUrlForDomainType(domainType);
-    const searchSuffix = searchQuery
-      ? `?q=${encodeURIComponent(searchQuery)}`
-      : "";
+    const searchSuffix = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : "";
     return `${baseUrl}/${itemToHashSegment(item)}${searchSuffix}`;
   }
 
@@ -845,9 +825,7 @@ global WF:false
    * @param {string} s The string to test.
    */
   function isWorkFlowyUrl(s) {
-    return (
-      s && s.match("^https://(dev\\.|beta\\.)?workflowy\\.com(/.*)?$") !== null
-    );
+    return s && s.match("^https://(dev\\.|beta\\.)?workflowy\\.com(/.*)?$") !== null;
   }
 
   /**
@@ -921,9 +899,7 @@ global WF:false
    * @returns {[string, string]} ID of the item in the URL, and search query.
    */
   function findItemIdAndSearchQueryForWorkFlowyUrl(fullUrl) {
-    const [hashSegment, searchQuery] = workFlowyUrlToHashSegmentAndSearchQuery(
-      fullUrl
-    );
+    const [hashSegment, searchQuery] = workFlowyUrlToHashSegmentAndSearchQuery(fullUrl);
     const itemId = findItemIdForHashSegment(hashSegment);
     return [itemId, searchQuery];
   }
@@ -976,8 +952,7 @@ global WF:false
     const itemLastModifiedSec = itemToLastModifiedSec(item);
     const modifiedHowLongAgoSec = currentTimeSec - itemLastModifiedSec;
     const modifiedHowLongAgoMinutes = Math.ceil(modifiedHowLongAgoSec / 60);
-    const timeClause = `last-changed:${modifiedHowLongAgoMinutes +
-      1} -last-changed:${modifiedHowLongAgoMinutes - 1} `;
+    const timeClause = `last-changed:${modifiedHowLongAgoMinutes + 1} -last-changed:${modifiedHowLongAgoMinutes - 1} `;
     const nameClause = splitStringToSearchTerms(itemToPlainTextName(item));
     return timeClause + nameClause;
   }
@@ -1112,9 +1087,7 @@ global WF:false
         parts.push(this.description);
       }
       if (this.item) {
-        parts.push(
-          `See ${itemAndSearchToWorkFlowyUrl("current", this.item, null)} .`
-        );
+        parts.push(`See ${itemAndSearchToWorkFlowyUrl("current", this.item, null)} .`);
       }
       if (this.causes) {
         parts.push(`Caused by: ${this.causes}.`);
@@ -1165,13 +1138,7 @@ global WF:false
     for (let child of getUncompletedChildren(item)) {
       let key = child.getNameInPlainText().trim();
       if (rMap.has(key)) {
-        failures.push(
-          new ConversionFailure(
-            `Ignoring value for ${key}, which is already set above.`,
-            child,
-            null
-          )
-        );
+        failures.push(new ConversionFailure(`Ignoring value for ${key}, which is already set above.`, child, null));
       } else {
         let childConverter = keyToConverter(key);
         if (childConverter) {
@@ -1184,9 +1151,7 @@ global WF:false
             failures.push(...conversionResult.conversionFailures);
           }
         } else {
-          failures.push(
-            new ConversionFailure(`Unknown key "${key}".`, child, null)
-          );
+          failures.push(new ConversionFailure(`Unknown key "${key}".`, child, null));
         }
       }
     }
@@ -1271,11 +1236,7 @@ global WF:false
     let value = null;
     if (nameTrimmed && noteTrimmed) {
       failures.push(
-        new ConversionFailure(
-          "Can't specify both a name and a note. Delete the name or the note.",
-          item,
-          null
-        )
+        new ConversionFailure("Can't specify both a name and a note. Delete the name or the note.", item, null)
       );
       isUsable = false;
     } else if (nameTrimmed) {
@@ -1300,23 +1261,14 @@ global WF:false
    * @returns {Item | null} item The configuration item if found, or null.
    */
   function findConfigurationRootItem() {
-    if (
-      configurationRootItem === null ||
-      !isConfigurationRoot(configurationRootItem)
-    ) {
+    if (configurationRootItem === null || !isConfigurationRoot(configurationRootItem)) {
       configurationRootItem = null;
-      const matchingNodes = findMatchingItems(
-        isConfigurationRoot,
-        WF.rootItem()
-      );
+      const matchingNodes = findMatchingItems(isConfigurationRoot, WF.rootItem());
       if (matchingNodes.length > 0) {
         configurationRootItem = matchingNodes[0];
       }
       if (matchingNodes.length > 1) {
-        WF.showMessage(
-          `Multiple ${CONFIGURATION_ROOT_NAME} items found. Using the first one.`,
-          false
-        );
+        WF.showMessage(`Multiple ${CONFIGURATION_ROOT_NAME} items found. Using the first one.`, false);
       }
     }
     return configurationRootItem;
@@ -1361,10 +1313,7 @@ global WF:false
    * @returns {void}
    */
   function wfEventListener(eventName) {
-    if (
-      (eventName && eventName.startsWith("operation--")) ||
-      eventName === "locationChanged"
-    ) {
+    if ((eventName && eventName.startsWith("operation--")) || eventName === "locationChanged") {
       gelData[GEL_CALLBACKS_FIRED]++;
       // Do the actual work after letting the UI update
       setTimeout(() => {
@@ -1378,10 +1327,7 @@ global WF:false
         const end = new Date();
         const elapsedMs = end.getTime() - start.getTime();
         gelData[GEL_CALLBACKS_TOTAL_MS] += elapsedMs;
-        gelData[GEL_CALLBACKS_MAX_MS] = Math.max(
-          gelData[GEL_CALLBACKS_MAX_MS],
-          elapsedMs
-        );
+        gelData[GEL_CALLBACKS_MAX_MS] = Math.max(gelData[GEL_CALLBACKS_MAX_MS], elapsedMs);
         if (IS_DEBUG_GEL_TIMING) console.log(`${gelData}`);
       }, 0);
     }
@@ -1431,14 +1377,12 @@ global WF:false
   function applyConfiguration(configObject) {
     // Text expansions
     /** @type Map<string, string> */
-    const expansionsConfig =
-      configObject.get(CONFIG_SECTION_EXPANSIONS) || new Map();
+    const expansionsConfig = configObject.get(CONFIG_SECTION_EXPANSIONS) || new Map();
     customExpansions = new Map([...abbrevsFromTags, ...expansionsConfig]);
 
     // Keyboard shortcuts
     /** @type Map<string, string> */
-    const shortcutsConfig =
-      configObject.get(CONFIG_SECTION_KB_SHORTCUTS) || new Map();
+    const shortcutsConfig = configObject.get(CONFIG_SECTION_KB_SHORTCUTS) || new Map();
     const allKeyCodesToFunctions = new Map([
       ...kbShortcutsFromTags,
       ..._convertKbShortcutsConfigToTargetMap(shortcutsConfig)
@@ -1449,8 +1393,7 @@ global WF:false
 
     // Banned bookmark searches
     bannedBookmarkSearchPrefixesToSuggestions =
-      configObject.get(CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES) ||
-      new Map();
+      configObject.get(CONFIG_SECTION_BANNED_BOOKMARK_SEARCH_PREFIXES) || new Map();
 
     // Bookmarks
     applyBookmarksConfiguration(configObject);
@@ -1463,8 +1406,7 @@ global WF:false
    */
   function applyBookmarksConfiguration(configObject) {
     /** @type Map<string, Item> */
-    const bookmarksConfig =
-      configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
+    const bookmarksConfig = configObject.get(CONFIG_SECTION_BOOKMARKS) || new Map();
     bookmarksConfig.forEach((sourceItem, bookmarkName) => {
       bookmarksToSourceItems.set(bookmarkName, sourceItem);
       const wfUrl = sourceItem.getNoteInPlainText();
@@ -1476,14 +1418,10 @@ global WF:false
             itemIdsToFirstBookmarks.set(item.getId(), bookmarkName);
           }
         } else {
-          WF.showMessage(
-            `No item found for URL ${wfUrl}, re bookmark "${bookmarkName}".`
-          );
+          WF.showMessage(`No item found for URL ${wfUrl}, re bookmark "${bookmarkName}".`);
         }
       } else {
-        WF.showMessage(
-          `"${wfUrl}" is not a valid WorkFlowy URL, re bookmark "${bookmarkName}".`
-        );
+        WF.showMessage(`"${wfUrl}" is not a valid WorkFlowy URL, re bookmark "${bookmarkName}".`);
       }
     });
   }
@@ -1496,12 +1434,7 @@ global WF:false
    */
   function findRecentlyEditedItems(earliestModifiedSec, maxSize, searchRoot) {
     const scoreFn = itemToLastModifiedSec; // Higher timestamp is a higher score
-    return findTopItemsByScore(
-      scoreFn,
-      earliestModifiedSec,
-      maxSize,
-      searchRoot
-    );
+    return findTopItemsByScore(scoreFn, earliestModifiedSec, maxSize, searchRoot);
   }
 
   /** @type DatesModule */
@@ -1525,38 +1458,9 @@ global WF:false
       }
     }
 
-    const STANDARD_MONTH_NAMES = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ];
-    const STANDARD_DAY_NAMES_FROM_SUNDAY = [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat"
-    ];
-    const FULL_DAY_NAMES_FROM_SUNDAY = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
-    ];
+    const STANDARD_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const STANDARD_DAY_NAMES_FROM_SUNDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const FULL_DAY_NAMES_FROM_SUNDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     const DAY_TOKEN_ARRAYS_FROM_SUNDAY = [
       ["su", "sun", "sunday"],
@@ -1569,25 +1473,14 @@ global WF:false
     ];
     const TODAY_TOKENS = ["td", "tod", "tdy", "today"];
     const TOMORROW_TOKENS = ["tm", "tw", "tmw", "tom", "tmrw", "tomorrow"];
-    const YESTERDAY_TOKENS = [
-      "y",
-      "ye",
-      "ys",
-      "yes",
-      "yest",
-      "yst",
-      "yd",
-      "yesterday"
-    ];
+    const YESTERDAY_TOKENS = ["y", "ye", "ys", "yes", "yest", "yst", "yd", "yesterday"];
 
     // Only use for simple alphanumeric strings
     function asCapturingGroup(arrayOfStrings) {
       return `(${arrayOfStrings.join("|")})`;
     }
 
-    const ALL_DAY_NAMES_CAPTURING_GROUP = asCapturingGroup(
-      DAY_TOKEN_ARRAYS_FROM_SUNDAY.flat()
-    );
+    const ALL_DAY_NAMES_CAPTURING_GROUP = asCapturingGroup(DAY_TOKEN_ARRAYS_FROM_SUNDAY.flat());
 
     const NAME_WEEK_TOKENS = ["w", "we", "wk", "week"];
     const NAME_LAST_TOKENS = ["l", "la", "lst", "last"];
@@ -1613,11 +1506,7 @@ global WF:false
      */
     function nameTokenToDayNumber(givenNamedDay) {
       for (var dayNumber = 0; dayNumber < 7; dayNumber++) {
-        if (
-          DAY_TOKEN_ARRAYS_FROM_SUNDAY[dayNumber].includes(
-            givenNamedDay.toLowerCase()
-          )
-        ) {
+        if (DAY_TOKEN_ARRAYS_FROM_SUNDAY[dayNumber].includes(givenNamedDay.toLowerCase())) {
           return dayNumber;
         }
       }
@@ -1632,9 +1521,7 @@ global WF:false
      */
     function daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber) {
       const refDayNumber = referenceDate.getDay();
-      return dayNumber === refDayNumber
-        ? 7
-        : (dayNumber + 7 - refDayNumber) % 7;
+      return dayNumber === refDayNumber ? 7 : (dayNumber + 7 - refDayNumber) % 7;
     }
 
     /**
@@ -1645,84 +1532,45 @@ global WF:false
      */
     function daysFromRecentDayNumberUntilReference(referenceDate, dayNumber) {
       const refDayNumber = referenceDate.getDay();
-      return dayNumber === refDayNumber
-        ? 7
-        : (refDayNumber + 7 - dayNumber) % 7;
+      return dayNumber === refDayNumber ? 7 : (refDayNumber + 7 - dayNumber) % 7;
     }
 
     function interpretAsYesterday(s, referenceDate) {
       if (s.match(onePatternWithSpaces(asCapturingGroup(YESTERDAY_TOKENS)))) {
-        return new DateInterpretation(
-          getNoonDateNDaysAway(-1, referenceDate),
-          "Yesterday"
-        );
+        return new DateInterpretation(getNoonDateNDaysAway(-1, referenceDate), "Yesterday");
       } else return null;
     }
 
     function interpretAsToday(s, referenceDate) {
       if (s.match(onePatternWithSpaces(asCapturingGroup(TODAY_TOKENS)))) {
-        return new DateInterpretation(
-          getNoonDateNDaysAway(0, referenceDate),
-          "Today"
-        );
+        return new DateInterpretation(getNoonDateNDaysAway(0, referenceDate), "Today");
       } else return null;
     }
 
     function interpretAsTodayWeek(s, referenceDate) {
-      if (
-        s.match(
-          twoPatternsWithSpaces(
-            asCapturingGroup(TODAY_TOKENS),
-            asCapturingGroup(NAME_WEEK_TOKENS)
-          )
-        )
-      ) {
-        return new DateInterpretation(
-          getNoonDateNDaysAway(7, referenceDate),
-          "A week from today, 7 days away"
-        );
+      if (s.match(twoPatternsWithSpaces(asCapturingGroup(TODAY_TOKENS), asCapturingGroup(NAME_WEEK_TOKENS)))) {
+        return new DateInterpretation(getNoonDateNDaysAway(7, referenceDate), "A week from today, 7 days away");
       } else return null;
     }
 
     function interpretAsTomorrow(s, referenceDate) {
       if (s.match(onePatternWithSpaces(asCapturingGroup(TOMORROW_TOKENS)))) {
-        return new DateInterpretation(
-          getNoonDateNDaysAway(1, referenceDate),
-          "Tomorrow"
-        );
+        return new DateInterpretation(getNoonDateNDaysAway(1, referenceDate), "Tomorrow");
       } else return null;
     }
 
     function interpretAsTomorrowWeek(s, referenceDate) {
-      if (
-        s.match(
-          twoPatternsWithSpaces(
-            asCapturingGroup(TOMORROW_TOKENS),
-            asCapturingGroup(NAME_WEEK_TOKENS)
-          )
-        )
-      ) {
-        return new DateInterpretation(
-          getNoonDateNDaysAway(8, referenceDate),
-          "A week from tomorrow, 8 days away"
-        );
+      if (s.match(twoPatternsWithSpaces(asCapturingGroup(TOMORROW_TOKENS), asCapturingGroup(NAME_WEEK_TOKENS)))) {
+        return new DateInterpretation(getNoonDateNDaysAway(8, referenceDate), "A week from tomorrow, 8 days away");
       } else return null;
     }
 
     function interpretAsMostRecentNamedDay(s, referenceDate) {
-      const result = s.match(
-        twoPatternsWithSpaces(
-          ALL_DAY_NAMES_CAPTURING_GROUP,
-          asCapturingGroup(NAME_LAST_TOKENS)
-        )
-      );
+      const result = s.match(twoPatternsWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP, asCapturingGroup(NAME_LAST_TOKENS)));
       if (result) {
         const givenNamedDay = result[1];
         const dayNumber = nameTokenToDayNumber(givenNamedDay);
-        const daysPrior = daysFromRecentDayNumberUntilReference(
-          referenceDate,
-          dayNumber
-        );
+        const daysPrior = daysFromRecentDayNumberUntilReference(referenceDate, dayNumber);
         return new DateInterpretation(
           getNoonDateNDaysAway(-daysPrior, referenceDate),
           `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} gone, ${daysPrior} days prior`
@@ -1731,16 +1579,11 @@ global WF:false
     }
 
     function interpretAsComingNamedDay(s, referenceDate) {
-      const result = s.match(
-        onePatternWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP)
-      );
+      const result = s.match(onePatternWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP));
       if (result) {
         const givenNamedDay = result[1];
         const dayNumber = nameTokenToDayNumber(givenNamedDay);
-        const daysAway = daysFromReferenceUntilComingDayNumber(
-          referenceDate,
-          dayNumber
-        );
+        const daysAway = daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber);
         return new DateInterpretation(
           getNoonDateNDaysAway(daysAway, referenceDate),
           `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]}, ${daysAway} days away`
@@ -1749,17 +1592,11 @@ global WF:false
     }
 
     function interpretAsComingNamedDayPlusWeek(s, referenceDate) {
-      const result = s.match(
-        twoPatternsWithSpaces(
-          ALL_DAY_NAMES_CAPTURING_GROUP,
-          asCapturingGroup(NAME_WEEK_TOKENS)
-        )
-      );
+      const result = s.match(twoPatternsWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP, asCapturingGroup(NAME_WEEK_TOKENS)));
       if (result) {
         const givenNamedDay = result[1];
         const dayNumber = nameTokenToDayNumber(givenNamedDay);
-        const daysAway =
-          7 + daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber);
+        const daysAway = 7 + daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber);
         return new DateInterpretation(
           getNoonDateNDaysAway(daysAway, referenceDate),
           `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} week, ${daysAway} days away`
@@ -1797,12 +1634,7 @@ global WF:false
       if (interpretations.length === 0) {
         return [null, `"${s}" was not recognized as a date`];
       } else if (interpretations.length > 1) {
-        return [
-          null,
-          `"${s}" was recognized in too many ways: ${interpretations
-            .map(i => i.description)
-            .join(", ")}`
-        ];
+        return [null, `"${s}" was recognized in too many ways: ${interpretations.map(i => i.description).join(", ")}`];
       } else {
         return [interpretations[0], null];
       }
@@ -1844,8 +1676,7 @@ global WF:false
       // This is to reduce likelihood of out by one errors re leap seconds
       setToNoon(date);
       const epochMillis = date.getTime();
-      const newEpochMillis =
-        epochMillis + 1000 * 60 * 60 * 24 * daysFromReference;
+      const newEpochMillis = epochMillis + 1000 * 60 * 60 * 24 * daysFromReference;
       date.setTime(newEpochMillis);
       setToNoon(date);
       return date;
@@ -1979,12 +1810,7 @@ global WF:false
       var [pre, , post] = splitByFirstDate(s);
       // If deleting the date squashes to strings together, ensure a space
       var padding = "";
-      if (
-        pre.trim() &&
-        post.trim() &&
-        !pre.endsWith(" ") &&
-        !post.startsWith(" ")
-      ) {
+      if (pre.trim() && post.trim() && !pre.endsWith(" ") && !post.startsWith(" ")) {
         padding = " ";
       }
       return pre + padding + post;
@@ -2010,21 +1836,12 @@ global WF:false
      */
     function setFirstDateOnItem(item, dateEntry) {
       if (doesRawStringHaveDates(item.getName())) {
-        WF.setItemName(
-          item,
-          setFirstDateOnRawString(item.getName(), dateEntry)
-        );
+        WF.setItemName(item, setFirstDateOnRawString(item.getName(), dateEntry));
       } else if (doesRawStringHaveDates(item.getNote())) {
-        WF.setItemNote(
-          item,
-          setFirstDateOnRawString(item.getNote(), dateEntry)
-        );
+        WF.setItemNote(item, setFirstDateOnRawString(item.getNote(), dateEntry));
       } else {
         // This will prepend a new <time> entry
-        WF.setItemName(
-          item,
-          setFirstDateOnRawString(item.getName(), dateEntry)
-        );
+        WF.setItemName(item, setFirstDateOnRawString(item.getName(), dateEntry));
       }
     }
 
@@ -2068,9 +1885,7 @@ global WF:false
           setFirstDateOnItem(activeItem, futureDateEntry);
         }
       });
-      WF.showMessage(
-        `Dated ${activeItems.length} item(s) for ${interpretation.description}`
-      );
+      WF.showMessage(`Dated ${activeItems.length} item(s) for ${interpretation.description}`);
     }
 
     /**
@@ -2091,10 +1906,7 @@ global WF:false
       for (const activeItem of activeItems) {
         const fullHtml = activeItem.getName() + activeItem.getNote();
         const [, timeElements] = stringToHtmlBodyAndTimeElements(fullHtml);
-        failIf(
-          timeElements.length > 1,
-          `Item ${formatItem(activeItem)} has more than 1 date.`
-        );
+        failIf(timeElements.length > 1, `Item ${formatItem(activeItem)} has more than 1 date.`);
       }
 
       WF.editGroup(() => {
@@ -2128,13 +1940,9 @@ global WF:false
         `Couldn't parse relative date or date range "${dateOrRangeString}". (Hint: use one hyphen at most)`
       );
       const firstDateOrEmpty = toDateStringOrEmptyOrFail(parts[0]);
-      const secondDateOrEmpty =
-        parts.length === 2 ? toDateStringOrEmptyOrFail(parts[1]) : "";
+      const secondDateOrEmpty = parts.length === 2 ? toDateStringOrEmptyOrFail(parts[1]) : "";
       failIf(!firstDateOrEmpty && !secondDateOrEmpty, "No date specified");
-      const dateClause =
-        parts.length === 1
-          ? firstDateOrEmpty
-          : firstDateOrEmpty + "-" + secondDateOrEmpty;
+      const dateClause = parts.length === 1 ? firstDateOrEmpty : firstDateOrEmpty + "-" + secondDateOrEmpty;
       return dateClause;
     }
 
@@ -2145,9 +1953,7 @@ global WF:false
      * @throws {AbortActionError} If a failure occurs
      */
     function _promptToFindByDateRangeOrFail() {
-      const dateOrRangeString = prompt(
-        "Enter relative date or range (a, a-, -b, a-b):"
-      );
+      const dateOrRangeString = prompt("Enter relative date or range (a, a-, -b, a-b):");
       if (!dateOrRangeString || !dateOrRangeString.trim()) {
         return;
       }
@@ -2156,12 +1962,9 @@ global WF:false
       WF.search(dateClause);
     }
 
-    const clearDate = () =>
-      callWithErrorHandling(_clearDateOnActiveItemsOrFail);
-    const updateDate = () =>
-      callWithErrorHandling(_updateDateOnActiveItemsOrFail);
-    const promptToFindByDateRange = () =>
-      callWithErrorHandling(_promptToFindByDateRangeOrFail);
+    const clearDate = () => callWithErrorHandling(_clearDateOnActiveItemsOrFail);
+    const updateDate = () => callWithErrorHandling(_updateDateOnActiveItemsOrFail);
+    const promptToFindByDateRange = () => callWithErrorHandling(_promptToFindByDateRangeOrFail);
 
     return {
       clearDate: clearDate,
@@ -2259,10 +2062,7 @@ global WF:false
         throw "Programmer error: opening or closing bracket must be 1 character.";
       }
       const trimmedText = text.trim();
-      if (
-        trimmedText.startsWith(openingBracket) &&
-        trimmedText.includes(closingBracket)
-      ) {
+      if (trimmedText.startsWith(openingBracket) && trimmedText.includes(closingBracket)) {
         const closingIndex = text.lastIndexOf(closingBracket);
         return trimmedText.substring(closingIndex + 1).trimLeft();
       } else if (trimmedText.endsWith(closingBracket)) {
@@ -2331,14 +2131,8 @@ global WF:false
         return null;
       }
       return (
-        plainAndRichNameOrNoteToNameChain(
-          item.getNameInPlainText(),
-          item.getName()
-        ) ||
-        plainAndRichNameOrNoteToNameChain(
-          item.getNoteInPlainText(),
-          item.getNote()
-        )
+        plainAndRichNameOrNoteToNameChain(item.getNameInPlainText(), item.getName()) ||
+        plainAndRichNameOrNoteToNameChain(item.getNoteInPlainText(), item.getNote())
       );
     }
 
@@ -2350,10 +2144,9 @@ global WF:false
      * @returns {Array<NameChainAndItem>} All name trees local to document.
      */
     function getAllLocalNameTrees() {
-      return findMatchingItems(
-        item => !item.isEmbedded() && itemToNameChain(item),
-        WF.rootItem()
-      ).map(toNameChainAndItem);
+      return findMatchingItems(item => !item.isEmbedded() && itemToNameChain(item), WF.rootItem()).map(
+        toNameChainAndItem
+      );
     }
 
     class ItemMove {
@@ -2371,9 +2164,7 @@ global WF:false
       const itemToMove = itemMove.itemToMove;
       const targetItem = itemMove.targetItem;
       if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
-        return `Cannot move ${formatItem(itemToMove)} to ${formatItem(
-          targetItem
-        )}.`;
+        return `Cannot move ${formatItem(itemToMove)} to ${formatItem(targetItem)}.`;
       }
       return null;
     }
@@ -2407,12 +2198,8 @@ global WF:false
         const itemToMove = itemMove.itemToMove;
         const targetItem = itemMove.targetItem;
         if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
-          const prefix = itemsMovedAlready
-            ? `Partial failure: ${itemsMovedAlready} item(s) moved already, but: `
-            : "";
-          return `${prefix}Cannot move ${formatItem(
-            itemToMove
-          )} to ${formatItem(targetItem)}.`;
+          const prefix = itemsMovedAlready ? `Partial failure: ${itemsMovedAlready} item(s) moved already, but: ` : "";
+          return `${prefix}Cannot move ${formatItem(itemToMove)} to ${formatItem(targetItem)}.`;
         }
         WF.moveItems([itemToMove], targetItem, 0);
         itemsMovedAlready++;
@@ -2550,19 +2337,14 @@ global WF:false
           continue;
         }
         const parentNameChain = nameChainToParent(nameChain);
-        const parentItems =
-          (parentNameChain && nameTrees.get(parentNameChain)) || [];
+        const parentItems = (parentNameChain && nameTrees.get(parentNameChain)) || [];
         const parentCount = parentItems.length;
         for (const item of items) {
           if (itemPredicate && !itemPredicate(item)) {
             continue;
           }
           addToMultimap(nameChain, item, nameChainsToItems);
-          const itemAndNameTreeParents = new ItemAndNameTreeParents(
-            item,
-            nameChain,
-            parentItems
-          );
+          const itemAndNameTreeParents = new ItemAndNameTreeParents(item, nameChain, parentItems);
           let arrayToPushTo;
           if (!parentNameChain) {
             arrayToPushTo = nameTreeRoots;
@@ -2570,8 +2352,7 @@ global WF:false
           } else if (parentCount === 0) {
             arrayToPushTo = noParentItems;
             impossibleMoves.push(
-              `No name tree parent found for item ${formatItem(item)} ` +
-                `which has name chain "${nameChain}".`
+              `No name tree parent found for item ${formatItem(item)} ` + `which has name chain "${nameChain}".`
             );
           } else if (parentCount === 1) {
             arrayToPushTo = singleParentItems;
@@ -2593,10 +2374,7 @@ global WF:false
       }
 
       /** @type {Map<string, Array<Item>>} */
-      const duplicateNameChains = filterMapByValues(
-        items => items.length > 1,
-        nameChainsToItems
-      );
+      const duplicateNameChains = filterMapByValues(items => items.length > 1, nameChainsToItems);
 
       /** @type {Array<ItemMove>} */
       const validRequiredMoves = [];
@@ -2678,11 +2456,7 @@ global WF:false
       const sortedRootChains = Array.from(mapsByRoots.keys()).sort();
       for (const rootChain of sortedRootChains) {
         const nameTreesByChainsForRoot = mapsByRoots.get(rootChain);
-        const result = analyseNameTrees(
-          nameTreesByChainsForRoot,
-          always,
-          always
-        );
+        const result = analyseNameTrees(nameTreesByChainsForRoot, always, always);
         const r = result;
         addMsg(1, `For name tree ${rootChain}:`);
         addMsg(2, `${r.requiredMoves.length} item(s) needing moving:`);
@@ -2731,9 +2505,7 @@ global WF:false
     function validateItemIsNameTreeOrFail(item) {
       failIf(
         !toNameChainAndItem(item).nameChain,
-        `${formatItem(
-          item
-        )} doesn't have a valid name chain. Expected pattern is "${exampleNameChain}".`
+        `${formatItem(item)} doesn't have a valid name chain. Expected pattern is "${exampleNameChain}".`
       );
     }
 
@@ -2750,11 +2522,7 @@ global WF:false
 
       // Calculate moves for active name tree items
       const isActiveItem = a => activeItems.some(b => b.getId() === a.getId());
-      const nameTreeResult = analyseNameTrees(
-        nameTreesByChain,
-        always,
-        isActiveItem
-      );
+      const nameTreeResult = analyseNameTrees(nameTreesByChain, always, isActiveItem);
 
       // Fail if analysis showed impossible moves
       const impossibleMoves = nameTreeResult.impossibleMoves;
@@ -2801,14 +2569,8 @@ global WF:false
       // Calculate moves for name tree items which are under target name chains
       const activeNameChains = activeItems.map(itemToNameChain);
       const isUnderTargetRoot = nameChain =>
-        activeNameChains.some(activeNameChain =>
-          isNameChainAAncestorOfB(activeNameChain, nameChain)
-        );
-      const nameTreeResult = analyseNameTrees(
-        nameTreesByChain,
-        isUnderTargetRoot,
-        always
-      );
+        activeNameChains.some(activeNameChain => isNameChainAAncestorOfB(activeNameChain, nameChain));
+      const nameTreeResult = analyseNameTrees(nameTreesByChain, isUnderTargetRoot, always);
 
       // Fail if analysis showed impossible moves
       const impossibleMoves = nameTreeResult.impossibleMoves;
@@ -2818,11 +2580,9 @@ global WF:false
       moveInEditGroupOrFail(nameTreeResult.requiredMoves, false);
     }
 
-    const reassembleNameTree = () =>
-      callWithErrorHandling(_reassembleNameTreeOrFail);
+    const reassembleNameTree = () => callWithErrorHandling(_reassembleNameTreeOrFail);
     const sendToNameTree = () => callWithErrorHandling(_sendToNameTreeOrFail);
-    const sendToNameTreeAndComplete = () =>
-      callWithErrorHandling(_sendToNameTreeAndCompleteOrFail);
+    const sendToNameTreeAndComplete = () => callWithErrorHandling(_sendToNameTreeAndCompleteOrFail);
 
     return {
       itemToNameChain: itemToNameChain,
@@ -2928,9 +2688,7 @@ global WF:false
   }
 
   function isValidCanonicalCode(canonicalCode) {
-    const result = canonicalCode.match(
-      "^(ctrl\\+)?(shift\\+)?(alt\\+)?(meta\\+)?Key.$"
-    );
+    const result = canonicalCode.match("^(ctrl\\+)?(shift\\+)?(alt\\+)?(meta\\+)?Key.$");
     return result !== null;
   }
 
@@ -3004,14 +2762,9 @@ global WF:false
     if (answer === "") {
       return;
     }
-    for (const [
-      banned,
-      suggestion
-    ] of bannedBookmarkSearchPrefixesToSuggestions.entries()) {
+    for (const [banned, suggestion] of bannedBookmarkSearchPrefixesToSuggestions.entries()) {
       if (answer.toLowerCase().startsWith(banned.toLowerCase())) {
-        alert(
-          `Bookmark searches starting with "${banned}" are banned. Suggestion: "${suggestion}".`
-        );
+        alert(`Bookmark searches starting with "${banned}" are banned. Suggestion: "${suggestion}".`);
         return;
       }
     }
@@ -3065,8 +2818,7 @@ global WF:false
         }
       }
     }
-    const needsPrompt =
-      rePromptFlag || includePrefixMatchesFlag || hasPartialMatch;
+    const needsPrompt = rePromptFlag || includePrefixMatchesFlag || hasPartialMatch;
     if (resultItems.length > 1 || (resultItems.length === 1 && needsPrompt)) {
       // Choose again amongst only the matches
       return promptToChooseItem(resultItems, promptMessage);
@@ -3110,10 +2862,7 @@ global WF:false
     if (focusedItem === null || isRootItem(focusedItem)) {
       return;
     }
-    for (let nameOrNote of [
-      itemToPlainTextName(focusedItem),
-      itemToPlainTextNote(focusedItem)
-    ]) {
+    for (let nameOrNote of [itemToPlainTextName(focusedItem), itemToPlainTextNote(focusedItem)]) {
       const matchResult = nameOrNote.match(/https?:\/\/[^\s]+/);
       if (matchResult) {
         const url = matchResult[0].trim();
@@ -3137,10 +2886,7 @@ global WF:false
     if (!item) {
       return new FunctionTarget("no-op", () => {}); // Return a no-op;
     }
-    for (let nameOrNote of [
-      itemToPlainTextName(item),
-      itemToPlainTextNote(item)
-    ]) {
+    for (let nameOrNote of [itemToPlainTextName(item), itemToPlainTextNote(item)]) {
       let target = textToTarget(nameOrNote);
       if (target) {
         return target;
@@ -3162,9 +2908,7 @@ global WF:false
     const trimmed = (text || "").trim();
     let target;
     if (isWorkFlowyUrl(trimmed)) {
-      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(
-        trimmed
-      );
+      const [item, searchQuery] = findItemAndSearchQueryForWorkFlowyUrl(trimmed);
       if (item) {
         target = new ItemTarget(item, searchQuery);
       } else {
@@ -3214,12 +2958,7 @@ global WF:false
      * @param {function} defaultFunction The default function for the target.
      */
     constructor(functionName, defaultFunction) {
-      super(
-        "builtInFunction",
-        "function:" + functionName,
-        `Built-in function ${functionName}`,
-        defaultFunction
-      );
+      super("builtInFunction", "function:" + functionName, `Built-in function ${functionName}`, defaultFunction);
     }
   }
 
@@ -3423,10 +3162,7 @@ global WF:false
       return;
     }
     const targetItem = activeItems.items[0];
-    const targetQuery =
-      targetItem.getId() === WF.currentItem().getId()
-        ? WF.currentSearchQuery()
-        : null;
+    const targetQuery = targetItem.getId() === WF.currentItem().getId() ? WF.currentSearchQuery() : null;
     const formattedTarget = activeItems.toString();
     let bookmarkName = prompt(`Choose bookmark name for ${formattedTarget}:`);
     if (bookmarkName === null || !bookmarkName.trim()) {
@@ -3446,13 +3182,9 @@ global WF:false
         existingItemTarget.searchQuery === targetQuery
       ) {
         // Nothing to do: there's an existing bookmark pointing to the target
-        WF.showMessage(
-          `No action required: Bookmark "${bookmarkName}" already points to ${formattedTarget}.`
-        );
+        WF.showMessage(`No action required: Bookmark "${bookmarkName}" already points to ${formattedTarget}.`);
       } else if (existingSourceItem) {
-        shouldCreate = confirm(
-          `Update existing bookmark "${bookmarkName}", pointing to ${formattedExistingTarget}?`
-        );
+        shouldCreate = confirm(`Update existing bookmark "${bookmarkName}", pointing to ${formattedExistingTarget}?`);
       } else {
         WF.showMessage(
           `Failed: Bookmark "${bookmarkName} is already specified via a tag, pointing to target item ${formattedExistingTarget}.`
@@ -3463,50 +3195,31 @@ global WF:false
     }
     if (shouldCreate) {
       if (configurationRootItem) {
-        const bookmarksSectionItem = findConfigurationSection(
-          CONFIG_SECTION_BOOKMARKS
-        );
+        const bookmarksSectionItem = findConfigurationSection(CONFIG_SECTION_BOOKMARKS);
         if (bookmarksSectionItem) {
           WF.editGroup(() => {
-            var newBookmarkItem = existingSourceItem
-              ? existingSourceItem
-              : WF.createItem(bookmarksSectionItem, 0);
+            var newBookmarkItem = existingSourceItem ? existingSourceItem : WF.createItem(bookmarksSectionItem, 0);
             // Workaround: coerce return value of createItem to correct type
             if (typeof newBookmarkItem.projectid === "string") {
               newBookmarkItem = WF.getItemById(newBookmarkItem.projectid);
             }
             if (newBookmarkItem) {
               WF.setItemName(newBookmarkItem, bookmarkName);
-              const prodUrl = itemAndSearchToWorkFlowyUrl(
-                "prod",
-                targetItem,
-                targetQuery
-              );
+              const prodUrl = itemAndSearchToWorkFlowyUrl("prod", targetItem, targetQuery);
               WF.setItemNote(newBookmarkItem, prodUrl);
-              WF.showMessage(
-                `Bookmark "${bookmarkName}" now points to ${formattedTarget}.`
-              );
+              WF.showMessage(`Bookmark "${bookmarkName}" now points to ${formattedTarget}.`);
             } else {
-              WF.showMessage(
-                "Failed to create or update new bookmark. Check the console log."
-              );
+              WF.showMessage("Failed to create or update new bookmark. Check the console log.");
             }
           });
         } else {
           WF.showMessage(
             `No "${CONFIG_SECTION_BOOKMARKS}" configuration section found under` +
-              `${itemAndSearchToWorkFlowyUrl(
-                "current",
-                configurationRootItem,
-                null
-              )}.`
+              `${itemAndSearchToWorkFlowyUrl("current", configurationRootItem, null)}.`
           );
         }
       } else {
-        WF.showMessage(
-          "Configuration root item not found. " +
-            `Are you missing a "${CONFIGURATION_ROOT_NAME}" item?`
-        );
+        WF.showMessage("Configuration root item not found. " + `Are you missing a "${CONFIGURATION_ROOT_NAME}" item?`);
       }
     }
   }
@@ -3643,10 +3356,7 @@ global WF:false
 
     let linkItem;
     WF.editGroup(() => {
-      linkItem = WF.createItem(
-        targetItem.getParent(),
-        targetItem.getPriority() + 1
-      );
+      linkItem = WF.createItem(targetItem.getParent(), targetItem.getPriority() + 1);
       WF.setItemName(linkItem, escapeHtmlCharacters(linkName));
       WF.setItemNote(linkItem, targetUrl);
     });
@@ -3669,10 +3379,7 @@ global WF:false
       expandAbbreviation(abbreviation.trim());
     }
 
-    const allExpansions = new Map([
-      ...builtInExpansionsMap,
-      ...customExpansions
-    ]);
+    const allExpansions = new Map([...builtInExpansionsMap, ...customExpansions]);
 
     const fnOrValue = allExpansions.get(abbreviation);
     if (!fnOrValue) {
@@ -3808,10 +3515,7 @@ global WF:false
           WF.showMessage(`"${targetText}" is not a valid target.`);
         }
       } else {
-        WF.showMessage(
-          `WARN: Invalid keyboard shortcut code: '${keyCode}'.`,
-          false
-        );
+        WF.showMessage(`WARN: Invalid keyboard shortcut code: '${keyCode}'.`, false);
       }
     }
     return rMap;

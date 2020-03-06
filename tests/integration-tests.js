@@ -61,9 +61,7 @@ loading the expect.js and jumpflowy modules.
     const ancestorOfFirstChild = firstChildOfRoot.getAncestors()[0];
     expect(ancestorOfFirstChild.getId()).to.be(rootItem.getId());
 
-    expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(
-      rootItem.getNumDescendants()
-    );
+    expect(firstChildOfRoot.getNumDescendants()).to.be.lessThan(rootItem.getNumDescendants());
   }
 
   /** Returns the one and only item with the given note text, or fails. */
@@ -73,14 +71,10 @@ loading the expect.js and jumpflowy modules.
       WF.rootItem()
     );
     if (matches.length === 0) {
-      expect.fail(
-        `Couldn't find item with note text matching >>>${noteText}<<<.`
-      );
+      expect.fail(`Couldn't find item with note text matching >>>${noteText}<<<.`);
     }
     if (matches.length > 1) {
-      expect.fail(
-        `Found multiple items with note text matching >>>${noteText}<<<, when expecting exactly 1.`
-      );
+      expect.fail(`Found multiple items with note text matching >>>${noteText}<<<, when expecting exactly 1.`);
     }
     return matches[0];
   }
@@ -112,9 +106,7 @@ loading the expect.js and jumpflowy modules.
       return items.map(item => jumpflowy.itemToPlainTextName(item));
     }
 
-    const searchRoot = getUniqueItemByNoteOrFail(
-      "b611674e-b218-9580-ea39-2dda99a0e627"
-    );
+    const searchRoot = getUniqueItemByNoteOrFail("b611674e-b218-9580-ea39-2dda99a0e627");
 
     const noItems = jumpflowy.findMatchingItems(alwaysFalse, searchRoot);
     expect(noItems).to.be.an("array");
@@ -131,18 +123,12 @@ loading the expect.js and jumpflowy modules.
       const name = jumpflowy.itemToPlainTextName(item);
       return name.length === 1 && "aeiouAEIOU".includes(name);
     }
-    const itemsWithSingleVowel = jumpflowy.findMatchingItems(
-      isNameSingleVowel,
-      searchRoot
-    );
+    const itemsWithSingleVowel = jumpflowy.findMatchingItems(isNameSingleVowel, searchRoot);
     expect(mapItemsToPlainTextNames(itemsWithSingleVowel)).to.eql(["a", "e"]);
 
     // Test that applyToEachItem is applied for each item in order
     const foundNames = Array(0);
-    jumpflowy.applyToEachItem(
-      item => foundNames.push(item.getName()),
-      searchRoot
-    );
+    jumpflowy.applyToEachItem(item => foundNames.push(item.getName()), searchRoot);
     expect(foundNames).to.eql(expectedNames);
   }
 
@@ -223,9 +209,7 @@ loading the expect.js and jumpflowy modules.
   function whenUsingDoesItemNameOrNoteMatch() {
     expect(jumpflowy.doesItemNameOrNoteMatch).to.be.a("function");
 
-    const parentItem = getUniqueItemByNoteOrFail(
-      "test/JumpFlowy/whenUsingDoesItemNameOrNoteMatch"
-    );
+    const parentItem = getUniqueItemByNoteOrFail("test/JumpFlowy/whenUsingDoesItemNameOrNoteMatch");
     const item = getOnlyChildOf(parentItem);
     const fnToTest = jumpflowy.doesItemNameOrNoteMatch;
 
@@ -239,9 +223,7 @@ loading the expect.js and jumpflowy modules.
   function whenUsingDoesItemHaveTag() {
     expect(jumpflowy.doesItemHaveTag).to.be.a("function");
 
-    const parentItem = getUniqueItemByNoteOrFail(
-      "test/JumpFlowy/whenUsingDoesItemHaveTag"
-    );
+    const parentItem = getUniqueItemByNoteOrFail("test/JumpFlowy/whenUsingDoesItemHaveTag");
     const item = getOnlyChildOf(parentItem);
 
     expect(jumpflowy.doesItemHaveTag("#foo", item)).to.be(true);
@@ -256,9 +238,7 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.itemToPlainTextName).to.be.a("function");
     expect(WF.rootItem().getNameInPlainText).to.be.a("function");
 
-    const item = getUniqueItemByNoteOrFail(
-      "test/JumpFlowy/whenUsingItemToPlainTextName"
-    );
+    const item = getUniqueItemByNoteOrFail("test/JumpFlowy/whenUsingItemToPlainTextName");
     expect(jumpflowy.itemToPlainTextName(item)).to.be("applePie");
     const rootItem = WF.rootItem();
     expect(jumpflowy.itemToPlainTextName(rootItem)).to.be("Home");
@@ -268,9 +248,7 @@ loading the expect.js and jumpflowy modules.
     expect(jumpflowy.itemToPlainTextNote).to.be.a("function");
     expect(WF.rootItem().getNoteInPlainText).to.be.a("function");
 
-    const item = getUniqueItemByNoteOrFail(
-      "test/JumpFlowy/whenUsingItemToPlainTextNote"
-    );
+    const item = getUniqueItemByNoteOrFail("test/JumpFlowy/whenUsingItemToPlainTextNote");
     const child = item.getChildren()[0];
     expect(jumpflowy.itemToPlainTextNote(child)).to.be("bananaCake");
     const rootItem = WF.rootItem();
@@ -318,9 +296,7 @@ loading the expect.js and jumpflowy modules.
   function whenUsingItemToTagArgsText() {
     expect(jumpflowy.itemToTagArgsText).to.be.a("function");
 
-    const parentItem = getUniqueItemByNoteOrFail(
-      "test/JumpFlowy/whenUsingItemToTagArgsText"
-    );
+    const parentItem = getUniqueItemByNoteOrFail("test/JumpFlowy/whenUsingItemToTagArgsText");
     const item = getOnlyChildOf(parentItem);
     expect(jumpflowy.itemToTagArgsText("#foo", item)).to.be("a, b, c");
   }
@@ -352,9 +328,7 @@ loading the expect.js and jumpflowy modules.
 
     expect(itemToHashSegment(WF.rootItem())).to.be.a("string");
     expect(itemToHashSegment(WF.rootItem())).to.be("#");
-    expect(itemToHashSegment(WF.rootItem().getChildren()[0])).to.match(
-      RegExp("^#/[a-f0-9]+$")
-    );
+    expect(itemToHashSegment(WF.rootItem().getChildren()[0])).to.match(RegExp("^#/[a-f0-9]+$"));
 
     const urlToHashAndQuery = jumpflowy.workFlowyUrlToHashSegmentAndSearchQuery;
     expect(urlToHashAndQuery).to.be.a("function");

@@ -108,13 +108,7 @@
   // Adds keyboard shortcut ctrl-r (only appropriate on macOS)
   function addShortcut() {
     const keyEventHandler = function(keyEvent) {
-      if (
-        keyEvent.ctrlKey &&
-        !keyEvent.shiftKey &&
-        !keyEvent.altKey &&
-        !keyEvent.metaKey &&
-        keyEvent.code === "KeyR"
-      ) {
+      if (keyEvent.ctrlKey && !keyEvent.shiftKey && !keyEvent.altKey && !keyEvent.metaKey && keyEvent.code === "KeyR") {
         keyEvent.stopPropagation();
         keyEvent.preventDefault();
         reloadScripts();
@@ -148,8 +142,7 @@
   }
 
   const USER_AGENT = navigator.userAgent;
-  const IS_MOBILE =
-    USER_AGENT.includes("iPhone") || USER_AGENT.includes("Android");
+  const IS_MOBILE = USER_AGENT.includes("iPhone") || USER_AGENT.includes("Android");
   if (IS_MOBILE) {
     alert("This script isn't supported on mobile");
   } else {

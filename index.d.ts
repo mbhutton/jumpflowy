@@ -31,10 +31,7 @@ type ItemPredicate = (item: Item) => boolean;
 type ItemHandler = (item: Item) => void;
 
 interface NameTreeModule {
-  plainAndRichNameOrNoteToNameChain(
-    itemNamePlain: string,
-    itemNameRich: string
-  ): string | null;
+  plainAndRichNameOrNoteToNameChain(itemNamePlain: string, itemNameRich: string): string | null;
   itemToNameChain(item: Item): string | null;
   sendToNameTree(): void;
   sendToNameTreeAndComplete(): void;
@@ -92,10 +89,7 @@ interface JumpFlowy {
 
   filterMapByKeys<K, V>(keyFilter: (K) => boolean, map: Map<K, V>): Map<K, V>;
 
-  filterMapByValues<K, V>(
-    valueFilter: (V) => boolean,
-    map: Map<K, V>
-  ): Map<K, V>;
+  filterMapByValues<K, V>(valueFilter: (V) => boolean, map: Map<K, V>): Map<K, V>;
 
   findClosestCommonAncestor(itemA: Item, itemB: Item): Item;
 
@@ -105,22 +99,11 @@ interface JumpFlowy {
 
   findItemsWithTag(tag: string, searchRoot: Item): Array<Item>;
 
-  findMatchingItems(
-    itemPredicate: ItemPredicate,
-    searchRoot: Item
-  ): Array<Item>;
+  findMatchingItems(itemPredicate: ItemPredicate, searchRoot: Item): Array<Item>;
 
-  findRecentlyEditedItems(
-    earliestModifiedSec: number,
-    maxSize: number,
-    searchRoot: Item
-  ): Array<Item>;
+  findRecentlyEditedItems(earliestModifiedSec: number, maxSize: number, searchRoot: Item): Array<Item>;
 
-  findTopItemsByComparator<T>(
-    isABetterThanB: (a: T, b: T) => boolean,
-    maxSize: number,
-    items: Iterable<T>
-  ): Array<T>;
+  findTopItemsByComparator<T>(isABetterThanB: (a: T, b: T) => boolean, maxSize: number, items: Iterable<T>): Array<T>;
 
   findTopItemsByScore(
     itemToScoreFn: (Item) => number,
@@ -133,10 +116,7 @@ interface JumpFlowy {
 
   followZoomedItem(): void;
 
-  getTagsForFilteredItems(
-    itemPredicate: ItemPredicate,
-    searchRoot: Item
-  ): Set<string>;
+  getTagsForFilteredItems(itemPredicate: ItemPredicate, searchRoot: Item): Set<string>;
 
   getCurrentTimeSec(): number;
 
@@ -208,15 +188,9 @@ interface JumpFlowy {
 
   todayAsYMDString(): string;
 
-  toItemMultimapWithSingleKeys<K>(
-    itemFunction: (Item) => K | null,
-    searchRoot: Item
-  ): Map<K, Array<Item>>;
+  toItemMultimapWithSingleKeys<K>(itemFunction: (Item) => K | null, searchRoot: Item): Map<K, Array<Item>>;
 
-  toItemMultimapWithMultipleKeys<K>(
-    itemFunction: (Item) => Array<K> | null,
-    searchRoot: Item
-  ): Map<K, Array<Item>>;
+  toItemMultimapWithMultipleKeys<K>(itemFunction: (Item) => Array<K> | null, searchRoot: Item): Map<K, Array<Item>>;
 
   validRootUrls: Array<string>;
 
