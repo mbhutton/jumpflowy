@@ -34,7 +34,7 @@ interface NameTreeModule {
   plainAndRichNameOrNoteToNameChain(itemNamePlain: string, itemNameRich: string): string | null;
   itemToNameChain(item: Item): string | null;
   sendToNameTree(): void;
-  sendToNameTreeAndComplete(): void;
+  sendToNameTreeAndClearDateAndComplete(): void;
   reassembleNameTree(): void;
   validateAllNameTrees(): void;
 }
@@ -45,8 +45,10 @@ interface DateInterpretation {}
 
 interface DatesModule {
   clearDate(): void;
+  clearFirstDateOnItem(item: Item): void;
   clearFirstDateOnRawString(s: string): string;
   doesRawStringHaveDates(s: string): boolean;
+  failIfMultipleDates(i: Item): void;
   interpretDate(s: string, referenceDate: Date): [DateInterpretation?, string?];
   promptToFindByDateRange(): void;
   updateDate(): void;

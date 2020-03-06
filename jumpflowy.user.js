@@ -1889,6 +1889,18 @@ global WF:false
     }
 
     /**
+     * Fail if the given item has more than one date.
+     * @param {Item} item The item to check
+     * @returns {void}
+     * @throws {AbortActionError} If the item has more than one date
+     */
+    function failIfMultipleDates(item) {
+      const fullHtml = item.getName() + item.getNote();
+      const [, timeElements] = stringToHtmlBodyAndTimeElements(fullHtml);
+      failIf(timeElements.length > 1, `Item ${formatItem(item)} has more than 1 date.`);
+    }
+
+    /**
      * Clears the first <time> element in the active items, if any,
      * failing if any items have multiple <time> elements.
      * @returns {void}
@@ -1903,11 +1915,7 @@ global WF:false
         return;
       }
 
-      for (const activeItem of activeItems) {
-        const fullHtml = activeItem.getName() + activeItem.getNote();
-        const [, timeElements] = stringToHtmlBodyAndTimeElements(fullHtml);
-        failIf(timeElements.length > 1, `Item ${formatItem(activeItem)} has more than 1 date.`);
-      }
+      activeItems.forEach(failIfMultipleDates);
 
       WF.editGroup(() => {
         for (const activeItem of activeItems) {
@@ -1968,8 +1976,10 @@ global WF:false
 
     return {
       clearDate: clearDate,
+      clearFirstDateOnItem: clearFirstDateOnItem,
       clearFirstDateOnRawString: clearFirstDateOnRawString,
       doesRawStringHaveDates: doesRawStringHaveDates,
+      failIfMultipleDates: failIfMultipleDates,
       interpretDate: interpretDate,
       promptToFindByDateRange: promptToFindByDateRange,
       updateDate: updateDate
@@ -2210,10 +2220,12 @@ global WF:false
     /**
      * @param {Array<ItemMove>} itemMoves The moves to make.
      * @param {boolean} shouldConfirm Whether to prompt the user to confirm.
+     * @param {function} toRunAfterSuccessInEditGroup Function to call after succesful completion in same edit group,
+     *                                                of type () -> void.
      * @returns {void}
      * @throws {AbortActionError} If a failure occurs
      */
-    function moveInEditGroupOrFail(itemMoves, shouldConfirm = false) {
+    function moveInEditGroupOrFail(itemMoves, shouldConfirm = false, toRunAfterSuccessInEditGroup = null) {
       const toMoveCount = itemMoves.length;
       if (toMoveCount === 0) {
         WF.showMessage("No moves required.");
@@ -2224,6 +2236,9 @@ global WF:false
       let errorMessage;
       WF.editGroup(() => {
         errorMessage = performMoves(itemMoves);
+        if (!errorMessage && toRunAfterSuccessInEditGroup) {
+          toRunAfterSuccessInEditGroup();
+        }
       });
       failIf(errorMessage, errorMessage);
       WF.showMessage(`Moved ${toMoveCount} item(s).`);
@@ -2511,10 +2526,12 @@ global WF:false
 
     /**
      * This action pushes the active item(s) back to their name tree parents.
+     * @param {function} toRunAfterSuccessInEditGroup Function to call after succesful completion in same edit group,
+     *                                                of type () -> void.
      * @returns {void}
      * @throws {AbortActionError} If a failure occurs
      */
-    function _sendToNameTreeOrFail() {
+    function _sendToNameTreeOrFail(toRunAfterSuccessInEditGroup = null) {
       const activeItems = getActiveItems().items;
       activeItems.forEach(validateItemIsLocalOrFail);
       activeItems.forEach(validateItemIsNameTreeOrFail);
@@ -2529,7 +2546,7 @@ global WF:false
       failIf(impossibleMoves.length > 0, impossibleMoves.join("\n"));
 
       // Perform the sends
-      moveInEditGroupOrFail(nameTreeResult.requiredMoves, false);
+      moveInEditGroupOrFail(nameTreeResult.requiredMoves, false, toRunAfterSuccessInEditGroup);
     }
 
     /**
@@ -2538,16 +2555,18 @@ global WF:false
      * @returns {void}
      * @throws {AbortActionError} If a failure occurs
      */
-    function _sendToNameTreeAndCompleteOrFail() {
+    function _sendToNameTreeAndClearDateAndCompleteOrFail() {
       const activeItems = getActiveItems().items;
-      _sendToNameTreeOrFail();
-      WF.editGroup(() => {
+      activeItems.forEach(datesModule.failIfMultipleDates);
+      const toRunAfterSuccessInEditGroup = () => {
         for (const item of activeItems) {
+          datesModule.clearFirstDateOnItem(item);
           if (!item.isCompleted()) {
             WF.completeItem(item);
           }
         }
-      });
+      };
+      _sendToNameTreeOrFail(toRunAfterSuccessInEditGroup);
     }
 
     /**
@@ -2582,7 +2601,8 @@ global WF:false
 
     const reassembleNameTree = () => callWithErrorHandling(_reassembleNameTreeOrFail);
     const sendToNameTree = () => callWithErrorHandling(_sendToNameTreeOrFail);
-    const sendToNameTreeAndComplete = () => callWithErrorHandling(_sendToNameTreeAndCompleteOrFail);
+    const sendToNameTreeAndClearDateAndComplete = () =>
+      callWithErrorHandling(_sendToNameTreeAndClearDateAndCompleteOrFail);
 
     return {
       itemToNameChain: itemToNameChain,
@@ -2590,7 +2610,7 @@ global WF:false
       simplifyNameTreeName: simplifyNameTreeName,
       reassembleNameTree: reassembleNameTree,
       sendToNameTree: sendToNameTree,
-      sendToNameTreeAndComplete: sendToNameTreeAndComplete,
+      sendToNameTreeAndClearDateAndComplete: sendToNameTreeAndClearDateAndComplete,
       validateAllNameTrees: validateAllNameTrees,
       nameChainToParent: nameChainToParent
     };
@@ -3647,7 +3667,7 @@ global WF:false
         moveToBookmark,
         nameTreeModule.reassembleNameTree,
         nameTreeModule.sendToNameTree,
-        nameTreeModule.sendToNameTreeAndComplete,
+        nameTreeModule.sendToNameTreeAndClearDateAndComplete,
         openFirstLinkInFocusedItem,
         promptToExpandAndInsertAtCursor,
         promptToAddBookmarkForCurrentItem, // Deprecated

@@ -137,7 +137,7 @@ The available named functions:
 - `promptToFindByDateRange`
 - `promptToFindByLastChanged`
 - `sendToNameTree`
-- `sendToNameTreeAndComplete`
+- `sendToNameTreeAndClearDateAndComplete`
 - `updateDate`
 - `showZoomedAndMostRecentlyEdited`
 - `validateAllNameTrees`
