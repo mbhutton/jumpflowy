@@ -47,6 +47,7 @@ interface DateInterpretation {
 }
 
 interface DatesModule {
+  _updateDateOnActiveItemsOrFail(): void;
   clearDate(): void;
   clearFirstDateOnItem(item: Item): void;
   clearFirstDateOnRawString(s: string): string;
@@ -71,6 +72,8 @@ interface JumpFlowy {
   blurFocusedContent(): void;
 
   callAfterDocumentLoaded(callbackFn: () => void);
+
+  combinationUpdateDateThenMoveToBookmark(): void;
 
   createOrdinaryLink(): void;
 

@@ -2062,6 +2062,7 @@ global WF:false
     const promptToFindByDateRange = () => callWithErrorHandling(_promptToFindByDateRangeOrFail);
 
     return {
+      _updateDateOnActiveItemsOrFail: _updateDateOnActiveItemsOrFail,
       clearDate: clearDate,
       clearFirstDateOnItem: clearFirstDateOnItem,
       clearFirstDateOnRawString: clearFirstDateOnRawString,
@@ -3364,6 +3365,18 @@ global WF:false
   }
 
   /**
+   * Effectively a combination of the updateDate and moveToBookmark actions.
+   * @returns {void}
+   */
+  function combinationUpdateDateThenMoveToBookmark() {
+    // Call with error handling, such that a failure of the update date step fails fast
+    callWithErrorHandling(() => {
+      datesModule._updateDateOnActiveItemsOrFail();
+      moveToBookmark();
+    });
+  }
+
+  /**
    * Logs some very basic info about the current document to the console,
    * showing an alert if any tests fail.
    * @returns {void}
@@ -3773,6 +3786,7 @@ global WF:false
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         addBookmark,
         blurFocusedContent,
+        combinationUpdateDateThenMoveToBookmark,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
         datesModule.clearDate,
@@ -3844,6 +3858,7 @@ global WF:false
     blurFocusedContent: blurFocusedContent,
     callAfterDocumentLoaded: callAfterDocumentLoaded,
     cleanUp: cleanUp,
+    combinationUpdateDateThenMoveToBookmark: combinationUpdateDateThenMoveToBookmark,
     createItemAtTopOfCurrent: createItemAtTopOfCurrent,
     createOrdinaryLink: createOrdinaryLink,
     dateToYMDString: dateToYMDString,

@@ -120,6 +120,7 @@ The available named functions:
 
 - `addBookmark`
 - `blurFocusedContent`
+- `combinationUpdateDateThenMoveToBookmark`
 - `clearDate`
 - `createItemAtTopOfCurrent`
 - `createOrdinaryLink`
