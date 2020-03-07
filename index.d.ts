@@ -68,6 +68,8 @@ interface JumpFlowy {
 
   applyToEachItem(functionToApply: ItemHandler, searchRoot: Item): void;
 
+  blurFocusedContent(): void;
+
   callAfterDocumentLoaded(callbackFn: () => void);
 
   createOrdinaryLink(): void;
@@ -258,6 +260,8 @@ interface Item {
 //****************************
 
 interface Window {
+  blurFocusedContent: () => void;
+
   jumpflowy: JumpFlowy;
 
   WFEventListener: (eventName: string) => void;

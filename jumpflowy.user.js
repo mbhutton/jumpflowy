@@ -3359,6 +3359,10 @@ global WF:false
 
   const scheduleDescendants = () => callWithErrorHandling(_scheduleDescendantsOfActiveItemsOrFail);
 
+  function blurFocusedContent() {
+    window.blurFocusedContent();
+  }
+
   /**
    * Logs some very basic info about the current document to the console,
    * showing an alert if any tests fail.
@@ -3768,6 +3772,7 @@ global WF:false
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         addBookmark,
+        blurFocusedContent,
         createItemAtTopOfCurrent,
         createOrdinaryLink,
         datesModule.clearDate,
@@ -3836,6 +3841,7 @@ global WF:false
     // Functions by alphabetical order
     addBookmark: addBookmark,
     applyToEachItem: applyToEachItem,
+    blurFocusedContent: blurFocusedContent,
     callAfterDocumentLoaded: callAfterDocumentLoaded,
     cleanUp: cleanUp,
     createItemAtTopOfCurrent: createItemAtTopOfCurrent,
