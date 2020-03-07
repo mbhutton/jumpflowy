@@ -1437,6 +1437,91 @@ global WF:false
     return findTopItemsByScore(scoreFn, earliestModifiedSec, maxSize, searchRoot);
   }
 
+  class ItemMove {
+    constructor(itemToMove, targetItem) {
+      this.itemToMove = itemToMove;
+      this.targetItem = targetItem;
+    }
+  }
+
+  /**
+   * @param {ItemMove} itemMove The move to validate.
+   * @returns {string} An error message if failed, or null if succeeded.
+   */
+  function validateMove(itemMove) {
+    const itemToMove = itemMove.itemToMove;
+    const targetItem = itemMove.targetItem;
+    if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
+      return `Cannot move ${formatItem(itemToMove)} to ${formatItem(targetItem)}.`;
+    }
+    return null;
+  }
+
+  /**
+   * @param {Array<ItemMove>} itemMoves The moves to validate.
+   * @returns {string} An error message if failed, or null if succeeded.
+   */
+  function validateMoves(itemMoves) {
+    for (const itemMove of itemMoves) {
+      const failureMessage = validateMove(itemMove);
+      if (failureMessage) {
+        return failureMessage;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param {Array<ItemMove>} itemMoves The moves to perform.
+   * @returns {string?} An error message if failed, or null if succeeded.
+   */
+  function performMoves(itemMoves) {
+    let whyUnsafe = validateMoves(itemMoves);
+    let itemsMovedAlready = 0;
+    if (whyUnsafe) {
+      return whyUnsafe;
+    }
+    // Re-do move safety checks, as the structure can changes as we go
+    for (const itemMove of itemMoves) {
+      const itemToMove = itemMove.itemToMove;
+      const targetItem = itemMove.targetItem;
+      if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
+        const prefix = itemsMovedAlready ? `Partial failure: ${itemsMovedAlready} item(s) moved already, but: ` : "";
+        return `${prefix}Cannot move ${formatItem(itemToMove)} to ${formatItem(targetItem)}.`;
+      }
+      WF.moveItems([itemToMove], targetItem, 0);
+      itemsMovedAlready++;
+    }
+    return null;
+  }
+
+  /**
+   * @param {Array<ItemMove>} itemMoves The moves to make.
+   * @param {boolean} shouldConfirm Whether to prompt the user to confirm.
+   * @param {function} toRunAfterSuccessInEditGroup Function to call after succesful completion in same edit group,
+   *                                                of type () -> void.
+   * @returns {void}
+   * @throws {AbortActionError} If a failure occurs
+   */
+  function moveInEditGroupOrFail(itemMoves, shouldConfirm = false, toRunAfterSuccessInEditGroup = null) {
+    const toMoveCount = itemMoves.length;
+    if (toMoveCount === 0) {
+      WF.showMessage("No moves required.");
+      return;
+    }
+    const prompt = `Move ${toMoveCount} item(s)?`;
+    failIf(shouldConfirm && !confirm(prompt), "Moves cancelled by user");
+    let errorMessage;
+    WF.editGroup(() => {
+      errorMessage = performMoves(itemMoves);
+      if (!errorMessage && toRunAfterSuccessInEditGroup) {
+        toRunAfterSuccessInEditGroup();
+      }
+    });
+    failIf(errorMessage, errorMessage);
+    WF.showMessage(`Moved ${toMoveCount} item(s).`);
+  }
+
   /** @type DatesModule */
   const datesModule = (function() {
     const domParser = new DOMParser();
@@ -2160,91 +2245,6 @@ global WF:false
       return findMatchingItems(item => !item.isEmbedded() && itemToNameChain(item), WF.rootItem()).map(
         toNameChainAndItem
       );
-    }
-
-    class ItemMove {
-      constructor(itemToMove, targetItem) {
-        this.itemToMove = itemToMove;
-        this.targetItem = targetItem;
-      }
-    }
-
-    /**
-     * @param {ItemMove} itemMove The move to validate.
-     * @returns {string} An error message if failed, or null if succeeded.
-     */
-    function validateMove(itemMove) {
-      const itemToMove = itemMove.itemToMove;
-      const targetItem = itemMove.targetItem;
-      if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
-        return `Cannot move ${formatItem(itemToMove)} to ${formatItem(targetItem)}.`;
-      }
-      return null;
-    }
-
-    /**
-     * @param {Array<ItemMove>} itemMoves The moves to validate.
-     * @returns {string} An error message if failed, or null if succeeded.
-     */
-    function validateMoves(itemMoves) {
-      for (const itemMove of itemMoves) {
-        const failureMessage = validateMove(itemMove);
-        if (failureMessage) {
-          return failureMessage;
-        }
-      }
-      return null;
-    }
-
-    /**
-     * @param {Array<ItemMove>} itemMoves The moves to perform.
-     * @returns {string?} An error message if failed, or null if succeeded.
-     */
-    function performMoves(itemMoves) {
-      let whyUnsafe = validateMoves(itemMoves);
-      let itemsMovedAlready = 0;
-      if (whyUnsafe) {
-        return whyUnsafe;
-      }
-      // Re-do move safety checks, as the structure can changes as we go
-      for (const itemMove of itemMoves) {
-        const itemToMove = itemMove.itemToMove;
-        const targetItem = itemMove.targetItem;
-        if (!isSafeToMoveItemToTarget(itemToMove, targetItem)) {
-          const prefix = itemsMovedAlready ? `Partial failure: ${itemsMovedAlready} item(s) moved already, but: ` : "";
-          return `${prefix}Cannot move ${formatItem(itemToMove)} to ${formatItem(targetItem)}.`;
-        }
-        WF.moveItems([itemToMove], targetItem, 0);
-        itemsMovedAlready++;
-      }
-      return null;
-    }
-
-    /**
-     * @param {Array<ItemMove>} itemMoves The moves to make.
-     * @param {boolean} shouldConfirm Whether to prompt the user to confirm.
-     * @param {function} toRunAfterSuccessInEditGroup Function to call after succesful completion in same edit group,
-     *                                                of type () -> void.
-     * @returns {void}
-     * @throws {AbortActionError} If a failure occurs
-     */
-    function moveInEditGroupOrFail(itemMoves, shouldConfirm = false, toRunAfterSuccessInEditGroup = null) {
-      const toMoveCount = itemMoves.length;
-      if (toMoveCount === 0) {
-        WF.showMessage("No moves required.");
-        return;
-      }
-      const prompt = `Move ${toMoveCount} item(s)?`;
-      failIf(shouldConfirm && !confirm(prompt), "Moves cancelled by user");
-      let errorMessage;
-      WF.editGroup(() => {
-        errorMessage = performMoves(itemMoves);
-        if (!errorMessage && toRunAfterSuccessInEditGroup) {
-          toRunAfterSuccessInEditGroup();
-        }
-      });
-      failIf(errorMessage, errorMessage);
-      WF.showMessage(`Moved ${toMoveCount} item(s).`);
     }
 
     /**
