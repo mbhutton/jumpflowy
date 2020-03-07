@@ -136,6 +136,7 @@ The available named functions:
 - `promptToNormalLocalSearch`
 - `promptToFindByDateRange`
 - `promptToFindByLastChanged`
+- `scatterDescendants`
 - `sendToNameTree`
 - `sendToNameTreeAndClearDateAndComplete`
 - `updateDate`

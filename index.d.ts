@@ -184,6 +184,8 @@ interface JumpFlowy {
 
   promptToFindByLastChanged(): void;
 
+  scatterDescendants(): void;
+
   showZoomedAndMostRecentlyEdited(): void;
 
   splitStringToSearchTerms(s: string): string;

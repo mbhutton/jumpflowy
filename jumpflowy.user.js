@@ -375,6 +375,7 @@ global WF:false
   const abbrevTag = "#abbrev";
   const shortcutTag = "#shortcut";
   // DEPRECATED TAGS END
+  const SCATTER_TAG = "#scatter";
 
   const searchQueryToMatchNoItems = "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
@@ -3267,6 +3268,45 @@ global WF:false
   }
 
   /**
+   * Finds descendants (inclusive) of the active items, which include instructions to
+   * scatter to some other bookmarked item (e.g. "#scatter(today_pm)" to move to an item
+   * bookmarked as "today_pm"), and moves those items to those bookmarks.
+   * @return {void}
+   */
+  function _scatterDescendantsOfActiveItemsOrFail() {
+    const activeItems = getActiveItems().items;
+    activeItems.forEach(validateItemIsLocalOrFail);
+    const allBookmarkedItemsByBookmark = getAllBookmarkedItemsByBookmark();
+
+    const itemsWithScatterTag = [];
+    const ids = [];
+    for (const activeItem of activeItems) {
+      for (const itemWithTag of findItemsWithTag(SCATTER_TAG, activeItem)) {
+        const id = itemWithTag.getId();
+        if (ids.includes(id)) continue; // Already processed this item
+        ids.push(id);
+        itemsWithScatterTag.push(itemWithTag);
+      }
+    }
+
+    const itemMoves = [];
+    for (const item of itemsWithScatterTag) {
+      const bookmark = itemToTagArgsText(SCATTER_TAG, item);
+      const recommendation = `Should be ${SCATTER_TAG}(<target-bookmark>)`;
+      failIf(!bookmark, `Item ${formatItem(item)} had a ${SCATTER_TAG} but with no argument. ${recommendation}`);
+      const targetItem = allBookmarkedItemsByBookmark.get(bookmark);
+      failIf(!targetItem, `No bookmark found for ${SCATTER_TAG} target bookmark "${bookmark}".`);
+      if (item.getParent().getId() !== targetItem.getId()) {
+        itemMoves.push(new ItemMove(item, targetItem));
+      }
+    }
+    const errorMessage = validateMoves(itemMoves);
+    failIf(!!errorMessage, errorMessage);
+    moveInEditGroupOrFail(itemMoves, false);
+  }
+
+  const scatterDescendants = () => callWithErrorHandling(_scatterDescendantsOfActiveItemsOrFail);
+  /**
    * Logs some very basic info about the current document to the console,
    * showing an alert if any tests fail.
    * @returns {void}
@@ -3697,6 +3737,7 @@ global WF:false
         promptToFindLocalRegexMatchThenZoom,
         promptToNormalLocalSearch,
         promptToFindByLastChanged,
+        scatterDescendants,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
@@ -3798,6 +3839,7 @@ global WF:false
     promptToFindLocalRegexMatchThenZoom: promptToFindLocalRegexMatchThenZoom,
     promptToNormalLocalSearch: promptToNormalLocalSearch,
     promptToFindByLastChanged: promptToFindByLastChanged,
+    scatterDescendants: scatterDescendants,
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,
