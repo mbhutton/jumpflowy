@@ -118,6 +118,8 @@ interface JumpFlowy {
 
   followZoomedItem(): void;
 
+  getAllBookmarkedItemsByBookmark(): Map<string, Item>;
+
   getTagsForFilteredItems(itemPredicate: ItemPredicate, searchRoot: Item): Set<string>;
 
   getCurrentTimeSec(): number;

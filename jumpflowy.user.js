@@ -3030,6 +3030,25 @@ global WF:false
   }
 
   /**
+   * @returns {Map<string, Item>} All bookmarked items, by bookmark name.
+   */
+  function getAllBookmarkedItemsByBookmark() {
+    /** @type Map<string, Item> */
+    const allBookmarkedItemsByBookmark = new Map();
+    const globalItemsWithBookmark = findItemsWithTag(bookmarkTag, WF.rootItem());
+    for (const item of globalItemsWithBookmark) {
+      const bookmark = itemToTagArgsText(bookmarkTag, item);
+      if (bookmark) {
+        allBookmarkedItemsByBookmark.set(bookmark, item);
+      }
+    }
+    for (const [bookmark, itemTarget] of bookmarksToItemTargets.entries()) {
+      allBookmarkedItemsByBookmark.set(bookmark, itemTarget.item);
+    }
+    return allBookmarkedItemsByBookmark;
+  }
+
+  /**
    * Prompts the user to choose from the bookmarked items, then follows
    * the chosen item.
    * Note: the behaviour of this method is expected to change.
@@ -3747,6 +3766,7 @@ global WF:false
     findTopItemsByScore: findTopItemsByScore,
     followItem: followItem,
     followZoomedItem: followZoomedItem,
+    getAllBookmarkedItemsByBookmark: getAllBookmarkedItemsByBookmark,
     getCurrentTimeSec: getCurrentTimeSec,
     getTagsForFilteredItems: getTagsForFilteredItems,
     getZoomedItem: getZoomedItem,
