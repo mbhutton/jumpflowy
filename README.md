@@ -137,6 +137,7 @@ The available named functions:
 - `promptToFindByDateRange`
 - `promptToFindByLastChanged`
 - `scatterDescendants`
+- `scheduleDescendants`
 - `sendToNameTree`
 - `sendToNameTreeAndClearDateAndComplete`
 - `updateDate`

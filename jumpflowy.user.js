@@ -376,6 +376,7 @@ global WF:false
   const shortcutTag = "#shortcut";
   // DEPRECATED TAGS END
   const SCATTER_TAG = "#scatter";
+  const SCHEDULE_TAG = "#scheduleFor";
 
   const searchQueryToMatchNoItems = "META:NO_MATCHING_ITEMS_" + new Date().getTime();
   let lastRegexString = null;
@@ -2064,10 +2065,12 @@ global WF:false
       clearDate: clearDate,
       clearFirstDateOnItem: clearFirstDateOnItem,
       clearFirstDateOnRawString: clearFirstDateOnRawString,
+      dateToDateEntry: dateToDateEntry,
       doesRawStringHaveDates: doesRawStringHaveDates,
       failIfMultipleDates: failIfMultipleDates,
       interpretDate: interpretDate,
       promptToFindByDateRange: promptToFindByDateRange,
+      setFirstDateOnItem: setFirstDateOnItem,
       updateDate: updateDate
     };
   })();
@@ -3265,9 +3268,10 @@ global WF:false
   }
 
   /**
-   * Finds descendants (inclusive) of the active items, which include instructions to
-   * scatter to some other bookmarked item (e.g. "#scatter(today_pm)" to move to an item
-   * bookmarked as "today_pm"), and moves those items to those bookmarks.
+   * Finds descendants (inclusive) of the active items,
+   * which include instructions to scatter to some other bookmarked item
+   * (e.g. "#scatter(today_pm)" to move to an item bookmarked as "today_pm"),
+   * and moves those items to those bookmarks.
    * @return {void}
    */
   function _scatterDescendantsOfActiveItemsOrFail() {
@@ -3290,7 +3294,7 @@ global WF:false
     for (const item of itemsWithScatterTag) {
       const bookmark = itemToTagArgsText(SCATTER_TAG, item);
       const recommendation = `Should be ${SCATTER_TAG}(<target-bookmark>)`;
-      failIf(!bookmark, `Item ${formatItem(item)} had a ${SCATTER_TAG} but with no argument. ${recommendation}`);
+      failIf(!bookmark, `Item ${formatItem(item)} had a ${SCATTER_TAG} tag but with no argument. ${recommendation}`);
       const targetItem = allBookmarkedItemsByBookmark.get(bookmark);
       failIf(!targetItem, `No bookmark found for ${SCATTER_TAG} target bookmark "${bookmark}".`);
       if (item.getParent().getId() !== targetItem.getId()) {
@@ -3303,6 +3307,58 @@ global WF:false
   }
 
   const scatterDescendants = () => callWithErrorHandling(_scatterDescendantsOfActiveItemsOrFail);
+
+  /**
+   * Finds descendants (inclusive) of the active items, which include instructions to schedule to some day
+   * (e.g. "#scheduleFor(tuesday)" to add a date for Tuesday), relative to some given reference date as "today",
+   * and sets those dates on those items.
+   * @return {void}
+   */
+  function _scheduleDescendantsOfActiveItemsOrFail() {
+    const activeItems = getActiveItems().items;
+    activeItems.forEach(validateItemIsLocalOrFail);
+
+    const actualToday = new Date();
+    const givenReferenceDayString = prompt('Which day to use as the "today" reference point for interpreting dates?');
+    if (!givenReferenceDayString) {
+      return;
+    }
+    const [refDateInterpretation, refDateErrorMsg] = datesModule.interpretDate(givenReferenceDayString, actualToday);
+    failIf(!!refDateErrorMsg, refDateErrorMsg);
+    const referenceDate = refDateInterpretation.date;
+
+    const itemsWithScheduleTag = [];
+    const ids = [];
+    for (const activeItem of activeItems) {
+      for (const itemWithTag of findItemsWithTag(SCHEDULE_TAG, activeItem)) {
+        const id = itemWithTag.getId();
+        if (ids.includes(id)) continue; // Already processed this item
+        ids.push(id);
+        itemsWithScheduleTag.push(itemWithTag);
+      }
+    }
+
+    /** @type Array<[Item, DateEntry]> */
+    const itemsAndDateEntries = [];
+    for (const item of itemsWithScheduleTag) {
+      const targetDateString = itemToTagArgsText(SCHEDULE_TAG, item);
+      const suffix = `Should be ${SCHEDULE_TAG}(<target-date>)`;
+      failIf(!targetDateString, `Item ${formatItem(item)} had a ${SCHEDULE_TAG} tag but with no argument. ${suffix}`);
+      const [targetDateInterpretation, targetDateErrorMsg] = datesModule.interpretDate(targetDateString, referenceDate);
+      failIf(!!targetDateErrorMsg, targetDateErrorMsg);
+      const targetDateEntry = datesModule.dateToDateEntry(targetDateInterpretation.date);
+      itemsAndDateEntries.push([item, targetDateEntry]);
+    }
+
+    WF.editGroup(() => {
+      for (const [item, dateEntry] of itemsAndDateEntries) {
+        datesModule.setFirstDateOnItem(item, dateEntry);
+      }
+    });
+  }
+
+  const scheduleDescendants = () => callWithErrorHandling(_scheduleDescendantsOfActiveItemsOrFail);
+
   /**
    * Logs some very basic info about the current document to the console,
    * showing an alert if any tests fail.
@@ -3735,6 +3791,7 @@ global WF:false
         promptToNormalLocalSearch,
         promptToFindByLastChanged,
         scatterDescendants,
+        scheduleDescendants,
         showZoomedAndMostRecentlyEdited
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // *******************************************************
@@ -3837,6 +3894,7 @@ global WF:false
     promptToNormalLocalSearch: promptToNormalLocalSearch,
     promptToFindByLastChanged: promptToFindByLastChanged,
     scatterDescendants: scatterDescendants,
+    scheduleDescendants: scheduleDescendants,
     showZoomedAndMostRecentlyEdited: showZoomedAndMostRecentlyEdited,
     splitStringToSearchTerms: splitStringToSearchTerms,
     stringToTagArgsText: stringToTagArgsText,

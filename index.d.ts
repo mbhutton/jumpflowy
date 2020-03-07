@@ -41,16 +41,21 @@ interface NameTreeModule {
 
 interface DateEntry {}
 
-interface DateInterpretation {}
+interface DateInterpretation {
+  date: Date;
+  description: string;
+}
 
 interface DatesModule {
   clearDate(): void;
   clearFirstDateOnItem(item: Item): void;
   clearFirstDateOnRawString(s: string): string;
+  dateToDateEntry(date: Date): DateEntry;
   doesRawStringHaveDates(s: string): boolean;
   failIfMultipleDates(i: Item): void;
   interpretDate(s: string, referenceDate: Date): [DateInterpretation?, string?];
   promptToFindByDateRange(): void;
+  setFirstDateOnItem(item: Item, dateEntry: DateEntry): void;
   updateDate(): void;
 }
 
@@ -185,6 +190,8 @@ interface JumpFlowy {
   promptToFindByLastChanged(): void;
 
   scatterDescendants(): void;
+
+  scheduleDescendants(): void;
 
   showZoomedAndMostRecentlyEdited(): void;
 
