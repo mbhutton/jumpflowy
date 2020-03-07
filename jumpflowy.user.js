@@ -1918,7 +1918,7 @@ global WF:false
 
     /**
      * Updates the first <time> element in the given item, pre-pending one
-     * if not already present.
+     * on the note if not already present.
      * @param {Item} item The item to update
      * @param {DateEntry} dateEntry The source of the date information
      * @return {void}
@@ -1926,11 +1926,8 @@ global WF:false
     function setFirstDateOnItem(item, dateEntry) {
       if (doesRawStringHaveDates(item.getName())) {
         WF.setItemName(item, setFirstDateOnRawString(item.getName(), dateEntry));
-      } else if (doesRawStringHaveDates(item.getNote())) {
-        WF.setItemNote(item, setFirstDateOnRawString(item.getNote(), dateEntry));
       } else {
-        // This will prepend a new <time> entry
-        WF.setItemName(item, setFirstDateOnRawString(item.getName(), dateEntry));
+        WF.setItemNote(item, setFirstDateOnRawString(item.getNote(), dateEntry));
       }
     }
 
