@@ -1577,18 +1577,18 @@ global WF:false
     const onePatternWithSpaces = p => new RegExp(`^ *${p} *$`, "i");
     const twoPatternsWithSpaces = (a, b) => new RegExp(`^ *${a} +${b} *$`, "i");
 
-    function getDayOfMonthAsCapturingGroup() {
-      const plainNumbers = Array.from(Array(31).keys()).map(n => (n + 1).toString());
-      const cardinals = plainNumbers.map(s => `${s}th`);
+    function getOrdinalOrCardinalDayOfMonthAsCapturingGroup() {
+      const cardinals = Array.from(Array(31).keys()).map(n => (n + 1).toString());
+      const ordinals = cardinals.map(s => `${s}th`);
       const offset = 1;
-      cardinals[1 - offset] = "1st";
-      cardinals[2 - offset] = "2nd";
-      cardinals[3 - offset] = "3rd";
-      cardinals[21 - offset] = "21st";
-      cardinals[22 - offset] = "22nd";
-      cardinals[23 - offset] = "23rd";
-      cardinals[31 - offset] = "31st";
-      const combined = cardinals.concat(plainNumbers);
+      ordinals[1 - offset] = "1st";
+      ordinals[2 - offset] = "2nd";
+      ordinals[3 - offset] = "3rd";
+      ordinals[21 - offset] = "21st";
+      ordinals[22 - offset] = "22nd";
+      ordinals[23 - offset] = "23rd";
+      ordinals[31 - offset] = "31st";
+      const combined = ordinals.concat(cardinals);
       return `${asCapturingGroup(combined)}`;
     }
 
@@ -1765,11 +1765,12 @@ global WF:false
      */
     function interpretAsDayAndMonthEitherOrder(s, referenceDate) {
       const monthsCapturingGroup = asCapturingGroup(STANDARD_MONTH_NAMES);
+      const dayGroup = getOrdinalOrCardinalDayOfMonthAsCapturingGroup();
       var dayOfMonthString;
       var monthName;
 
-      var dayThenMonthResult = s.match(twoPatternsWithSpaces(getDayOfMonthAsCapturingGroup(), monthsCapturingGroup));
-      var monthThenDayResult = s.match(twoPatternsWithSpaces(monthsCapturingGroup, getDayOfMonthAsCapturingGroup()));
+      var dayThenMonthResult = s.match(twoPatternsWithSpaces(dayGroup, monthsCapturingGroup));
+      var monthThenDayResult = s.match(twoPatternsWithSpaces(monthsCapturingGroup, dayGroup));
       if (dayThenMonthResult) {
         dayOfMonthString = dayThenMonthResult[1];
         monthName = dayThenMonthResult[2];
@@ -1813,6 +1814,26 @@ global WF:false
     }
 
     /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
+    function interpretAsNDaysOrWeeksAway(s, referenceDate) {
+      const cardinalNumberGroup = "([1-9][0-9]*)";
+      const dayOrWeekSuffixGroup = "(d|w)";
+      const result = s.match(onePatternWithSpaces(`${cardinalNumberGroup}${dayOrWeekSuffixGroup}`));
+      if (result) {
+        const numberString = result[1];
+        const number = parseInt(numberString);
+        const dayOrWeekString = result[2];
+        const isWeeks = dayOrWeekString.toLowerCase() === "w";
+        const date = getNoonDateNDaysAway(number * (isWeeks ? 7 : 1), referenceDate);
+        const description = `${formatDateWithoutTime(date)}, ${number} ${isWeeks ? "week" : "day"}(s) away`;
+        return [new DateInterpretation(date, description), null];
+      } else return [null, null];
+    }
+
+    /**
      * Attempts to parse the given date string, returning a corresponding
      * Date object at noon (12pm) or an error message.
      * @param {string} s The string to parse
@@ -1845,6 +1866,7 @@ global WF:false
       addIfMatch(interpretAsDayAndMonthEitherOrder(s, referenceDate));
       addIfMatch(interpretAsEpoch(s));
       addIfMatch(interpretAsEndOfTime(s));
+      addIfMatch(interpretAsNDaysOrWeeksAway(s, referenceDate));
 
       if (interpretations.length === 1 && errors.length === 0) {
         return [interpretations[0], null];
