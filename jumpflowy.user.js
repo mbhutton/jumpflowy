@@ -1509,6 +1509,9 @@ global WF:false
     const toMoveCount = itemMoves.length;
     if (toMoveCount === 0) {
       WF.showMessage("No moves required.");
+      if (toRunAfterSuccessInEditGroup) {
+        WF.editGroup(() => toRunAfterSuccessInEditGroup());
+      }
       return;
     }
     const prompt = `Move ${toMoveCount} item(s)?`;
