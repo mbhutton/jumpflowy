@@ -1561,6 +1561,8 @@ global WF:false
     const TODAY_TOKENS = ["td", "tod", "tdy", "today"];
     const TOMORROW_TOKENS = ["tm", "tw", "tmw", "tom", "tmrw", "tomorrow"];
     const YESTERDAY_TOKENS = ["y", "ye", "ys", "yes", "yest", "yst", "yd", "yesterday"];
+    const EPOCH_TOKENS = ["ep", "epoch"];
+    const END_TIME_TOKENS = ["et", "eot", "end"];
 
     // Only use for simple alphanumeric strings
     function asCapturingGroup(arrayOfStrings) {
@@ -1574,6 +1576,21 @@ global WF:false
 
     const onePatternWithSpaces = p => new RegExp(`^ *${p} *$`, "i");
     const twoPatternsWithSpaces = (a, b) => new RegExp(`^ *${a} +${b} *$`, "i");
+
+    function getDayOfMonthAsCapturingGroup() {
+      const plainNumbers = Array.from(Array(31).keys()).map(n => (n + 1).toString());
+      const cardinals = plainNumbers.map(s => `${s}th`);
+      const offset = 1;
+      cardinals[1 - offset] = "1st";
+      cardinals[2 - offset] = "2nd";
+      cardinals[3 - offset] = "3rd";
+      cardinals[21 - offset] = "21st";
+      cardinals[22 - offset] = "22nd";
+      cardinals[23 - offset] = "23rd";
+      cardinals[31 - offset] = "31st";
+      const combined = cardinals.concat(plainNumbers);
+      return `${asCapturingGroup(combined)}`;
+    }
 
     class DateInterpretation {
       /**
@@ -1601,7 +1618,7 @@ global WF:false
     }
 
     /**
-     * @param {Date} referenceDate The date to use as a reference
+     * @param {Date} referenceDate The "today" date to use as a reference
      * @param {number} dayNumber The day number to find (Sunday is 0)
      * @returns {number} The number of days until the next occurrence of the
      *                   given day number after the reference
@@ -1612,7 +1629,7 @@ global WF:false
     }
 
     /**
-     * @param {Date} referenceDate The date to use as a reference
+     * @param {Date} referenceDate The "today" date to use as a reference
      * @param {number} dayNumber The day number to find (Sunday is 0)
      * @returns {number} The number of days since the most recent previous
      *                   occurrence of the given day number before the reference
@@ -1622,73 +1639,177 @@ global WF:false
       return dayNumber === refDayNumber ? 7 : (refDayNumber + 7 - dayNumber) % 7;
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsYesterday(s, referenceDate) {
       if (s.match(onePatternWithSpaces(asCapturingGroup(YESTERDAY_TOKENS)))) {
-        return new DateInterpretation(getNoonDateNDaysAway(-1, referenceDate), "Yesterday");
-      } else return null;
+        return [new DateInterpretation(getNoonDateNDaysAway(-1, referenceDate), "Yesterday"), null];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsToday(s, referenceDate) {
       if (s.match(onePatternWithSpaces(asCapturingGroup(TODAY_TOKENS)))) {
-        return new DateInterpretation(getNoonDateNDaysAway(0, referenceDate), "Today");
-      } else return null;
+        return [new DateInterpretation(getNoonDateNDaysAway(0, referenceDate), "Today"), null];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsTodayWeek(s, referenceDate) {
       if (s.match(twoPatternsWithSpaces(asCapturingGroup(TODAY_TOKENS), asCapturingGroup(NAME_WEEK_TOKENS)))) {
-        return new DateInterpretation(getNoonDateNDaysAway(7, referenceDate), "A week from today, 7 days away");
-      } else return null;
+        return [new DateInterpretation(getNoonDateNDaysAway(7, referenceDate), "A week from today, 7 days away"), null];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsTomorrow(s, referenceDate) {
       if (s.match(onePatternWithSpaces(asCapturingGroup(TOMORROW_TOKENS)))) {
-        return new DateInterpretation(getNoonDateNDaysAway(1, referenceDate), "Tomorrow");
-      } else return null;
+        return [new DateInterpretation(getNoonDateNDaysAway(1, referenceDate), "Tomorrow"), null];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsTomorrowWeek(s, referenceDate) {
       if (s.match(twoPatternsWithSpaces(asCapturingGroup(TOMORROW_TOKENS), asCapturingGroup(NAME_WEEK_TOKENS)))) {
-        return new DateInterpretation(getNoonDateNDaysAway(8, referenceDate), "A week from tomorrow, 8 days away");
-      } else return null;
+        const description = "A week from tomorrow, 8 days away";
+        return [new DateInterpretation(getNoonDateNDaysAway(8, referenceDate), description), null];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsMostRecentNamedDay(s, referenceDate) {
       const result = s.match(twoPatternsWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP, asCapturingGroup(NAME_LAST_TOKENS)));
       if (result) {
         const givenNamedDay = result[1];
         const dayNumber = nameTokenToDayNumber(givenNamedDay);
         const daysPrior = daysFromRecentDayNumberUntilReference(referenceDate, dayNumber);
-        return new DateInterpretation(
-          getNoonDateNDaysAway(-daysPrior, referenceDate),
-          `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} gone, ${daysPrior} days prior`
-        );
-      } else return null;
+        return [
+          new DateInterpretation(
+            getNoonDateNDaysAway(-daysPrior, referenceDate),
+            `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} gone, ${daysPrior} days prior`
+          ),
+          null
+        ];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsComingNamedDay(s, referenceDate) {
       const result = s.match(onePatternWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP));
       if (result) {
         const givenNamedDay = result[1];
         const dayNumber = nameTokenToDayNumber(givenNamedDay);
         const daysAway = daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber);
-        return new DateInterpretation(
-          getNoonDateNDaysAway(daysAway, referenceDate),
-          `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]}, ${daysAway} days away`
-        );
-      } else return null;
+        return [
+          new DateInterpretation(
+            getNoonDateNDaysAway(daysAway, referenceDate),
+            `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]}, ${daysAway} days away`
+          ),
+          null
+        ];
+      } else return [null, null];
     }
 
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
     function interpretAsComingNamedDayPlusWeek(s, referenceDate) {
       const result = s.match(twoPatternsWithSpaces(ALL_DAY_NAMES_CAPTURING_GROUP, asCapturingGroup(NAME_WEEK_TOKENS)));
       if (result) {
         const givenNamedDay = result[1];
         const dayNumber = nameTokenToDayNumber(givenNamedDay);
         const daysAway = 7 + daysFromReferenceUntilComingDayNumber(referenceDate, dayNumber);
-        return new DateInterpretation(
-          getNoonDateNDaysAway(daysAway, referenceDate),
-          `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} week, ${daysAway} days away`
-        );
-      } else return null;
+        return [
+          new DateInterpretation(
+            getNoonDateNDaysAway(daysAway, referenceDate),
+            `${FULL_DAY_NAMES_FROM_SUNDAY[dayNumber]} week, ${daysAway} days away`
+          ),
+          null
+        ];
+      } else return [null, null];
+    }
+
+    /**
+     * @param {string} s The date to interpret
+     * @param {Date} referenceDate The "today" date to use as a reference
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
+    function interpretAsDayAndMonthEitherOrder(s, referenceDate) {
+      const monthsCapturingGroup = asCapturingGroup(STANDARD_MONTH_NAMES);
+      var dayOfMonthString;
+      var monthName;
+
+      var dayThenMonthResult = s.match(twoPatternsWithSpaces(getDayOfMonthAsCapturingGroup(), monthsCapturingGroup));
+      var monthThenDayResult = s.match(twoPatternsWithSpaces(monthsCapturingGroup, getDayOfMonthAsCapturingGroup()));
+      if (dayThenMonthResult) {
+        dayOfMonthString = dayThenMonthResult[1];
+        monthName = dayThenMonthResult[2];
+      } else if (monthThenDayResult) {
+        monthName = monthThenDayResult[1];
+        dayOfMonthString = monthThenDayResult[2];
+      } else {
+        return [null, null];
+      }
+
+      const simpleNumberString = dayOfMonthString.replace(/a-z/gi, "");
+      const simpleNumber = parseInt(simpleNumberString);
+      const monthIndex = STANDARD_MONTH_NAMES.map(s => s.toLowerCase()).indexOf(monthName.toLowerCase());
+      const date = new Date(referenceDate.getFullYear(), monthIndex, simpleNumber, 12, 0, 0);
+      const description = `${simpleNumberString} ${STANDARD_MONTH_NAMES[monthIndex]}`;
+      if (date.getTime() <= referenceDate.getTime()) {
+        return [null, "Month and day formats only supported for clearly future dates. To fix: specify the year."];
+      }
+      return [new DateInterpretation(date, description), null];
+    }
+
+    /**
+     * @param {string} s The date to interpret
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
+    function interpretAsEpoch(s) {
+      if (s.match(onePatternWithSpaces(asCapturingGroup(EPOCH_TOKENS)))) {
+        return [new DateInterpretation(new Date(0), "Epoch"), null];
+      } else return [null, null];
+    }
+
+    /**
+     * @param {string} s The date to interpret
+     * @returns {[DateInterpretation?, string?]} Date interpretation or error message, or neither if no match
+     */
+    function interpretAsEndOfTime(s) {
+      if (s.match(onePatternWithSpaces(asCapturingGroup(END_TIME_TOKENS)))) {
+        const endOfTime = new Date(9999, 11, 31, 23, 59, 59); // Pessimistic
+        return [new DateInterpretation(endOfTime, "End of time"), null];
+      } else return [null, null];
     }
 
     /**
@@ -1704,9 +1825,13 @@ global WF:false
       // Note: optimise for flexibility and maintainability, not runtime speed.
 
       const interpretations = [];
-      const addIfMatch = interpretation => {
+      const errors = [];
+      const addIfMatch = ([interpretation, error]) => {
         if (interpretation) {
           interpretations.push(interpretation);
+        }
+        if (error) {
+          errors.push(error);
         }
       };
       addIfMatch(interpretAsYesterday(s, referenceDate));
@@ -1717,13 +1842,18 @@ global WF:false
       addIfMatch(interpretAsComingNamedDay(s, referenceDate));
       addIfMatch(interpretAsComingNamedDayPlusWeek(s, referenceDate));
       addIfMatch(interpretAsMostRecentNamedDay(s, referenceDate));
+      addIfMatch(interpretAsDayAndMonthEitherOrder(s, referenceDate));
+      addIfMatch(interpretAsEpoch(s));
+      addIfMatch(interpretAsEndOfTime(s));
 
-      if (interpretations.length === 0) {
+      if (interpretations.length === 1 && errors.length === 0) {
+        return [interpretations[0], null];
+      } else if (errors.length !== 0) {
+        return [null, errors[0]];
+      } else if (interpretations.length === 0) {
         return [null, `"${s}" was not recognized as a date`];
       } else if (interpretations.length > 1) {
         return [null, `"${s}" was recognized in too many ways: ${interpretations.map(i => i.description).join(", ")}`];
-      } else {
-        return [interpretations[0], null];
       }
     }
 
