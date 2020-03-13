@@ -2878,8 +2878,177 @@ global WF:false
     }
   }
 
+  const experimentalUiDecoratorsModule = (function() {
+    class ItemElements {
+      constructor(item, projectE, nameE, notesE, bulletE, itemMenuE) {
+        this.item = item;
+        this.projectE = projectE;
+        this.nameE = nameE;
+        this.notesE = notesE;
+        this.bulletE = bulletE;
+        this.itemMenuE = itemMenuE;
+      }
+    }
+
+    /**
+     * @param {Element | null} htmlElementOrNull The parent element, or null
+     * @param {string} className The class name of the element to find
+     * @returns {Element | null} The matching child, or null
+     */
+    function getFirstChildWithClassOrNull(htmlElementOrNull, className) {
+      if (!htmlElementOrNull) {
+        return null;
+      }
+      const matchingChildren = htmlElementOrNull.getElementsByClassName(className);
+      return matchingChildren.length > 0 ? matchingChildren[0] : null;
+    }
+
+    /**
+     * @param {Item} item The item
+     * @returns {ItemElements} The item's useful (for us) elements as an ItemElements
+     */
+    function getItemElements(item) {
+      const projectE = item.getElement();
+      const nameE = getFirstChildWithClassOrNull(projectE, "name");
+      const bulletE = getFirstChildWithClassOrNull(nameE, "bullet");
+      const itemMenuE = getFirstChildWithClassOrNull(nameE, "itemMenu");
+      const notesE = getFirstChildWithClassOrNull(projectE, "notes");
+      return new ItemElements(item, projectE, nameE, notesE, bulletE, itemMenuE);
+    }
+
+    /**
+     * @param {Element} drawOverElement The Element to draw over
+     * @param {string} s The text to put on the "dot"
+     * @returns {Element} The new element drawn over the top
+     */
+    function overlayGutterCodes(drawOverElement, s) {
+      const styles = window.getComputedStyle(drawOverElement);
+      const div = document.createElement("a");
+      div.innerHTML = `<b>${s}</b>`;
+      div.style.top = styles.top;
+      div.style.left = styles.left;
+      div.style.opacity = "1";
+      div.style.setProperty("position", "absolute", "important");
+      div.style.background = "lightgreen";
+      div.style.zIndex = "1";
+      drawOverElement.parentElement.insertBefore(div, drawOverElement);
+      return div;
+    }
+
+    /**
+     * @param {Element} childElement The element to remove
+     * @returns {void}
+     */
+    function removeElementFromParent(childElement) {
+      if (childElement && childElement.parentElement) {
+        childElement.parentElement.removeChild(childElement);
+      }
+    }
+
+    function getVisibleItemsDepthFirst() {
+      const visibleItems = [];
+      /**
+       * @param {Item} item The visible item
+       * @returns {void}
+       */
+      function addVisibleRecursive(item) {
+        if (item.getElement()) {
+          // If non-visible due to being collapsed, Element will be null
+          visibleItems.push(item);
+          item.getVisibleChildren().forEach(addVisibleRecursive);
+        }
+      }
+      addVisibleRecursive(WF.currentItem());
+      return visibleItems;
+    }
+
+    const gutterCodesToItems = new Map();
+    let allGutterElements = null;
+    let keyMotionModeActive = false;
+
+    function clearKeyMotionState() {
+      gutterCodesToItems.clear();
+      if (allGutterElements) {
+        for (const dot of allGutterElements) {
+          removeElementFromParent(dot);
+        }
+      }
+      allGutterElements = null;
+    }
+
+    /**
+     * @param {KeyboardEvent} keyEvent The key event
+     * @returns {boolean} True if event handled here, false if still needs to be handled
+     */
+    function handleKeyEvent(keyEvent) {
+      if (!keyMotionModeActive) {
+        return false;
+      }
+      const hasModifiers = keyEvent.ctrlKey || keyEvent.shiftKey || keyEvent.altKey || keyEvent.metaKey;
+      const item = gutterCodesToItems.get(keyEvent.key);
+      let exitKeyMotionMode = false;
+
+      if (hasModifiers) {
+        WF.showMessage("Unexpected modifier keys typed when in key motion mode");
+      } else if (item) {
+        exitKeyMotionMode = true;
+        WF.editItemName(item);
+      } else if (keyEvent.key === "Escape") {
+        exitKeyMotionMode = true;
+      } else {
+        WF.showMessage("Unexpected key typed when in key motion mode");
+      }
+      if (exitKeyMotionMode) {
+        clearKeyMotionState();
+        keyMotionModeActive = false;
+      }
+      keyEvent.stopPropagation();
+      keyEvent.preventDefault();
+      return true;
+    }
+
+    const DIGIT_NAMES = Array.from("0123456789");
+    const LOWER_CASE_LETTERS = Array.from("abcdefghijklmnopqrstuvwxyz");
+    // const UPPER_CASE_LETTERS = Array.from(LOWER_CASE_LETTERS).map(c => c.toUpperCase);
+    const DIGIT_AND_LOWER_CASE_LETTERS = DIGIT_NAMES.concat(LOWER_CASE_LETTERS);
+
+    function experimentalKeyMotion() {
+      clearKeyMotionState();
+      let index = 0;
+      const gutterElements = [];
+      for (const item of getVisibleItemsDepthFirst()) {
+        const letterOrDigit = DIGIT_AND_LOWER_CASE_LETTERS[index];
+        const ie = getItemElements(item);
+        const gutterElement = overlayGutterCodes(ie.bulletE || ie.itemMenuE, letterOrDigit);
+        gutterElements.push(gutterElement);
+        gutterCodesToItems.set(letterOrDigit, item);
+        index = index + 1;
+        if (index >= DIGIT_AND_LOWER_CASE_LETTERS.length) {
+          break;
+        }
+      }
+      allGutterElements = gutterElements;
+      keyMotionModeActive = true;
+    }
+
+    return {
+      experimentalKeyMotion: experimentalKeyMotion,
+      handleKeyEvent: handleKeyEvent,
+      getItemElements: getItemElements,
+      overlayGutterCodes: overlayGutterCodes,
+      removeElementFromParent: removeElementFromParent
+    };
+  })();
+
+  /**
+   * @param {KeyboardEvent} keyEvent The key event
+   * @returns {void}
+   */
   function _keyDownListener(keyEvent) {
     const canonicalCode = keyDownEventToCanonicalCode(keyEvent);
+    if (experimentalUiDecoratorsModule.handleKeyEvent(keyEvent)) {
+      return; // Already handled
+    }
     const registeredTarget = canonicalKeyCodesToTargets.get(canonicalCode);
     if (registeredTarget) {
       registeredTarget.go();
@@ -3939,6 +4108,8 @@ global WF:false
         // *******************************************************
         // Maintenance note: keep this list in sync with README.md
         // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        experimentalUiDecoratorsModule.experimentalKeyMotion,
+        // ^^^ Experimental actions
         addBookmark,
         blurFocusedContent,
         combinationUpdateDateThenMoveToBookmark,
@@ -4007,6 +4178,7 @@ global WF:false
   self.jumpflowy = {
     nameTree: nameTreeModule,
     dates: datesModule,
+    experimentalUiDecorators: experimentalUiDecoratorsModule,
     // Functions by alphabetical order
     addBookmark: addBookmark,
     applyToEachItem: applyToEachItem,

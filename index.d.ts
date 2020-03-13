@@ -52,10 +52,22 @@ interface DatesModule {
   updateDate(): void;
 }
 
+interface ExperimentalUiDecoratorsModule {
+  experimentalKeyMotion(): void;
+  handleKeyEvent(keyEvent: KeyboardEvent): boolean;
+  getItemElements(item: Item): ItemElements;
+  overlayGutterCodes(drawOverElement: Element, s: string): Element;
+  removeElementFromParent(childElement: Element): void;
+}
+
+interface ItemElements {}
+
 interface JumpFlowy {
   nameTree: NameTreeModule;
 
   dates: DatesModule;
+
+  experimentalUiDecorators: ExperimentalUiDecoratorsModule;
 
   addBookmark(): void;
 
