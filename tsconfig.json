@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "noEmit": true,
+        "downlevelIteration": true,
+        "lib": [
+            "dom",
+            "es2019",
+        ]
+    },
+    "files": [
+        "jumpflowy.user.js",
+        "devtools/add-browser-reload.user.js",
+        "tests/integration-tests.js",
+        "index.d.ts",
+        "types/workflowy-api.d.ts"
+    ]
+}
