@@ -1500,7 +1500,7 @@ global WF:false
   /**
    * @param {Array<ItemMove>} itemMoves The moves to make.
    * @param {boolean} shouldConfirm Whether to prompt the user to confirm.
-   * @param {function} toRunAfterSuccessInEditGroup Function to call after succesful completion in same edit group,
+   * @param {function} toRunAfterSuccessInEditGroup Function to call after successful completion in same edit group,
    *                                                of type () -> void.
    * @returns {void}
    * @throws {AbortActionError} If a failure occurs
@@ -2686,7 +2686,7 @@ global WF:false
 
     /**
      * This action pushes the active item(s) back to their name tree parents.
-     * @param {function} toRunAfterSuccessInEditGroup Function to call after succesful completion in same edit group,
+     * @param {function} toRunAfterSuccessInEditGroup Function to call after successful completion in same edit group,
      *                                                of type () -> void.
      * @returns {void}
      * @throws {AbortActionError} If a failure occurs
