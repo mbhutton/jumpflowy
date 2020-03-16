@@ -71,21 +71,21 @@ loading the expect.js and jumpflowy modules.
       WF.rootItem()
     );
     if (matches.length === 0) {
-      expect.fail(`Couldn't find item with note text matching >>>${noteText}<<<.`);
+      expect().fail(`Couldn't find item with note text matching >>>${noteText}<<<.`);
     }
     if (matches.length > 1) {
-      expect.fail(`Found multiple items with note text matching >>>${noteText}<<<, when expecting exactly 1.`);
+      expect().fail(`Found multiple items with note text matching >>>${noteText}<<<, when expecting exactly 1.`);
     }
     return matches[0];
   }
 
   function getOnlyChildOf(item) {
     if (item === null) {
-      expect.fail("Item was null");
+      expect().fail("Item was null");
     }
     const children = item.getChildren();
     if (children === null || children.length !== 1) {
-      expect.fail("Item has no children or multiple children");
+      expect().fail("Item has no children or multiple children");
     }
     return children[0];
   }
