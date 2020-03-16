@@ -10,14 +10,6 @@
 // annotated in JSDoc on the functions definitions in jumpflowy.user.js.
 //****************************************************************************
 
-interface String {
-  /** Removes the leading white space and line terminator characters from a string. */
-  trimLeft(): string;
-
-  /** Removes the trailing white space and line terminator characters from a string. */
-  trimRight(): string;
-}
-
 //****************************
 // JumpFlowy types
 //****************************
@@ -276,25 +268,3 @@ interface Window {
   reloadJumpFlowy: (() => void) | null;
 }
 
-//****************************
-// Types from other packages
-//****************************
-
-declare namespace webkit.MessageHandlers.Toast {
-  function postMessage(m: string): void;
-}
-
-declare namespace expect {
-  function fail(s: string): void;
-}
-
-//****************************
-// As a workaround, define more modern methods on in-built types here,
-// as importing the related *.d.ts files directly causes errors.
-//****************************
-
-interface String {
-  trimLeft(): string;
-
-  trimRight(): string;
-}
