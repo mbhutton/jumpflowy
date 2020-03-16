@@ -46,6 +46,9 @@
 
 */
 
+// Enable TypeScript checking
+// @ts-check
+
 (function() {
   "use strict";
 
