@@ -263,11 +263,17 @@ interface Item {
 //****************************
 
 interface Window {
+  // From WorkFlowy
   blurFocusedContent: () => void;
 
+  // From JumpFlowy
   jumpflowy: JumpFlowy;
 
+  // From WorkFlowy
   WFEventListener: (eventName: string) => void;
+
+  // From JumpFlowy add-browser-reload
+  reloadJumpFlowy: (() => void) | null;
 }
 
 //****************************
