@@ -3,7 +3,7 @@
 // It exists solely to help support TypeScript's static analysis.
 //
 // This file contains best effort type declarations for JumpFlowy,
-// WorkFlowy, and third party packages, added as needed to get jumpflowy.user.js
+// and WorkFlowy's window level variables, added as needed to get jumpflowy.user.js
 // and the integration tests to pass type checks.
 //
 // The authoritative type definitions for JumpFlowy itself are
@@ -208,49 +208,6 @@ interface JumpFlowy {
 }
 
 //****************************
-// WorkFlowy types
-//****************************
-
-interface Item {
-  childrenAreInSameTree(item: Item);
-
-  getAncestors(): Array<Item>;
-
-  getChildren(): Array<Item>;
-
-  getId(): string;
-
-  getLastModifiedDate(): Date;
-
-  getName(): string | null;
-
-  getNameInPlainText(): string | null;
-
-  getNextVisibleSibling(ignoreSearch?: boolean): Item | null;
-
-  getNote(): string | null;
-
-  getNoteInPlainText(): string | null;
-
-  getNumDescendants(): number;
-
-  getParent(): Item;
-
-  getPriority(): number;
-
-  getUrl(): string;
-
-  isCompleted(): boolean;
-
-  isReadOnly(): boolean;
-
-  // Temporary workaround for WF.createItem() return type
-  projectid: string;
-
-  isEmbedded(): boolean;
-}
-
-//****************************
 // Window object
 //****************************
 
@@ -267,4 +224,3 @@ interface Window {
   // From JumpFlowy add-browser-reload
   reloadJumpFlowy: (() => void) | null;
 }
-

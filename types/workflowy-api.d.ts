@@ -2,6 +2,45 @@
 // Type declarations for the public WorkFlowy API, in TypeScript format
 //****************************************************************************
 
+interface Item {
+  childrenAreInSameTree(item: Item);
+
+  getAncestors(): Array<Item>;
+
+  getChildren(): Array<Item>;
+
+  getId(): string;
+
+  getLastModifiedDate(): Date;
+
+  getName(): string | null;
+
+  getNameInPlainText(): string | null;
+
+  getNextVisibleSibling(ignoreSearch?: boolean): Item | null;
+
+  getNote(): string | null;
+
+  getNoteInPlainText(): string | null;
+
+  getNumDescendants(): number;
+
+  getParent(): Item;
+
+  getPriority(): number;
+
+  getUrl(): string;
+
+  isCompleted(): boolean;
+
+  isReadOnly(): boolean;
+
+  // Temporary workaround for WF.createItem() return type
+  projectid: string;
+
+  isEmbedded(): boolean;
+}
+
 declare namespace WF {
   function createItem(parent: Item, priority: number): Item | null;
 
