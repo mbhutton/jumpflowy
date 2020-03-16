@@ -9,6 +9,8 @@ interface Item {
 
   getChildren(): Array<Item>;
 
+  getElement(): HTMLElement | null;
+
   getId(): string;
 
   getLastModifiedDate(): Date;
@@ -27,9 +29,13 @@ interface Item {
 
   getParent(): Item;
 
+  getPreviousVisibleSibling(ignoreSearch?: boolean): Item | null;
+
   getPriority(): number;
 
   getUrl(): string;
+
+  getVisibleChildren(): Item[];
 
   isCompleted(): boolean;
 
