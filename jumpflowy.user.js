@@ -2929,7 +2929,8 @@ global WF:false
       div.style.left = styles.left;
       div.style.opacity = "1";
       div.style.setProperty("position", "absolute", "important");
-      div.style.background = "lightgreen";
+      div.style.color = "black";
+      div.style.background = "yellow";
       div.style.zIndex = "1";
       drawOverElement.parentElement.insertBefore(div, drawOverElement);
       return div;
@@ -2984,19 +2985,22 @@ global WF:false
       if (!keyMotionModeActive) {
         return false;
       }
+      const canonicalCode = keyDownEventToCanonicalCode(keyEvent);
       const hasModifiers = keyEvent.ctrlKey || keyEvent.shiftKey || keyEvent.altKey || keyEvent.metaKey;
       const item = gutterCodesToItems.get(keyEvent.key);
       let exitKeyMotionMode = false;
 
       if (hasModifiers) {
-        WF.showMessage("Unexpected modifier keys typed when in key motion mode");
+        if (canonicalCode !== "ctrl+ControlLeft") { // Allow for setups where left control doubles as the escape key
+          WF.showMessage("Unexpected modifier keys typed when in key motion mode: " + canonicalCode);
+        }
       } else if (item) {
         exitKeyMotionMode = true;
         WF.editItemName(item);
       } else if (keyEvent.key === "Escape") {
         exitKeyMotionMode = true;
       } else {
-        WF.showMessage("Unexpected key typed when in key motion mode");
+        WF.showMessage("Unexpected key typed when in key motion mode: " + canonicalCode);
       }
       if (exitKeyMotionMode) {
         clearKeyMotionState();
@@ -3007,23 +3011,24 @@ global WF:false
       return true;
     }
 
+    // const ALPHABET_LETTERS_LOWER_CASE = Array.from("abcdefghijklmnopqrstuvwxyz");
+    const KEY_MOTION_LETTERS = Array.from("fjdkghslarueitywoqpvbcnxmz");
     const DIGIT_NAMES = Array.from("0123456789");
-    const LOWER_CASE_LETTERS = Array.from("abcdefghijklmnopqrstuvwxyz");
     // const UPPER_CASE_LETTERS = Array.from(LOWER_CASE_LETTERS).map(c => c.toUpperCase);
-    const DIGIT_AND_LOWER_CASE_LETTERS = DIGIT_NAMES.concat(LOWER_CASE_LETTERS);
+    const KEY_MOTION_CHARACTERS = KEY_MOTION_LETTERS.concat(DIGIT_NAMES);
 
     function experimentalKeyMotion() {
       clearKeyMotionState();
       let index = 0;
       const gutterElements = [];
       for (const item of getVisibleItemsDepthFirst()) {
-        const letterOrDigit = DIGIT_AND_LOWER_CASE_LETTERS[index];
+        const letterOrDigit = KEY_MOTION_CHARACTERS[index];
         const ie = getItemElements(item);
         const gutterElement = overlayGutterCodes(ie.bulletE || ie.itemMenuE, letterOrDigit);
         gutterElements.push(gutterElement);
         gutterCodesToItems.set(letterOrDigit, item);
         index = index + 1;
-        if (index >= DIGIT_AND_LOWER_CASE_LETTERS.length) {
+        if (index >= KEY_MOTION_CHARACTERS.length) {
           break;
         }
       }
