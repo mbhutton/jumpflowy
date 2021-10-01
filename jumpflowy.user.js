@@ -3024,7 +3024,11 @@ global WF:false
       for (const item of getVisibleItemsDepthFirst()) {
         const letterOrDigit = KEY_MOTION_CHARACTERS[index];
         const ie = getItemElements(item);
-        const gutterElement = overlayGutterCodes(ie.bulletE || ie.itemMenuE, letterOrDigit);
+        const elementToOverlay = ie.bulletE || ie.itemMenuE;
+        if (!(elementToOverlay instanceof Element)) {
+          continue;
+        }
+        const gutterElement = overlayGutterCodes(elementToOverlay, letterOrDigit);
         gutterElements.push(gutterElement);
         gutterCodesToItems.set(letterOrDigit, item);
         index = index + 1;
